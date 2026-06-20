@@ -10,13 +10,16 @@ We started with a simple question:
 
 > **Do different audio representations fail in different ways?**
 
-After 26 experiments, that question has expanded into two distinct research arcs:
+After 27 experiments, that question has expanded into three distinct research arcs:
 
 **Arc 1 — Blind Spot Atlas** (Exp 001–013)
 Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, harmonic removal, pitch shifts, and targeted adversarial probes.
 
 **Arc 2 — Representation Intelligence** (Exp 014–026)
 Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, cooperate to make better decisions, learn their own failure manifolds, and transfer failure knowledge across tasks.
+
+**Arc 3 — Failure Manifold Mapping** (Exp 027)
+Map the task-independent multidimensional physical boundaries of representation failure directly, projecting the failure space via PCA and clustering collapse regions.
 
 ---
 
@@ -29,7 +32,7 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── experiments/      # All 26 experiment scripts (exp001–exp026)
+│   └── experiments/      # All 27 experiment scripts (exp001–exp027)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -256,6 +259,18 @@ Cross-task transfer succeeded completely under filtering and distortion, where t
 
 ---
 
+### Phase 7 — Failure Manifold Mapping (Exp 027)
+
+#### Exp 027 — Failure Manifold Mapping
+Abstracted away specific downstream tasks to evaluate representation failures directly. Subjected a reference clean harmonic stack to 2,000 randomized perturbations across 8 degradation types.
+- **PCA Dimensionality Reduction**: Standardized the 11 failure descriptors and projected them to 2D via SVD-based PCA. The first two Principal Components explained **69.55% of the total variance**, proving that representation failures are highly structured and low-dimensional.
+- **K-Means Clustering**: Automatically clustered the 2D projected space into $k=5$ regions, discovering universal task-independent collapse zones:
+  - *Harmonic / Periodicity Collapse (C0)*: High ZCR, high ACF similarity, but cepstral similarity collapses to negative values.
+  - *Noise / Stochastic Collapse (C3)*: High spectral entropy, complete similarity breakdown across all three representations.
+  - *Healthy / Low-degradation Region (C4)*: High similarities (> 0.88) across all.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -285,10 +300,14 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 7. **Heuristics vs Learned Error**: Confidence does not need to be handcrafted. A model trained to predict estimation error directly from multidimensional physical features (the failure manifold) can dynamically route weights with high accuracy, transforming confidence into a learned estimate of future failure.
 8. **Cross-Task Generalisation**: Representation failure geometry is highly universal for structural collapses (filtering and distortion), enabling a failure model trained entirely on pitch tracking to route onset detection weights with perfect F1 accuracy. However, task-dependent differences in noise robustness (e.g. ACF is pitch-robust but onset-fragile) represent the fundamental limit of cross-task transfer.
 
+### On Failure Manifolds
+9. **Universal Task-Independent Collapse Regions**: When mapping representation failures directly, K-Means clustering in a low-dimensional PCA space of 11 signal descriptors reveals distinct, well-defined collapse zones (such as Noise/Stochastic Collapse and Harmonic/Periodicity Collapse) that exist independently of the downstream DSP task.
+10. **Failure Topology**: Representation failure is not a chaotic, unstructured process; rather, it occupies a highly structured, low-dimensional landscape where 69.55% of physical feature variance is explained by the first two principal components.
+
 ### On the Product
-9. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
-10. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
-11. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
+11. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
+12. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
+13. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
 
 ---
 
@@ -327,6 +346,9 @@ pip install -r requirements.txt
 
 # Run the cross-task transfer experiment
 .venv/bin/python3 src/experiments/exp026_cross_task_transfer.py
+
+# Run the failure manifold mapping experiment
+.venv/bin/python3 src/experiments/exp027_failure_manifold_mapping.py
 
 # Open listen tests
 open listen_test/index.html
