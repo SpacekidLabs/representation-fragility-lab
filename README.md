@@ -21,8 +21,8 @@ Use those failure maps to build a system where representations know their own we
 **Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
 Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
-**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–039)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, deploy the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings, automatically learn optimal control surfaces to minimize Log Spectral Distance, and package the architecture into a reusable coordinate-gated library (Framework V1) with three adaptive reference plugins (denoiser, pitch tracker, onset detector).
+**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–040)
+Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, deploy the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings, automatically learn optimal control surfaces to minimize Log Spectral Distance, package the architecture into a reusable coordinate-gated library (Framework V1) with three adaptive reference plugins (denoiser, pitch tracker, onset detector), and validate that State Compatibility Index correlation predicts framework benefit.
 
 ---
 
@@ -494,6 +494,17 @@ A single, frozen representation intelligence engine trained on physical signal a
 
 ---
 
+### Phase 20 — Framework Generalization Challenge (Exp 040)
+
+#### Exp 040 — Framework Generalization Challenge
+Evaluates the core hypothesis of the Local State Hypothesis: **Does a task's State Compatibility Index ($\eta^2$) predict the performance benefit ($\Delta P$) of integrating the state-space framework?**
+- **Dynamic Compatibility Index ($\eta^2$)**: Calculated dynamically via 5-fold cross-validation on 500 synthesized physical frames across 10 DSP tasks (covering classification and regression).
+- **Framework Benefit ($\Delta P$)**: Difference between normalized adaptive and baseline performances: $\Delta P = P_{\text{adaptive}} - P_{\text{baseline}}$.
+- **Hypothesis Verification**: Pearson correlation coefficient $r = 0.8629$ confirms a strong positive relationship between compatibility and performance benefit. Mapped low-compatibility task performance degradation ($\Delta P < 0.0$) as a direct consequence of state-space blind spots (loudness, reference alignment, long-term decay).
+- **Dashboard Plot**: Saved to [exp040_generalization_challenge.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp040_generalization_challenge.png).
+
+---
+
 
 ## Listen Tests
 
@@ -613,6 +624,9 @@ pip install -r requirements.txt
 # Run the framework V1 validation and plugins suite
 .venv/bin/python3 src/experiments/exp039_framework_v1_validation.py
 
+# Run the framework generalization challenge
+.venv/bin/python3 src/experiments/exp040_generalization_challenge.py
+
 # Open listen tests
 open listen_test/index.html
 open listen_test/exp023.html
@@ -651,7 +665,7 @@ The remaining open questions are **product questions**, not research questions:
 
 The framework API (`src/framework`) is ready for integration into any YIN-based or representation-based DSP pipeline.
 
-Exp 039 closes the research loop and establishes the V1 product architecture:
+Exp 040 completes the validation of the Local State Hypothesis:
 
 ```
 Exp 001–013:  Atlas of failures
@@ -662,6 +676,7 @@ Exp 033–034:  Practical gains & zero-shot validation across 5 tasks
 Exp 035–036:  Limits and formal theory validation (Local State Hypothesis)
 Exp 037–038:  Real audio integration & learned control surface optimization
 Exp 039:      Framework V1 package & reference plugins (Denoiser, Pitch Tracker, Onset Detector)
+Exp 040:      Framework Generalization Challenge (validation of the Local State Hypothesis)
 ```
 
 The coordinate-gated DSP library is the product.
