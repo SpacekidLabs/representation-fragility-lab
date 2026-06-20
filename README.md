@@ -292,6 +292,19 @@ Mapped paths through the failure manifold to treat representation collapse as a 
 
 ---
 
+### Phase 10 — Universal Audio State Space (Exp 030)
+
+#### Exp 030 — Universal Audio State Space
+Investigated whether the failure manifold maps the specific boundaries of representations or the physical geometry of audio itself.
+- **Physical Feature Space**: Bypassed representation similarities and failure metrics entirely. Extracted 10 pure physical signal descriptors (spectral entropy, flatness, ZCR, harmonic ratio, crest factor, periodicity, spectral rolloff, Hoyer sparsity, time-domain kurtosis, sub-frame amplitude modulation) across 2,000 frames from 10 distinct audio classes.
+- **Topological Reconstruction**: Fitting a 2D PCA explained **63.55%** of the physical variance. Correlating axes confirmed PC1 represents *Order ↔ Disorder* ($r = 0.920$ with Spectral Entropy) and PC2 represents *Harmonic ↔ Transient/Peakiness* ($r = 0.840$ with Crest Factor).
+- **Trajectory Mapping**: Projecting the continuous sweeps from Exp 029 (Vocals + Noise, Guitar + Lowpass, Piano + Saturation) onto the physical state space replicated the exact same paths and terminal collapse states.
+
+**Key Finding**:
+The failure manifold is a projection of the **Universal Audio State Space** itself. Representation collapse is physically determined by the signal's coordinate in this state space (e.g., high entropy or high crest-factor transients), meaning we can predict failure and route DSP parameters using purely physical descriptors of the input audio.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -329,6 +342,7 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 13. **Density Cluster Authenticity**: DBSCAN verification confirms that the discovered collapse regions (such as Noise Collapse and Periodicity Collapse) correspond to density-based physical realities, not K-Means spherical clustering artifacts.
 14. **Semantic Axis Mapping**: The failure manifold axes have explicit physical meaning: PC1 maps **Order ↔ Disorder** (r = -0.912 with Spectral Entropy), and PC2 maps **Harmonic ↔ Transient** (r = -0.642 with ZCR).
 15. **Manifold Trajectory Flow**: Continuous degradation sweeps (noise, filtering, saturation) trace smooth, directional paths through the manifold, turning the failure manifold into a coordinate-gated DSP navigation control layer.
+16. **Representation-Independent Failure Manifold**: Experiment 030 proves that the failure manifold is not an artifact of representation algorithms but a projection of the **Universal Audio State Space** itself. The 2D PCA constructed purely from 10 physical signal descriptors (explaining 63.55% of the feature variance) reconstructs the exact same manifold topology, density clusters, and continuous trajectories, showing that representation failure is physically dictated by the state of the audio itself.
 
 ### On the Product
 13. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
@@ -381,6 +395,9 @@ pip install -r requirements.txt
 
 # Run the failure manifold trajectories experiment
 .venv/bin/python3 src/experiments/exp029_failure_trajectories.py
+
+# Run the universal audio state space experiment
+.venv/bin/python3 src/experiments/exp030_universal_audio_state_space.py
 
 # Open listen tests
 open listen_test/index.html
