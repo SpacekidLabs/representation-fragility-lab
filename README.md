@@ -10,13 +10,13 @@ We started with a simple question:
 
 > **Do different audio representations fail in different ways?**
 
-After 23 experiments, that question has expanded into two distinct research arcs:
+After 24 experiments, that question has expanded into two distinct research arcs:
 
 **Arc 1 — Blind Spot Atlas** (Exp 001–013)
 Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, harmonic removal, pitch shifts, and targeted adversarial probes.
 
-**Arc 2 — Representation Intelligence** (Exp 014–023)
-Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, and cooperate to make better decisions — culminating in a working adaptive auto-tuner prototype.
+**Arc 2 — Representation Intelligence** (Exp 014–024)
+Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, and cooperate to make better decisions — spanning pitch tracking, auto-tuning, and onset detection.
 
 ---
 
@@ -29,7 +29,7 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── experiments/      # All 23 experiment scripts (exp001–exp023)
+│   └── experiments/      # All 24 experiment scripts (exp001–exp024)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -199,6 +199,25 @@ Each frame moves 32% of the remaining distance to the target note. At 11.6 ms/ho
 
 ---
 
+### Phase 4 — Generalisation to Other DSP Primitives (Exp 024)
+
+#### Exp 024 — Representation Intelligence for Onset Detection
+Tested if the representation intelligence architecture (confidence signals + meta-layer fusion) generalises from pitch tracking to onset detection.
+- **Onset Detectors**: Spectral Flux (STFT), Prominence Drop (ACF), Peak Velocity (Cepstrum).
+- **Confidence Metrics**: Reused the same logic from Exp 015/022.
+- **Training**: Trained the meta-layer on clean note sequences (seeds 0–5) using Moore-Penrose pseudo-inverse.
+- **Testing**: Evaluated on an independent sequence under clean, light noise ($\sigma=0.10$), and heavy noise ($\sigma=0.30$) conditions (F1-score with 50 ms tolerance).
+
+**Results:**
+- **Clean**: STFT F1 = 1.000, ACF F1 = 0.933, Cepstrum F1 = 0.889, Reactive F1 = 0.714, Meta F1 = 0.941.
+- **Light Noise**: STFT F1 = 1.000, ACF F1 = 0.000, Cepstrum F1 = 0.357, Reactive F1 = 0.000, Meta F1 = 0.429.
+- **Heavy Noise**: STFT F1 = 0.769, ACF F1 = 0.000, Cepstrum F1 = 0.435, Reactive F1 = 0.000, Meta F1 = 0.091.
+
+**Key Finding**:
+The self-confidence signals (DC shift, peak ratio, spectral dominance) are indeed transferable, successfully weighting down failing representations in clean and light noise. However, because the meta-layer was trained on clean signals, it failed to generalise to heavy noise (Meta F1 = 0.091 vs STFT-only = 0.769). This demonstrates that **transferability of confidence is high**, but **robust routing requires noise-aware training**.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -259,6 +278,9 @@ pip install -r requirements.txt
 
 # Run the retune dynamics atlas
 .venv/bin/python3 src/experiments/exp023_retune_atlas.py
+
+# Run the onset detection generalisation test
+.venv/bin/python3 src/experiments/exp024_onset_detection.py
 
 # Open listen tests
 open listen_test/index.html
