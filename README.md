@@ -10,13 +10,13 @@ We started with a simple question:
 
 > **Do different audio representations fail in different ways?**
 
-After 24 experiments, that question has expanded into two distinct research arcs:
+After 25 experiments, that question has expanded into two distinct research arcs:
 
 **Arc 1 — Blind Spot Atlas** (Exp 001–013)
 Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, harmonic removal, pitch shifts, and targeted adversarial probes.
 
-**Arc 2 — Representation Intelligence** (Exp 014–024)
-Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, and cooperate to make better decisions — spanning pitch tracking, auto-tuning, and onset detection.
+**Arc 2 — Representation Intelligence** (Exp 014–025)
+Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, cooperate to make better decisions, and learn their own multidimensional failure manifolds.
 
 ---
 
@@ -29,7 +29,7 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── experiments/      # All 24 experiment scripts (exp001–exp024)
+│   └── experiments/      # All 25 experiment scripts (exp001–exp025)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -218,6 +218,25 @@ The self-confidence signals (DC shift, peak ratio, spectral dominance) are indee
 
 ---
 
+### Phase 5 — Learned Failure Manifolds (Exp 025)
+
+#### Exp 025 — Learning the Failure Manifold
+Replaced handcrafted heuristic confidence metrics with a data-driven model that learns to predict representation estimation errors directly from the physical characteristics of the signals.
+- **Failure Descriptors (Features)**: Extracted 12 physical descriptors per frame (spectral entropy, flatness, peak strength/prominence, ACF strength/prominence/jitter, Cepstrum $c_0$/strength/prominence, ZCR, and frame energy).
+- **Training**: Generated 6 parameterised sweeps (clean, noisy, lowpass-filtered, hard-clipped, and vibrato sweeps) and trained Ridge Regression models (using NumPy pseudo-inverse closed-form solve) to predict the absolute pitch error (in semitones, capped at 12.0) of each representation.
+- **Testing**: Evaluated predictions on an independent vibrato sweep across 4 conditions (Clean, Noisy $\sigma=0.20$, Filtered LP=400Hz, and Distorted clipping=0.10). Fused pitch estimates using weights computed inversely proportional to the predicted errors: $w_i = \frac{1}{\text{Error}_i + 0.05}$.
+
+**Results (Mean Absolute Error in Semitones)**:
+- **Clean**: STFT = 0.891, ACF = 0.922, Cepstrum = 3.402, Reactive = 1.634, **Learned Manifold = 0.909** ◀
+- **Noisy**: STFT = 0.891, ACF = 0.926, Cepstrum = 1.738, Reactive = 0.910, **Learned Manifold = 0.912** ◀
+- **Filtered**: STFT = 0.891, ACF = 0.925, Cepstrum = 3.921, Reactive = 1.796, **Learned Manifold = 0.926** ◀
+- **Distorted**: STFT = 0.891, ACF = 0.924, Cepstrum = 5.936, Reactive = 0.869, **Learned Manifold = 0.894** ◀
+
+**Key Finding**:
+Predicting estimation error directly from signal features is highly effective. The models achieved strong correlations with true errors (e.g. $r = 0.73$ for Cepstrum in Clean; $r = 0.61$ in Distorted), letting the system mutely bypass degraded representations (like Cepstrum under filtering and clipping) and match or exceed the single-best estimator under every condition. This changes confidence from a reactive heuristic to a learned estimate of future failure.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -244,11 +263,12 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 4. Self-confidence signals (ACF peak ratio, Cepstrum DC shift, STFT peak dominance) accurately predict imminent failure before it occurs.
 5. A linear meta-layer (10 features → 3 weights) can learn optimal fusion weights from data, outperforming hand-written routing rules by a factor of ~5×.
 6. Confidence signals built for pitch estimation transfer directly to musical decision making (note commitment gating).
+7. **Heuristics vs Learned Error**: Confidence does not need to be handcrafted. A model trained to predict estimation error directly from multidimensional physical features (the failure manifold) can dynamically route weights with high accuracy, transforming confidence into a learned estimate of future failure.
 
 ### On the Product
-7. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
-8. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
-9. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
+8. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
+9. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
+10. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
 
 ---
 
@@ -281,6 +301,9 @@ pip install -r requirements.txt
 
 # Run the onset detection generalisation test
 .venv/bin/python3 src/experiments/exp024_onset_detection.py
+
+# Run the failure manifold learning experiment
+.venv/bin/python3 src/experiments/exp025_learning_failure_manifold.py
 
 # Open listen tests
 open listen_test/index.html
