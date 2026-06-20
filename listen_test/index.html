@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listen Test — Adaptive Tuner</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0a0f;
+      --surface:   #111118;
+      --card:      #16161f;
+      --border:    #1e1e2e;
+      --accent:    #7c6af7;
+      --green:     #33cc66;
+      --amber:     #f5a623;
+      --red:       #ff4d6d;
+      --muted:     #888899;
+      --text:      #e2e2f0;
+      --text-dim:  #6b6b88;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    header .eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    header p {
+      font-size: 15px;
+      color: var(--muted);
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .blind-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 auto 48px;
+      padding: 10px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.2s;
+      user-select: none;
+    }
+    .blind-toggle:hover { border-color: var(--accent); color: var(--text); }
+    .blind-toggle .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .blind-toggle.active .dot { opacity: 1; }
+    .blind-toggle.active { color: var(--text); border-color: var(--accent); }
+
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 32px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--card-accent, var(--border));
+      border-radius: 3px 0 0 3px;
+    }
+    .card:hover { border-color: #2a2a3e; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .card.playing { border-color: var(--card-accent, var(--accent)); }
+
+    .card-a { --card-accent: var(--muted); }
+    .card-b { --card-accent: var(--red); }
+    .card-c { --card-accent: var(--amber); }
+    .card-d { --card-accent: var(--green); }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    .card-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--card-accent, var(--border));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 15px;
+      color: #fff;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+
+    .card-title-wrap {}
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      transition: opacity 0.3s;
+    }
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      transition: opacity 0.3s;
+    }
+
+    .blind-mode .card-title,
+    .blind-mode .card-subtitle { opacity: 0; pointer-events: none; }
+
+    .play-btn {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--card-accent, var(--border));
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s, opacity 0.15s;
+      opacity: 0.85;
+    }
+    .play-btn:hover { transform: scale(1.08); opacity: 1; }
+    .play-btn svg { fill: #fff; width: 16px; height: 16px; }
+
+    /* Waveform progress bar */
+    .progress-wrap {
+      height: 36px;
+      background: var(--surface);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--card-accent, var(--border));
+      opacity: 0.25;
+      width: 0%;
+      transition: width 0.1s linear;
+      border-radius: 8px;
+    }
+    .progress-wrap:hover .progress-bar { opacity: 0.35; }
+
+    .time-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .time-label {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--text-dim);
+    }
+
+    /* Description tags */
+    .tags {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      transition: opacity 0.3s;
+    }
+    .blind-mode .tags { opacity: 0; pointer-events: none; }
+    .tag {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    footer {
+      margin-top: 64px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    .reveal-btn {
+      display: none;
+      margin: 32px auto 0;
+      padding: 12px 28px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .reveal-btn:hover { opacity: 0.85; }
+    .blind-mode + .cards + .reveal-btn,
+    .cards.blind-mode ~ .reveal-btn { display: block; }
+
+    /* playing icon animation */
+    @keyframes pulse-ring {
+      0%   { transform: scale(1);   opacity: 0.6; }
+      100% { transform: scale(1.5); opacity: 0;   }
+    }
+    .play-btn.playing::after {
+      content: '';
+      position: absolute;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--card-accent, var(--accent));
+      animation: pulse-ring 1.2s ease-out infinite;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Representation Fragility Lab · Exp 020–022</div>
+  <h1>Listen Test</h1>
+  <p>Four renders of the same vocal. No metrics. No plots. Just listen.</p>
+</header>
+
+<div class="blind-toggle" id="blindToggle" onclick="toggleBlind()">
+  <span class="dot"></span>
+  <span id="blindLabel">Enable blind test</span>
+</div>
+
+<div class="cards" id="cards">
+
+  <!-- A: Raw -->
+  <div class="card card-a" id="card-0">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">A</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Raw Vocal</div>
+          <div class="card-subtitle">no processing · source</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-0" onclick="togglePlay(0)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event, 0)">
+      <div class="progress-bar" id="prog-0"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-0">0:00</span>
+      <span class="time-label" id="dur-0">–:––</span>
+    </div>
+    <div class="tags">
+      <span class="tag">reference</span>
+      <span class="tag">unprocessed</span>
+    </div>
+    <audio id="audio-0" src="A_raw_vocal.wav" preload="metadata"></audio>
+  </div>
+
+  <!-- B: V1 -->
+  <div class="card card-b" id="card-1">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">B</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Autotune V1 — Frame-by-Frame</div>
+          <div class="card-subtitle">exp020 · new target every frame</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-1" onclick="togglePlay(1)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event, 1)">
+      <div class="progress-bar" id="prog-1"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-1">0:00</span>
+      <span class="time-label" id="dur-1">–:––</span>
+    </div>
+    <div class="tags">
+      <span class="tag">unstabilized</span>
+      <span class="tag">frame jitter</span>
+      <span class="tag">26 target changes</span>
+    </div>
+    <audio id="audio-1" src="B_autotune_v1_frame_by_frame.wav" preload="metadata"></audio>
+  </div>
+
+  <!-- C: V2 -->
+  <div class="card card-c" id="card-2">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">C</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Autotune V2 — Note Tracker</div>
+          <div class="card-subtitle">exp021 · min-hold debounce</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-2" onclick="togglePlay(2)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event, 2)">
+      <div class="progress-bar" id="prog-2"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-2">0:00</span>
+      <span class="time-label" id="dur-2">–:––</span>
+    </div>
+    <div class="tags">
+      <span class="tag">simple debounce</span>
+      <span class="tag">42% jitter reduction</span>
+      <span class="tag">attack artifact</span>
+    </div>
+    <audio id="audio-2" src="C_autotune_v2_note_tracker.wav" preload="metadata"></audio>
+  </div>
+
+  <!-- D: V3 -->
+  <div class="card card-d" id="card-3">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">D</div>
+        <div class="card-title-wrap">
+          <div class="card-title">Autotune V3 — Confidence-Gated</div>
+          <div class="card-subtitle">exp022 · undecided / tracking / locked</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-3" onclick="togglePlay(3)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event, 3)">
+      <div class="progress-bar" id="prog-3"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-3">0:00</span>
+      <span class="time-label" id="dur-3">–:––</span>
+    </div>
+    <div class="tags">
+      <span class="tag">confidence-gated</span>
+      <span class="tag">78% frames locked</span>
+      <span class="tag">no attack artifact</span>
+    </div>
+    <audio id="audio-3" src="D_autotune_v3_confidence_gated.wav" preload="metadata"></audio>
+  </div>
+
+</div>
+
+<footer>
+  Representation Fragility Lab &nbsp;·&nbsp; Experiments 020–022<br>
+  <span style="color:#444">ACF + Cepstrum + STFT · Meta-Representation Layer · Confidence-Gated NoteTracker</span>
+</footer>
+
+<script>
+  const N = 4;
+  let currentPlaying = -1;
+  let timers = Array(N).fill(null);
+  let blindMode = false;
+
+  function fmt(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  // Init duration labels
+  for (let i = 0; i < N; i++) {
+    const a = document.getElementById(`audio-${i}`);
+    a.addEventListener('loadedmetadata', () => {
+      document.getElementById(`dur-${i}`).textContent = fmt(a.duration);
+    });
+    a.addEventListener('ended', () => stopAll());
+  }
+
+  function stopAll() {
+    for (let i = 0; i < N; i++) {
+      const a = document.getElementById(`audio-${i}`);
+      const btn = document.getElementById(`btn-${i}`);
+      const card = document.getElementById(`card-${i}`);
+      a.pause();
+      a.currentTime = 0;
+      document.getElementById(`prog-${i}`).style.width = '0%';
+      document.getElementById(`cur-${i}`).textContent = '0:00';
+      btn.classList.remove('playing');
+      card.classList.remove('playing');
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+      if (timers[i]) { cancelAnimationFrame(timers[i]); timers[i] = null; }
+    }
+    currentPlaying = -1;
+  }
+
+  function startProgress(i) {
+    const a = document.getElementById(`audio-${i}`);
+    const prog = document.getElementById(`prog-${i}`);
+    const cur = document.getElementById(`cur-${i}`);
+    function tick() {
+      if (!a.paused && !a.ended) {
+        const pct = a.duration ? (a.currentTime / a.duration) * 100 : 0;
+        prog.style.width = pct + '%';
+        cur.textContent = fmt(a.currentTime);
+        timers[i] = requestAnimationFrame(tick);
+      }
+    }
+    timers[i] = requestAnimationFrame(tick);
+  }
+
+  function togglePlay(i) {
+    const a = document.getElementById(`audio-${i}`);
+    const btn = document.getElementById(`btn-${i}`);
+    const card = document.getElementById(`card-${i}`);
+
+    if (currentPlaying === i) {
+      stopAll();
+      return;
+    }
+
+    stopAll();
+
+    a.play();
+    currentPlaying = i;
+    btn.classList.add('playing');
+    card.classList.add('playing');
+    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`;
+    startProgress(i);
+  }
+
+  function seek(e, i) {
+    const a = document.getElementById(`audio-${i}`);
+    if (!a.duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    a.currentTime = pct * a.duration;
+    document.getElementById(`prog-${i}`).style.width = (pct * 100) + '%';
+    document.getElementById(`cur-${i}`).textContent = fmt(a.currentTime);
+    if (currentPlaying !== i) togglePlay(i);
+  }
+
+  function toggleBlind() {
+    blindMode = !blindMode;
+    const cards = document.getElementById('cards');
+    const toggle = document.getElementById('blindToggle');
+    const label = document.getElementById('blindLabel');
+    if (blindMode) {
+      cards.classList.add('blind-mode');
+      toggle.classList.add('active');
+      label.textContent = 'Blind mode ON — labels hidden';
+    } else {
+      cards.classList.remove('blind-mode');
+      toggle.classList.remove('active');
+      label.textContent = 'Enable blind test';
+    }
+  }
+
+  // Keyboard shortcuts: 1-4 to play/stop
+  document.addEventListener('keydown', e => {
+    const k = parseInt(e.key);
+    if (k >= 1 && k <= 4) togglePlay(k - 1);
+    if (e.key === ' ') { e.preventDefault(); if (currentPlaying >= 0) togglePlay(currentPlaying); }
+  });
+</script>
+
+</body>
+</html>
