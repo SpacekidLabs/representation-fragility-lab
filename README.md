@@ -10,7 +10,7 @@ We started with a simple question:
 
 > **Do different audio representations fail in different ways?**
 
-After 28 experiments, that question has expanded into three distinct research arcs:
+After 29 experiments, that question has expanded into three distinct research arcs:
 
 **Arc 1 — Blind Spot Atlas** (Exp 001–013)
 Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, harmonic removal, pitch shifts, and targeted adversarial probes.
@@ -18,8 +18,8 @@ Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, h
 **Arc 2 — Representation Intelligence** (Exp 014–026)
 Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, cooperate to make better decisions, learn their own failure manifolds, and transfer failure knowledge across tasks.
 
-**Arc 3 — Failure Manifold & Universality** (Exp 027–028)
-Map the task-independent multidimensional physical boundaries of representation failure directly, and validate its universality across new representations, signals, and perturbations.
+**Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
+Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
 ---
 
@@ -32,7 +32,7 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── experiments/      # All 28 experiment scripts (exp001–exp028)
+│   └── experiments/      # All 29 experiment scripts (exp001–exp029)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -279,6 +279,19 @@ Stress-tested the universality and predictive power of the failure manifold unde
 
 ---
 
+### Phase 9 — Failure Trajectories (Exp 029)
+
+#### Exp 029 — Failure Trajectories
+Mapped paths through the failure manifold to treat representation collapse as a continuous dynamical system, validated clusters, interpreted the axes physically, and built a DSP control layer.
+- **DBSCAN Clustering**: DBSCAN in pure NumPy ($\epsilon=0.35$, `min_samples=15`) successfully discovered the density-based *Stochastic Noise Collapse* cluster (STFT=0.159, ACF=0.075, Cep=-0.008), proving the clusters are physical realities, not K-Means artifacts.
+- **Axis Semantics**: Correlated PCA axes with physical signal descriptors:
+  - *PC1 Axis (r = -0.912 with Spectral Entropy; r = 0.483 with SNR)*: Maps **Order ↔ Disorder**.
+  - *PC2 Axis (r = -0.642 with ZCR; r = 0.339 with Periodicity)*: Maps **Harmonic ↔ Transient**.
+- **Continuous Trajectories**: Projected 50-step continuous degradation paths (Vocals + Noise, Guitar + Lowpass, Piano + Saturation) onto the manifold, showing smooth paths moving from the Healthy Zone into specific collapse regions.
+- **DSP Navigation**: Created a coordinate-gated recommendation engine that outputs active parameters (window size, weights, gating) as signals travel along the manifold trajectories.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -313,6 +326,9 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 10. **Failure Topology**: Representation failure is not a chaotic, unstructured process; rather, it occupies a highly structured, low-dimensional landscape where 69.55% of physical feature variance is explained by the first two principal components.
 11. **Universality of Failure Topology**: Stress-testing the failure manifold under highly diverse signals (singing voice, speech, piano, drums, guitar) and representations (CQT, Wavelet CWT, Mel Spectrogram) reveals that the 2D layout and collapse regions are a universal physical reality.
 12. **Coordinate Gated Failure Prediction**: A simple polynomial regression model trained *solely* on the 2D manifold coordinates $(z_1, z_2)$ successfully predicts downstream pitch estimation error ($r = 0.549$) and onset detection failure ($r = 0.539$), proving that the failure manifold is not just descriptive but has significant predictive utility.
+13. **Density Cluster Authenticity**: DBSCAN verification confirms that the discovered collapse regions (such as Noise Collapse and Periodicity Collapse) correspond to density-based physical realities, not K-Means spherical clustering artifacts.
+14. **Semantic Axis Mapping**: The failure manifold axes have explicit physical meaning: PC1 maps **Order ↔ Disorder** (r = -0.912 with Spectral Entropy), and PC2 maps **Harmonic ↔ Transient** (r = -0.642 with ZCR).
+15. **Manifold Trajectory Flow**: Continuous degradation sweeps (noise, filtering, saturation) trace smooth, directional paths through the manifold, turning the failure manifold into a coordinate-gated DSP navigation control layer.
 
 ### On the Product
 13. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
@@ -362,6 +378,9 @@ pip install -r requirements.txt
 
 # Run the failure manifold validation experiment
 .venv/bin/python3 src/experiments/exp028_failure_manifold_validation.py
+
+# Run the failure manifold trajectories experiment
+.venv/bin/python3 src/experiments/exp029_failure_trajectories.py
 
 # Open listen tests
 open listen_test/index.html
