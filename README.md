@@ -187,13 +187,15 @@ Swept seven retune speeds with the Axis 1 fixed at the Exp 022 confidence-gated 
 |---|---|---|
 | 0 ms | 1.000 | Instant snap — robotic |
 | 15 ms | 0.539 | Hard pop |
-| 30 ms | 0.321 | Modern pop |
+| **30 ms** | **0.321** | **Modern pop ← confirmed default** |
 | 60 ms | 0.176 | Balanced |
 | 120 ms | 0.092 | Natural |
 | 250 ms | 0.045 | Transparent correction |
 | 500 ms | 0.023 | Barely audible |
 
-Listen test result: the **frame-by-frame (Exp 020) version sounded best** — equivalent to a ~60–120 ms retune speed — confirming that smooth correction dynamics are more musical than hard snapping for this vocal.
+**Listen test result (real vocal, blind test): 30 ms sounds best.**
+
+Each frame moves 32% of the remaining distance to the target note. At 11.6 ms/hop, the tuner reaches ~70% of the target in ~35 ms and ~95% in ~105 ms — fast enough to sound corrected, slow enough to sound human. This is the confirmed default retune speed for the prototype.
 
 ---
 
