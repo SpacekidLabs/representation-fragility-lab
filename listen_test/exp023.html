@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Retune Dynamics Atlas — Exp 023</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:#1e1e2e;--text:#e2e2f0;--dim:#6b6b88}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;
+          display:flex;flex-direction:column;align-items:center;padding:48px 24px 80px}
+    header{text-align:center;margin-bottom:48px}
+    .eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;
+              color:#7c6af7;margin-bottom:12px}
+    h1{font-size:34px;font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
+    header p{font-size:14px;color:var(--dim);max-width:480px;line-height:1.6}
+    .axis-box{display:flex;gap:12px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+    .axis{padding:10px 20px;border-radius:12px;border:1px solid var(--border);
+           background:var(--surface);font-size:12px;line-height:1.5;max-width:220px;text-align:center}
+    .axis strong{display:block;font-size:13px;margin-bottom:4px;color:var(--text)}
+    .axis span{color:var(--dim)}
+    .axis.fixed{border-color:#7c6af7;} .axis.sweep{border-color:#f5a623;}
+    .cards{display:flex;flex-direction:column;gap:14px;width:100%;max-width:680px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+           padding:24px 28px;position:relative;overflow:hidden;transition:border-color .2s}
+    .card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;
+                   background:var(--ca,var(--border));border-radius:3px 0 0 3px}
+    .card.playing{border-color:var(--ca,var(--border))}
+    .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+    .card-label{display:flex;align-items:center;gap:12px}
+    .badge{width:34px;height:34px;border-radius:9px;background:var(--ca,var(--border));
+            display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+            color:#fff;flex-shrink:0}
+    .card-title{font-size:15px;font-weight:600;margin-bottom:2px}
+    .card-subtitle{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace}
+    .play-btn{width:40px;height:40px;border-radius:50%;background:var(--ca,var(--border));
+               border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+               flex-shrink:0;transition:transform .15s,opacity .15s;opacity:.85;position:relative}
+    .play-btn:hover{transform:scale(1.08);opacity:1}
+    .play-btn svg{fill:#fff;width:15px;height:15px}
+    @keyframes pulse{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+    .play-btn.playing::after{content:'';position:absolute;width:40px;height:40px;border-radius:50%;
+                               background:var(--ca);animation:pulse 1.2s ease-out infinite}
+    .progress-wrap{height:32px;background:var(--surface);border-radius:8px;overflow:hidden;
+                    position:relative;cursor:pointer}
+    .progress-bar{height:100%;background:var(--ca,var(--border));opacity:.25;width:0%;
+                   transition:width .08s linear;border-radius:8px}
+    .progress-wrap:hover .progress-bar{opacity:.4}
+    .time-row{display:flex;justify-content:space-between;margin-top:6px}
+    .time-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--dim)}
+    .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+    .tag{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;
+          padding:3px 9px;border-radius:99px;border:1px solid var(--border);color:var(--dim)}
+    footer{margin-top:56px;text-align:center;font-size:12px;color:var(--dim);line-height:1.8}
+  </style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">Representation Fragility Lab · Experiment 023</div>
+  <h1>Retune Dynamics Atlas</h1>
+  <p>Same note target (confidence-gated). Seven correction speeds.<br>Same vocal. Just listen.</p>
+</header>
+<div class="axis-box">
+  <div class="axis fixed">
+    <strong>Axis 1 — Fixed</strong>
+    <span>Confidence-Gated NoteTracker<br>(Exp 022 decision intelligence)</span>
+  </div>
+  <div class="axis sweep">
+    <strong>Axis 2 — Swept</strong>
+    <span>Retune Speed: 0 → 500 ms<br>(correction dynamics)</span>
+  </div>
+</div>
+<div class="cards" id="cards">
+
+  <div class="card" id="card-0" style="--ca:#888">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">1</div>
+        <div>
+          <div class="card-title">0 ms — Instant Snap</div>
+          <div class="card-subtitle">retune speed · instant snap</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-0" onclick="togglePlay(0)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,0)">
+      <div class="progress-bar" id="prog-0"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-0">0:00</span>
+      <span class="time-label" id="dur-0">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">robotic</span><span class="tag">instant</span></div>
+    <audio id="audio-0" src="retune_0ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-1" style="--ca:#e63946">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">2</div>
+        <div>
+          <div class="card-title">15 ms</div>
+          <div class="card-subtitle">retune speed · ≈ hard pop</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-1" onclick="togglePlay(1)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,1)">
+      <div class="progress-bar" id="prog-1"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-1">0:00</span>
+      <span class="time-label" id="dur-1">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">tight</span><span class="tag">hard snap</span></div>
+    <audio id="audio-1" src="retune_15ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-2" style="--ca:#f4a261">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">3</div>
+        <div>
+          <div class="card-title">30 ms</div>
+          <div class="card-subtitle">retune speed · ≈ modern pop</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-2" onclick="togglePlay(2)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,2)">
+      <div class="progress-bar" id="prog-2"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-2">0:00</span>
+      <span class="time-label" id="dur-2">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">modern pop</span><span class="tag">fast</span></div>
+    <audio id="audio-2" src="retune_30ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-3" style="--ca:#f5c518">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">4</div>
+        <div>
+          <div class="card-title">60 ms</div>
+          <div class="card-subtitle">retune speed · ≈ balanced</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-3" onclick="togglePlay(3)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,3)">
+      <div class="progress-bar" id="prog-3"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-3">0:00</span>
+      <span class="time-label" id="dur-3">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">balanced</span><span class="tag">medium</span></div>
+    <audio id="audio-3" src="retune_60ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-4" style="--ca:#2ec4b6">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">5</div>
+        <div>
+          <div class="card-title">120 ms</div>
+          <div class="card-subtitle">retune speed · ≈ natural</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-4" onclick="togglePlay(4)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,4)">
+      <div class="progress-bar" id="prog-4"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-4">0:00</span>
+      <span class="time-label" id="dur-4">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">natural</span><span class="tag">slow</span></div>
+    <audio id="audio-4" src="retune_120ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-5" style="--ca:#4cc9f0">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">6</div>
+        <div>
+          <div class="card-title">250 ms</div>
+          <div class="card-subtitle">retune speed · ≈ transparent</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-5" onclick="togglePlay(5)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,5)">
+      <div class="progress-bar" id="prog-5"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-5">0:00</span>
+      <span class="time-label" id="dur-5">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">transparent</span><span class="tag">very slow</span></div>
+    <audio id="audio-5" src="retune_250ms.wav" preload="metadata"></audio>
+  </div>
+  <div class="card" id="card-6" style="--ca:#a8dadc">
+    <div class="card-header">
+      <div class="card-label">
+        <div class="badge">7</div>
+        <div>
+          <div class="card-title">500 ms</div>
+          <div class="card-subtitle">retune speed · ≈ barely audible</div>
+        </div>
+      </div>
+      <button class="play-btn" id="btn-6" onclick="togglePlay(6)">
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+    <div class="progress-wrap" onclick="seek(event,6)">
+      <div class="progress-bar" id="prog-6"></div>
+    </div>
+    <div class="time-row">
+      <span class="time-label" id="cur-6">0:00</span>
+      <span class="time-label" id="dur-6">–:––</span>
+    </div>
+    <div class="tags"><span class="tag">barely audible</span><span class="tag">ultra slow</span></div>
+    <audio id="audio-6" src="retune_500ms.wav" preload="metadata"></audio>
+  </div>
+</div>
+<footer>
+  Experiment 023 · Retune Dynamics Atlas<br>
+  <span style="color:#333">Keys 1–7 to play · Space to pause</span>
+</footer>
+<script>
+  const N=7;
+  let cur=-1,timers=Array(N).fill(null);
+  const fmt=s=>{const m=Math.floor(s/60),sec=String(Math.floor(s%60)).padStart(2,'0');return m+':'+sec};
+  for(let i=0;i<N;i++){
+    const a=document.getElementById('audio-'+i);
+    a.addEventListener('loadedmetadata',()=>{document.getElementById('dur-'+i).textContent=fmt(a.duration)});
+    a.addEventListener('ended',stopAll);
+  }
+  function stopAll(){
+    for(let i=0;i<N;i++){
+      const a=document.getElementById('audio-'+i);
+      a.pause();a.currentTime=0;
+      document.getElementById('prog-'+i).style.width='0%';
+      document.getElementById('cur-'+i).textContent='0:00';
+      document.getElementById('btn-'+i).classList.remove('playing');
+      document.getElementById('btn-'+i).innerHTML='<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+      document.getElementById('card-'+i).classList.remove('playing');
+      if(timers[i]){cancelAnimationFrame(timers[i]);timers[i]=null;}
+    }
+    cur=-1;
+  }
+  function tick(i){
+    const a=document.getElementById('audio-'+i);
+    if(!a.paused&&!a.ended){
+      const p=a.duration?(a.currentTime/a.duration*100):0;
+      document.getElementById('prog-'+i).style.width=p+'%';
+      document.getElementById('cur-'+i).textContent=fmt(a.currentTime);
+      timers[i]=requestAnimationFrame(()=>tick(i));
+    }
+  }
+  function togglePlay(i){
+    if(cur===i){stopAll();return;}
+    stopAll();
+    const a=document.getElementById('audio-'+i);
+    const btn=document.getElementById('btn-'+i);
+    a.play();cur=i;
+    btn.classList.add('playing');
+    document.getElementById('card-'+i).classList.add('playing');
+    btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+    timers[i]=requestAnimationFrame(()=>tick(i));
+  }
+  function seek(e,i){
+    const a=document.getElementById('audio-'+i);
+    if(!a.duration)return;
+    const r=e.currentTarget.getBoundingClientRect();
+    a.currentTime=(e.clientX-r.left)/r.width*a.duration;
+    if(cur!==i)togglePlay(i);
+  }
+  document.addEventListener('keydown',e=>{
+    const k=parseInt(e.key);
+    if(k>=1&&k<=N)togglePlay(k-1);
+    if(e.key===' '){e.preventDefault();if(cur>=0)togglePlay(cur);}
+  });
+</script>
+</body>
+</html>
