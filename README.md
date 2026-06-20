@@ -305,6 +305,20 @@ The failure manifold is a projection of the **Universal Audio State Space** itse
 
 ---
 
+### Phase 11 — Assumption Surfaces (Exp 031)
+
+#### Exp 031 — Assumption Surfaces
+Mapped and learned the explicit physical boundaries where the mathematical assumptions of STFT, ACF, Cepstrum, CQT, and Wavelets become invalid inside the Universal Audio State Space.
+- **Dataset**: Evaluated 4,000 total frames (2,000 clean + 2,000 perturbed) across all 5 representations.
+- **Status Classification**: Classified each representation's health: Works (pitch error $\le 1.0$ semitones, similarity $\ge 0.80$), Degrades (pitch error $\le 3.0$ semitones, similarity $\ge 0.60$), or Catastrophically Fails.
+- **Boundary Learning**: Fitted degree-2 polynomial Ridge Regression models in the 2D Universal Audio State Space to predict safety scores and plotted the 0.5 contour line.
+- **Findings**: Cepstrum has the narrowest assumption surface, demanding clean harmonic stacks. Wavelets have the largest safe zone, showing excellent noise and transient tolerance due to time-frequency multiscale locality.
+
+**Key Finding**:
+The assumption surfaces form a nested geometric topology. This allows a new coordinate-gated DSP paradigm: query the signal's 2D coordinate first using cheap physical descriptors, find which assumptions are valid, and route only to guaranteed representations.
+
+---
+
 ## Listen Tests
 
 Two interactive listen-test pages are included in `listen_test/`:
@@ -343,6 +357,7 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 14. **Semantic Axis Mapping**: The failure manifold axes have explicit physical meaning: PC1 maps **Order ↔ Disorder** (r = -0.912 with Spectral Entropy), and PC2 maps **Harmonic ↔ Transient** (r = -0.642 with ZCR).
 15. **Manifold Trajectory Flow**: Continuous degradation sweeps (noise, filtering, saturation) trace smooth, directional paths through the manifold, turning the failure manifold into a coordinate-gated DSP navigation control layer.
 16. **Representation-Independent Failure Manifold**: Experiment 030 proves that the failure manifold is not an artifact of representation algorithms but a projection of the **Universal Audio State Space** itself. The 2D PCA constructed purely from 10 physical signal descriptors (explaining 63.55% of the feature variance) reconstructs the exact same manifold topology, density clusters, and continuous trajectories, showing that representation failure is physically dictated by the state of the audio itself.
+17. **Assumption Surfaces & Nested Geometry**: Experiment 031 demonstrates that representation boundaries form a nested geometric topology. The Cepstrum has the most fragile, narrowest safe zone; Wavelets have the largest, most robust safe zone due to multiscale locality. Polynomial models can predict safety contours in real-time, enabling a coordinate-gated DSP paradigm.
 
 ### On the Product
 13. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
@@ -398,6 +413,9 @@ pip install -r requirements.txt
 
 # Run the universal audio state space experiment
 .venv/bin/python3 src/experiments/exp030_universal_audio_state_space.py
+
+# Run the assumption surfaces experiment
+.venv/bin/python3 src/experiments/exp031_assumption_surfaces.py
 
 # Open listen tests
 open listen_test/index.html
