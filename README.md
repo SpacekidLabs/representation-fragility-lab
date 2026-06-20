@@ -21,8 +21,8 @@ Use those failure maps to build a system where representations know their own we
 **Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
 Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
-**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–035)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five structurally different tasks, and map the boundaries of applicability where the physical state space is blind.
+**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–036)
+Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, and formally validate the Local State Hypothesis using the State Compatibility Index (eta-squared).
 
 ---
 
@@ -397,6 +397,28 @@ Scientifically mapped the boundaries where physical audio state knowledge (the U
 
 **Key Finding**:
 The physical state space coordinates $(z_1, z_2)$ represent amplitude-normalized, instantaneous frame characteristics. The framework improves physics-driven tasks but fails on content-dependent, target-reference-dependent, temporally-global, and amplitude-domain tasks. The boundaries of applicability are precise, clean, and theoretically sound.
+
+---
+
+### Phase 16 — State-Space Theory Formalisation (Exp 036)
+
+#### Exp 036 — State Compatibility Index ($\eta^2$) Measurement
+Formally evaluated the **Local State Hypothesis** by measuring the State Compatibility Index ($\eta^2$) — the proportion of variance/information explained by engine coordinates — across ten diverse DSP tasks.
+
+**Tasks and $\eta^2$ Scores (Ranked):**
+1. **Onset Detection**: $\eta^2 = 0.970$ (Clean frame transient coordinate $z_2 > 1.2$) — **Highly Compatible ✓**
+2. **Spectral Denoising**: $\eta^2 = 0.874$ (Optimal subtraction alpha mapped to noise floor) — **Highly Compatible ✓**
+3. **Pitch Tracking**: $\eta^2 = 0.766$ (Optimal window choice based on $f_0$ and SNR) — **Highly Compatible ✓**
+4. **Voicing Detection**: $\eta^2 = 0.754$ (Clean signal periodic voicing state) — **Highly Compatible ✓**
+5. **Beat Tracking**: $\eta^2 = 0.506$ (Beat grid alignment; transient-correlated) — **Partially Compatible ⚠**
+6. **Source Separation**: $\eta^2 = 0.496$ (Harmonic-to-percussive mixture ratio) — **Partially Compatible ⚠**
+7. **EQ Matching**: $\eta^2 = 0.412$ (Target reference filter applied; changes flatness/entropy) — **Partially Compatible ⚠**
+8. **Speaker/Timbre ID**: $\eta^2 = 0.297$ (Instrument source class; distinct spectral envelopes) — **Partially Compatible ⚠**
+9. **Dynamic Compression**: $\eta^2 = 0.146$ (Absolute gain level applied; amplitude-normalized coordinates) — **State-Space Blind ✗**
+10. **RT60 Estimation**: $\eta^2 = 0.000$ (Environmental decay rate; long-term temporal context) — **State-Space Blind ✗**
+
+**Key Finding**:
+The results **empirically validate the Local State Hypothesis**. The coordinates $(z_1, z_2)$ represent a complete description of instantaneous frame physics. Algorithms whose optimal settings are dictated by frame physics (Pitch, Voicing, Onsets, Denoising) are highly state-space compatible ($\eta^2 \ge 0.67$). Conversely, algorithms requiring global temporal context (RT60) or absolute amplitude (Compression) are fundamentally blind ($\eta^2 \le 0.15$).
 
 ---
 
