@@ -7,5 +7,14 @@ optimal representations and window sizes.
 """
 
 from .engine import RepresentationIntelligenceEngine, FrameworkState
+from .plugins.denoiser import AdaptiveDenoiser
+from .plugins.pitch_tracker import AdaptivePitchTracker
+from .plugins.onset_detector import AdaptiveOnsetDetector
 
-__all__ = ["RepresentationIntelligenceEngine", "FrameworkState"]
+__all__ = [
+    "RepresentationIntelligenceEngine",
+    "FrameworkState",
+    "AdaptiveDenoiser",
+    "AdaptivePitchTracker",
+    "AdaptiveOnsetDetector"
+]

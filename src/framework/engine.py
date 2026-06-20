@@ -22,6 +22,70 @@ class FrameworkState:
         self.assumptions = assumptions  # dict mapping rep name -> float safety score [0, 1]
         self.recommendations = recommendations  # dict containing active reps, window size, etc.
 
+    @property
+    def coordinates(self) -> tuple[float, float]:
+        """Get the (z1, z2) coordinates in the physical state space."""
+        return self.coordinate
+
+    @property
+    def safe_representations(self) -> list[str]:
+        """List of representation names with safety score >= 0.50."""
+        return [name for name, score in self.assumptions.items() if score >= 0.50]
+
+    @property
+    def recommended_window(self) -> int:
+        """Recommended analysis window size in samples."""
+        return self.recommendations.get("window_size", 2048)
+
+    @property
+    def recommended_latency(self) -> int:
+        """Recommended processing latency in samples (assuming 50% overlap)."""
+        return self.recommended_window // 2
+
+    @property
+    def recommended_parameters(self) -> dict[str, dict]:
+        """
+        Dictionary of task-specific parameter recommendations:
+        - 'denoising': {'alpha': float, 'beta': float}
+        - 'pitch_tracking': {'yin_trough': float, 'voicing_gate': bool, 'hold_pitch': bool}
+        - 'onset_detection': {'fusion_weights': dict[str, float], 'threshold': float}
+        """
+        stft_s = self.assumptions.get("stft", 1.0)
+        alpha = 0.5 + 3.5 * (1.0 - stft_s)
+        if self.region == "noise_collapse":
+            beta = 0.06
+        elif self.region == "periodic_harmonic":
+            beta = 0.005
+        else:
+            beta = 0.02
+            
+        yin_trough = 0.25 if self.region == "noise_collapse" else (0.08 if self.region == "transient_overloaded" else 0.15)
+        voicing_gate = self.region in ("periodic_harmonic", "smooth_lowpass")
+        hold_pitch = self.region == "transient_overloaded"
+
+        fusion_weights = {
+            "stft": self.assumptions.get("stft", 0.0),
+            "acf": self.assumptions.get("acf", 0.0),
+            "cepstrum": self.assumptions.get("cepstrum", 0.0)
+        }
+        onset_threshold = 0.3 if self.region == "noise_collapse" else 0.15
+
+        return {
+            "denoising": {
+                "alpha": alpha,
+                "beta": beta
+            },
+            "pitch_tracking": {
+                "yin_trough": yin_trough,
+                "voicing_gate": voicing_gate,
+                "hold_pitch": hold_pitch
+            },
+            "onset_detection": {
+                "fusion_weights": fusion_weights,
+                "threshold": onset_threshold
+            }
+        }
+
     def __repr__(self) -> str:
         return (f"FrameworkState(\n"
                 f"  coordinate={self.coordinate},\n"
