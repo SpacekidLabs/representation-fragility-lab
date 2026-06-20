@@ -21,8 +21,8 @@ Use those failure maps to build a system where representations know their own we
 **Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
 Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
-**Arc 4 — Universal Audio State Space & Practical Gains** (Exp 030–034)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, and validate zero-shot transfer across five structurally different tasks.
+**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–035)
+Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five structurally different tasks, and map the boundaries of applicability where the physical state space is blind.
 
 ---
 
@@ -380,6 +380,23 @@ Validated that the `RepresentationIntelligenceEngine` improves DSP decision-maki
 
 **Key Finding**:
 The `RepresentationIntelligenceEngine` is a **universal DSP state sensor**. The project's central object is no longer ACF, STFT, Cepstrum, CQT, or Wavelets. It is the engine itself.
+
+---
+
+### Phase 15 — Framework Limits (Exp 035)
+
+#### Exp 035 — Framework Limits Mapping
+Scientifically mapped the boundaries where physical audio state knowledge (the Universal Audio State Space) **fails to improve** DSP decision-making, validating the theoretical limits of the framework.
+
+**Limit Cases Tested:**
+1. **Source Separation (HPSS)**: Separate harmonic/percussive sources. *Result*: Baseline = 14.25 dB SDR, Framework = 12.74 dB SDR (**−1.51 dB** degradation). Mixture state is blind to component ratios.
+2. **Dynamic Range Compression**: Reduce dynamic range on quiet/loud sweep. *Result*: Baseline = 11.41 dB ratio, Framework = 7.83 dB ratio (**−3.58 dB** over-compression). Engine is amplitude-blind and recommends the same threshold shift.
+3. **EQ Matching**: Adapt matching filter smoothing. *Result*: Baseline = 1.45 dB LSD, Framework = 7.35 dB LSD (**+5.90 dB** degradation). Engine is blind to target reference spectrum.
+4. **RT60 Estimation**: Estimate decay rates. *Result*: Baseline = 1.244s MAE, Framework = 1.491s MAE (**+0.246s** degradation). Frame state cannot capture long-term temporal context.
+5. **Timbre ID**: Classify note sources (voice/guitar/bell). *Result*: Baseline = 100%, Framework = 100%. While engine coordinates separated simple synthetic note profiles, the framework is content-blind.
+
+**Key Finding**:
+The physical state space coordinates $(z_1, z_2)$ represent amplitude-normalized, instantaneous frame characteristics. The framework improves physics-driven tasks but fails on content-dependent, target-reference-dependent, temporally-global, and amplitude-domain tasks. The boundaries of applicability are precise, clean, and theoretically sound.
 
 ---
 
