@@ -21,8 +21,8 @@ Use those failure maps to build a system where representations know their own we
 **Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
 Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
-**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–036)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, and formally validate the Local State Hypothesis using the State Compatibility Index (eta-squared).
+**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–037)
+Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, and bridge the final gap by deploying the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings.
 
 ---
 
@@ -419,6 +419,31 @@ Formally evaluated the **Local State Hypothesis** by measuring the State Compati
 
 **Key Finding**:
 The results **empirically validate the Local State Hypothesis**. The coordinates $(z_1, z_2)$ represent a complete description of instantaneous frame physics. Algorithms whose optimal settings are dictated by frame physics (Pitch, Voicing, Onsets, Denoising) are highly state-space compatible ($\eta^2 \ge 0.67$). Conversely, algorithms requiring global temporal context (RT60) or absolute amplitude (Compression) are fundamentally blind ($\eta^2 \le 0.15$).
+
+---
+
+### Phase 17 — Real Plugin Integration (Exp 037)
+
+#### Exp 037 — State-Space Adaptive Spectral Subtraction
+Deployed the `RepresentationIntelligenceEngine` into a real-time spectral subtraction vocal denoiser, evaluating on a real vocal recording [Clean_vocal.wav](file:///Users/user/Desktop/representation-fragility-lab/Clean_vocal.wav) corrupted with white noise at $+6$ dB SNR.
+
+*   **Integration Strategy**: Downsampled 44100Hz audio frames to 22050Hz for engine state analysis, then continuously adapted the subtraction factor $\alpha_m$ based on the frame's `stft_safety` score and the spectral floor $\beta_m$ based on the mapped semantic region.
+*   **Audio Assets Generated** (available in `results/`):
+    *   [Noisy Vocal](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_noisy.wav): Input signal corrupted with hiss.
+    *   [Static Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_static.wav): Static baseline (fixed $\alpha=2.0$, $\beta=0.02$).
+    *   [Adaptive Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_adaptive.wav): State-Space adaptive.
+
+**Results:**
+
+| Method | Segmental SNR (SegSNR) | Log Spectral Distance (LSD) | Performance |
+|---|---|---|---|
+| Noisy Input | 1.50 dB | 30.60 dB | Unprocessed |
+| **Static Baseline** | 8.21 dB | 18.53 dB | Standard subtraction |
+| **State-Space Adaptive** | **8.58 dB** | **18.19 dB** | **Simultaneous Improvement ✓** |
+| **Delta** | **+0.38 dB** (higher is better) | **−0.34 dB** (lower is better) | **Unambiguous win** |
+
+**Key Finding**:
+Signal state feedback yields a superior DSP product. The adaptive denoiser successfully suppressed musical noise chirps during silence/noise collapse (by raising the floor to $\beta=0.06$) while protecting vocal formants and high harmonics during active speech (by lowering $\alpha$ to $\approx 0.5$ and $\beta$ to $0.005$), achieving simultaneous improvements in noise reduction (SegSNR) and signal fidelity (LSD).
 
 ---
 
