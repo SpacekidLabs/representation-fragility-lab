@@ -3,6 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
+#include <fstream>
 
 static float snapToScale (float rawMidiNote, int scaleIndex)
 {
@@ -192,17 +193,25 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     
     // Copy the latest analysis frame for the pitch tracker
     std::vector<float> pitchFrame (curWindowSize, 0.0f);
+    float frameRms = 0.0f;
     for (int i = 0; i < curWindowSize; ++i)
     {
         int readPos = circularBufferWritePos - curWindowSize + i;
         while (readPos < 0) readPos += (int)inputCircularBuffer.size();
         pitchFrame[i] = inputCircularBuffer[readPos];
+        frameRms += pitchFrame[i] * pitchFrame[i];
     }
+    frameRms = std::sqrt (frameRms / curWindowSize);
+    bool isSilent = (frameRms < 0.002f); // noise gate at -54dB for higher sensitivity
 
     if (stateAware && activeHoldPitch)
     {
         // Keep last valid pitch, bypass tracker
         detectedF0 = lastTargetPitch;
+    }
+    else if (isSilent)
+    {
+        detectedF0 = 0.0f;
     }
     else
     {
@@ -214,7 +223,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     // Apply confidence gate based on ACF safety score
     float currentConf = safetyACF.load();
-    bool isVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f);
+    bool isVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
     if (!hardTune && stateAware && currentConf < confThresh)
     {
         isVoiced = false;
@@ -259,6 +268,23 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     // Apply Correction Amount scalar (force 1.0 for hardTune)
     float finalShift = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
+
+    static int debugCounter = 0;
+    if (++debugCounter >= 100)
+    {
+        debugCounter = 0;
+        std::ofstream logFile ("/Users/user/Desktop/representation-fragility-lab/scratch/debug_vst.txt", std::ios::app);
+        if (logFile.is_open())
+        {
+            logFile << "F0: " << detectedF0 
+                    << " | Conf: " << currentConf 
+                    << " | Shift: " << finalShift 
+                    << " | Voiced: " << (isVoiced ? "yes" : "no")
+                    << " | Hard: " << (hardTune ? "yes" : "no")
+                    << " | Scale: " << scaleIndex
+                    << "\n";
+        }
+    }
 
     // Process audio buffer sample-by-sample (multi-channel independent pitch shifters)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)

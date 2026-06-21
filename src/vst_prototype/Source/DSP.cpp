@@ -39,16 +39,19 @@ float AutocorrelationPitchTracker::detectPitch(const float* samples, int numSamp
         }
     }
 
-    // 3. Absolute thresholding (first trough below threshold)
+    // 3. Absolute thresholding (first local minimum below threshold)
     int periodLag = -1;
-    for (int tau = minLag; tau <= maxLag; ++tau) {
+    for (int tau = minLag + 1; tau < maxLag; ++tau) {
         if (dPrime[tau] < troughThreshold) {
-            periodLag = tau;
-            break;
+            // Check if it is a local minimum (trough)
+            if (dPrime[tau] < dPrime[tau - 1] && dPrime[tau] < dPrime[tau + 1]) {
+                periodLag = tau;
+                break;
+            }
         }
     }
 
-    // Fallback to global minimum in range if no trough meets threshold
+    // Fallback to global minimum in range if no local minimum meets threshold
     if (periodLag == -1) {
         float minVal = 100.0f;
         for (int tau = minLag; tau <= maxLag; ++tau) {
