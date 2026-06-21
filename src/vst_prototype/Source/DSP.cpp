@@ -60,6 +60,9 @@ float AutocorrelationPitchTracker::detectPitch(const float* samples, int numSamp
                 periodLag = tau;
             }
         }
+        if (minVal > 0.30f) {
+            return 0.0f;
+        }
     }
 
     // 4. Parabolic interpolation for sub-sample precision
@@ -70,7 +73,10 @@ float AutocorrelationPitchTracker::detectPitch(const float* samples, int numSamp
         float gamma = dPrime[periodLag + 1];
         float denom = alpha - 2.0f * beta + gamma;
         if (std::abs(denom) > 1e-6f) {
-            floatLag = (float)periodLag + 0.5f * (alpha - gamma) / denom;
+            float offset = 0.5f * (alpha - gamma) / denom;
+            if (std::abs(offset) <= 1.0f) {
+                floatLag = (float)periodLag + offset;
+            }
         }
     }
 
@@ -107,15 +113,6 @@ void DelayPitchShifter::clear()
 
 float DelayPitchShifter::processSample(float inputSample, float pitchShiftSemitones)
 {
-    // Bypass if shift is effectively zero
-    if (std::abs(pitchShiftSemitones) < 0.02f)
-    {
-        delayBuffer[writeIndex] = inputSample;
-        float out = delayBuffer[writeIndex];
-        writeIndex = (writeIndex + 1) % bufferSize;
-        return out;
-    }
-
     // Write input sample
     delayBuffer[writeIndex] = inputSample;
 

@@ -91,6 +91,9 @@ void AdaptiveAutoTuneAudioProcessor::prepareToPlay (double sampleRate, int sampl
     samplesSinceLastAnalysis = 0;
     smoothedCorrectionSemitones = 0.0f;
     lastTargetPitch = 220.0f;
+    lastCandidateMidi = 0.0f;
+    candidateConsecutiveFrames = 0;
+    stableSnappedMidi = 0.0f;
 }
 
 void AdaptiveAutoTuneAudioProcessor::releaseResources()
@@ -224,7 +227,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Apply confidence gate based on ACF safety score
     float currentConf = safetyACF.load();
     bool isVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
-    if (!hardTune && stateAware && currentConf < confThresh)
+    if (stateAware && currentConf < confThresh)
     {
         isVoiced = false;
     }
@@ -234,21 +237,37 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         // Find nearest MIDI note in selected scale
         float rawMidi = 12.0f * std::log2 (detectedF0 / 440.0f) + 69.0f;
         float snappedMidi = snapToScale (rawMidi, scaleIndex);
-        float targetF0 = 440.0f * std::pow (2.0f, (snappedMidi - 69.0f) / 12.0f);
+
+        // Stabilize snapped MIDI note (debounce)
+        if (snappedMidi == lastCandidateMidi)
+        {
+            candidateConsecutiveFrames++;
+            if (candidateConsecutiveFrames >= 3)
+            {
+                stableSnappedMidi = snappedMidi;
+            }
+        }
+        else
+        {
+            lastCandidateMidi = snappedMidi;
+            candidateConsecutiveFrames = 1;
+        }
+
+        // Committed stable note, fallback to snappedMidi during initial latching
+        float finalSnappedMidi = (stableSnappedMidi > 0.0f) ? stableSnappedMidi : snappedMidi;
+
+        float targetF0 = 440.0f * std::pow (2.0f, (finalSnappedMidi - 69.0f) / 12.0f);
         
-        targetCorrection = snappedMidi - rawMidi;
+        targetCorrection = finalSnappedMidi - rawMidi;
         lastTargetPitch = targetF0;
     }
     else
     {
-        // Hold pitch or bypass correction
+        // Reset debouncer and bypass/hold correction
         targetCorrection = 0.0f;
-    }
-
-    // Apply voicing gate to mute correction in noise/silence
-    if (!hardTune && stateAware && activeVoicingGate && !isVoiced)
-    {
-        targetCorrection = 0.0f;
+        lastCandidateMidi = 0.0f;
+        candidateConsecutiveFrames = 0;
+        stableSnappedMidi = 0.0f;
     }
 
     // Retune speed smoothing constant calculation
@@ -293,11 +312,6 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         
         if (channel < (int)pitchShifters.size())
         {
-            if (std::abs(finalShift) < 0.01f)
-            {
-                pitchShifters[channel].clear();
-            }
-
             for (int i = 0; i < numSamples; ++i)
             {
                 channelData[i] = pitchShifters[channel].processSample (channelData[i], finalShift);

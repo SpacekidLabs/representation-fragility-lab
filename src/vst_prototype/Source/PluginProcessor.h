@@ -64,6 +64,9 @@ private:
     // DSP state tracking variables
     float lastTargetPitch { 0.0f };
     float smoothedCorrectionSemitones { 0.0f };
+    float lastCandidateMidi { 0.0f };
+    int candidateConsecutiveFrames { 0 };
+    float stableSnappedMidi { 0.0f };
     
     // Hop counter to trigger engine analysis (e.g. every 256 samples)
     int samplesSinceLastAnalysis { 0 };
