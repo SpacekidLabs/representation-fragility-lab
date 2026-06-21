@@ -56,5 +56,7 @@ private:
     static const float W_CQT[6];
     static const float W_CWT[6];
 
-    std::unique_ptr<juce::dsp::FFT> fft;
+    std::unique_ptr<juce::dsp::FFT> fft1024;
+    std::unique_ptr<juce::dsp::FFT> fft2048;
+    std::unique_ptr<juce::dsp::FFT> fft4096;
 };

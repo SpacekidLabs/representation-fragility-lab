@@ -150,6 +150,16 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
     advancedButton.addListener (this);
     addAndMakeVisible (advancedButton);
 
+    // Scale Selector ComboBox
+    scaleSelector.addItem ("Chromatic", 1);
+    scaleSelector.addItem ("C Major", 2);
+    scaleSelector.addItem ("C Natural Minor", 3);
+    scaleSelector.addItem ("C Major Pentatonic", 4);
+    scaleSelector.addItem ("C Minor Pentatonic", 5);
+    scaleSelector.addItem ("G Major", 6);
+    scaleSelector.addItem ("A Natural Minor", 7);
+    addAndMakeVisible (scaleSelector);
+
     // Attachments
     amountAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.apvts, "amount", amountSlider);
     speedAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.apvts, "speed", speedSlider);
@@ -158,6 +168,8 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
     stateAwareAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "stateAware", stateAwareToggle);
     adaptiveRetuneAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "adaptiveRetune", adaptiveRetuneToggle);
     adaptiveWindowAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "adaptiveWindow", adaptiveWindowToggle);
+
+    scaleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (audioProcessor.apvts, "scale", scaleSelector);
 
     // Add state space visualizer
     addAndMakeVisible (visualizer);
@@ -233,6 +245,11 @@ void AdaptiveAutoTuneAudioProcessorEditor::paint(juce::Graphics& g)
     drawIndicator ("STFT (Stationary)", audioProcessor.safetySTFT.load(), checkY + 36);
     drawIndicator ("CEP (Harmonics)", audioProcessor.safetyCEP.load(), checkY + 54);
 
+    // Scale Selector Label
+    g.setColour (juce::Colours::white.withAlpha(0.7f));
+    g.setFont (juce::Font("sans-serif", 10.5f, juce::Font::bold));
+    g.drawText ("Scale Key/Type:", colX, 248, 140, 14, juce::Justification::left, true);
+
     // Advanced Section Label
     if (isAdvancedOpen)
     {
@@ -261,6 +278,7 @@ void AdaptiveAutoTuneAudioProcessorEditor::resized()
 
     // Position main toggles
     stateAwareToggle.setBounds (330, 220, 150, 24);
+    scaleSelector.setBounds (330, 265, 140, 24);
     advancedButton.setBounds (330, 310, 140, 28);
 
     // Display Advanced options dynamically

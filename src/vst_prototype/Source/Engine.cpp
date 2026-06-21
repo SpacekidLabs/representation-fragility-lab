@@ -41,8 +41,9 @@ const float RepresentationIntelligenceEngine::W_CWT[6] = {
 
 RepresentationIntelligenceEngine::RepresentationIntelligenceEngine()
 {
-    // 2048-point FFT -> order 11
-    fft = std::make_unique<juce::dsp::FFT>(11);
+    fft1024 = std::make_unique<juce::dsp::FFT>(10); // 1024 points
+    fft2048 = std::make_unique<juce::dsp::FFT>(11); // 2048 points
+    fft4096 = std::make_unique<juce::dsp::FFT>(12); // 4096 points
 }
 
 FrameworkState RepresentationIntelligenceEngine::analyze(const float* frameSamples, int numSamples, double sampleRate)
@@ -213,13 +214,19 @@ std::vector<float> RepresentationIntelligenceEngine::computeACF(const float* fra
 
 std::vector<float> RepresentationIntelligenceEngine::computeMagnitudeSpectrum(const float* frame, int numSamples)
 {
-    // Pad to 2N (4096) for real forward transform
+    juce::dsp::FFT* activeFFT = nullptr;
+    if (numSamples == 1024)      activeFFT = fft1024.get();
+    else if (numSamples == 2048) activeFFT = fft2048.get();
+    else if (numSamples == 4096) activeFFT = fft4096.get();
+    else                         activeFFT = fft2048.get(); // fallback
+
+    // Pad to 2N for real forward transform
     std::vector<float> fftBuffer(numSamples * 2, 0.0f);
     std::copy(frame, frame + numSamples, fftBuffer.begin());
 
-    fft->performRealOnlyForwardTransform(fftBuffer.data());
+    activeFFT->performRealOnlyForwardTransform(fftBuffer.data());
 
-    int nBins = numSamples / 2 + 1; // 1025 bins
+    int nBins = numSamples / 2 + 1; // e.g. 1025 bins for 2048 samples
     std::vector<float> mag(nBins, 0.0f);
     
     // Bin 0

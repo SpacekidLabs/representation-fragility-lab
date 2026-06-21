@@ -49,6 +49,8 @@ private:
     juce::ToggleButton adaptiveRetuneToggle;
     juce::ToggleButton adaptiveWindowToggle;
 
+    juce::ComboBox scaleSelector;
+
     juce::TextButton advancedButton;
     bool isAdvancedOpen { false };
 
@@ -60,6 +62,8 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> stateAwareAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> adaptiveRetuneAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> adaptiveWindowAttachment;
+
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> scaleAttachment;
 
     // State space plot component
     StateSpaceVisualizer visualizer;

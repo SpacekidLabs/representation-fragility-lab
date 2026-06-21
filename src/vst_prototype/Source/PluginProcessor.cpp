@@ -1,6 +1,52 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include <cmath>
+#include <vector>
+#include <algorithm>
+
+static float snapToScale (float rawMidiNote, int scaleIndex)
+{
+    if (scaleIndex == 0) // Chromatic
+        return std::round (rawMidiNote);
+
+    // Get valid pitch classes for the selected scale
+    std::vector<int> validClasses;
+    switch (scaleIndex)
+    {
+        case 1: validClasses = { 0, 2, 4, 5, 7, 9, 11 }; break; // C Major
+        case 2: validClasses = { 0, 2, 3, 5, 7, 8, 10 }; break; // C Minor
+        case 3: validClasses = { 0, 2, 4, 7, 9 };         break; // C Pentatonic Major
+        case 4: validClasses = { 0, 3, 5, 7, 10 };        break; // C Pentatonic Minor
+        case 5: validClasses = { 0, 2, 4, 6, 7, 9, 11 }; break; // G Major (contains F# = 6)
+        case 6: validClasses = { 0, 2, 4, 5, 7, 9, 11 }; break; // A Minor (same as C Major)
+        default: return std::round (rawMidiNote);
+    }
+
+    // Find the nearest note in validClasses
+    int baseMidi = (int)std::round (rawMidiNote);
+    
+    int closestMidi = baseMidi;
+    float minDist = 999.0f;
+
+    // Search in a range of ±12 semitones around baseMidi
+    for (int checkMidi = baseMidi - 12; checkMidi <= baseMidi + 12; ++checkMidi)
+    {
+        int pc = checkMidi % 12;
+        if (pc < 0) pc += 12;
+
+        if (std::find (validClasses.begin(), validClasses.end(), pc) != validClasses.end())
+        {
+            float dist = std::abs (rawMidiNote - (float)checkMidi);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestMidi = checkMidi;
+            }
+        }
+    }
+
+    return (float)closestMidi;
+}
 
 AdaptiveAutoTuneAudioProcessor::AdaptiveAutoTuneAudioProcessor()
     : AudioProcessor (BusesProperties()
@@ -33,7 +79,12 @@ void AdaptiveAutoTuneAudioProcessor::changeProgramName (int index, const juce::S
 
 void AdaptiveAutoTuneAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    pitchShifter.init (sampleRate);
+    pitchShifters.resize (std::max (1, getTotalNumInputChannels()));
+    for (auto& ps : pitchShifters)
+    {
+        ps.init (sampleRate);
+        ps.clear();
+    }
     std::fill (inputCircularBuffer.begin(), inputCircularBuffer.end(), 0.0f);
     circularBufferWritePos = 0;
     samplesSinceLastAnalysis = 0;
@@ -67,12 +118,16 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         buffer.clear (i, 0, buffer.getNumSamples());
 
     int numSamples = buffer.getNumSamples();
+    if (totalNumInputChannels == 0 || buffer.getNumChannels() == 0 || numSamples == 0)
+        return;
+
     double sampleRate = getSampleRate();
 
     // Read parameter values from APVTS
     float amount = *apvts.getRawParameterValue ("amount");
     float speed = *apvts.getRawParameterValue ("speed");
     bool stateAware = *apvts.getRawParameterValue ("stateAware") > 0.5f;
+    int scaleIndex = (int)(*apvts.getRawParameterValue ("scale"));
     float confThresh = *apvts.getRawParameterValue ("confThresh");
     bool adaptiveRetune = *apvts.getRawParameterValue ("adaptiveRetune") > 0.5f;
     bool adaptiveWindow = *apvts.getRawParameterValue ("adaptiveWindow") > 0.5f;
@@ -166,11 +221,12 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     if (isVoiced)
     {
-        // Find nearest MIDI note
-        float midiNote = std::round (12.0f * std::log2 (detectedF0 / 440.0f) + 69.0f);
-        float targetF0 = 440.0f * std::pow (2.0f, (midiNote - 69.0f) / 12.0f);
+        // Find nearest MIDI note in selected scale
+        float rawMidi = 12.0f * std::log2 (detectedF0 / 440.0f) + 69.0f;
+        float snappedMidi = snapToScale (rawMidi, scaleIndex);
+        float targetF0 = 440.0f * std::pow (2.0f, (snappedMidi - 69.0f) / 12.0f);
         
-        targetCorrection = 12.0f * std::log2 (targetF0 / detectedF0);
+        targetCorrection = snappedMidi - rawMidi;
         lastTargetPitch = targetF0;
     }
     else
@@ -199,22 +255,22 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Apply Correction Amount scalar
     float finalShift = smoothedCorrectionSemitones * amount;
 
-    // Process audio buffer sample-by-sample
+    // Process audio buffer sample-by-sample (multi-channel independent pitch shifters)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
         float* channelData = buffer.getWritePointer (channel);
         
-        // Note: For simplicity in the prototype, we process mono pitch correction.
-        // We clear delay line when bypassed to avoid latency click.
-        if (std::abs(finalShift) < 0.01f)
+        if (channel < (int)pitchShifters.size())
         {
-            pitchShifter.clear();
-        }
+            if (std::abs(finalShift) < 0.01f)
+            {
+                pitchShifters[channel].clear();
+            }
 
-        for (int i = 0; i < numSamples; ++i)
-        {
-            // Process channel 0. If stereo, process both with the same mono pitch shifter logic
-            channelData[i] = pitchShifter.processSample (channelData[i], finalShift);
+            for (int i = 0; i < numSamples; ++i)
+            {
+                channelData[i] = pitchShifters[channel].processSample (channelData[i], finalShift);
+            }
         }
     }
 }
@@ -249,6 +305,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout AdaptiveAutoTuneAudioProcess
     params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID ("amount", 1), "Correction Amount", 0.0f, 1.0f, 1.0f));
     params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID ("speed", 1), "Retune Speed (ms)", 1.0f, 500.0f, 30.0f));
     params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID ("stateAware", 1), "State-Aware Mode", true));
+
+    // Scale selector choice parameter
+    juce::StringArray scaleChoices = {
+        "Chromatic",
+        "C Major",
+        "C Natural Minor",
+        "C Major Pentatonic",
+        "C Minor Pentatonic",
+        "G Major",
+        "A Natural Minor"
+    };
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID ("scale", 1), "Scale", scaleChoices, 0));
 
     // Advanced controls
     params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID ("confThresh", 1), "Confidence Threshold", 0.0f, 1.0f, 0.40f));

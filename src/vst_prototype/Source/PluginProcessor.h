@@ -54,7 +54,7 @@ private:
     // C++ Engine and DSP objects (mono processing, using channel 0 for analysis)
     RepresentationIntelligenceEngine engine;
     AutocorrelationPitchTracker pitchTracker;
-    DelayPitchShifter pitchShifter;
+    std::vector<DelayPitchShifter> pitchShifters;
 
     // Circular input buffer for 2048-sample analysis
     std::vector<float> inputCircularBuffer;
