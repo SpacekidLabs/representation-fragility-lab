@@ -42,7 +42,7 @@ private:
     float computeSpectralRolloff (const std::vector<float>& mag, double sampleRate);
     float computeHoyerSparsity (const std::vector<float>& mag);
     float computeKurtosis (const float* frame, int numSamples, float rms);
-    float computeSpectralCentroid (const std::vector<float>& mag, double sampleRate);
+    float computeModulation (const float* frame, int numSamples);
 
     // Pre-trained SVD / normalization weights from weights.py
     static const float MU[10];

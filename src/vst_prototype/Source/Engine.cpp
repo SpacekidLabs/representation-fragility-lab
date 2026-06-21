@@ -48,42 +48,55 @@ RepresentationIntelligenceEngine::RepresentationIntelligenceEngine()
 
 FrameworkState RepresentationIntelligenceEngine::analyze(const float* frameSamples, int numSamples, double sampleRate)
 {
-    // Compute RMS and basic stats
-    float sumSq = 1e-12f;
+    // 1. Normalize frame to peak amplitude 1.0
     float maxVal = 0.0f;
     for (int i = 0; i < numSamples; ++i) {
         float absVal = std::abs(frameSamples[i]);
-        sumSq += frameSamples[i] * frameSamples[i];
         if (absVal > maxVal) maxVal = absVal;
+    }
+
+    std::vector<float> normalizedFrame(numSamples, 0.0f);
+    if (maxVal > 1e-9f) {
+        for (int i = 0; i < numSamples; ++i) {
+            normalizedFrame[i] = frameSamples[i] / maxVal;
+        }
+    } else {
+        std::copy(frameSamples, frameSamples + numSamples, normalizedFrame.begin());
+    }
+
+    // Compute RMS and basic stats on normalized frame
+    float sumSq = 1e-12f;
+    for (int i = 0; i < numSamples; ++i) {
+        sumSq += normalizedFrame[i] * normalizedFrame[i];
     }
     float rms = std::sqrt(sumSq / numSamples);
 
     // 1. ZCR
-    float zcr = computeZCR(frameSamples, numSamples);
+    float zcr = computeZCR(normalizedFrame.data(), numSamples);
 
     // 2. Crest Factor
-    float crestFactor = computeCrestFactor(frameSamples, numSamples, rms);
+    float crestFactor = computeCrestFactor(normalizedFrame.data(), numSamples, rms);
 
     // 3. Kurtosis
-    float kurtosis = computeKurtosis(frameSamples, numSamples, rms);
+    float kurtosis = computeKurtosis(normalizedFrame.data(), numSamples, rms);
 
     // 4. ACF-derived Periodicity and Harmonic Ratio
-    std::vector<float> acf = computeACF(frameSamples, numSamples);
+    std::vector<float> acf = computeACF(normalizedFrame.data(), numSamples);
     std::pair<float, float> acfFeats = computeACFFeatures(acf, sampleRate);
     float harmonicRatio = acfFeats.first;
     float periodicity = acfFeats.second;
 
     // 5. Spectral features from FFT Magnitude
-    std::vector<float> mag = computeMagnitudeSpectrum(frameSamples, numSamples);
+    std::vector<float> mag = computeMagnitudeSpectrum(normalizedFrame.data(), numSamples);
     float entropy = computeSpectralEntropy(mag);
     float flatness = computeSpectralFlatness(mag);
     float rolloff = computeSpectralRolloff(mag, sampleRate);
     float sparsity = computeHoyerSparsity(mag);
-    float centroid = computeSpectralCentroid(mag, sampleRate);
+    float modulation = computeModulation(normalizedFrame.data(), numSamples);
 
     // Package the 10 descriptors
     // Features array order matches MU/SIGMA:
-    // [entropy, flatness, zcr, harmonic_ratio, crest_factor, periodicity, rolloff, Hoyer, kurtosis, centroid]
+    // [entropy, flatness, zcr, harmonic_ratio, crest_factor, periodicity, rolloff, Hoyer, kurtosis, modulation]
     float features[10];
     features[0] = entropy;
     features[1] = flatness;
@@ -94,7 +107,7 @@ FrameworkState RepresentationIntelligenceEngine::analyze(const float* frameSampl
     features[6] = rolloff;
     features[7] = sparsity;
     features[8] = kurtosis;
-    features[9] = centroid;
+    features[9] = modulation;
 
     // Standardize features
     float featuresStd[10];
@@ -220,16 +233,24 @@ std::vector<float> RepresentationIntelligenceEngine::computeMagnitudeSpectrum(co
     else if (numSamples == 4096) activeFFT = fft4096.get();
     else                         activeFFT = fft2048.get(); // fallback
 
+    // Apply Hann window
+    std::vector<float> windowed(numSamples, 0.0f);
+    for (int i = 0; i < numSamples; ++i)
+    {
+        float win = 0.5f * (1.0f - std::cos(2.0f * M_PI * i / (numSamples - 1)));
+        windowed[i] = frame[i] * win;
+    }
+
     // Pad to 2N for real forward transform
     std::vector<float> fftBuffer(numSamples * 2, 0.0f);
-    std::copy(frame, frame + numSamples, fftBuffer.begin());
+    std::copy(windowed.begin(), windowed.end(), fftBuffer.begin());
 
     activeFFT->performRealOnlyForwardTransform(fftBuffer.data());
 
     int nBins = numSamples / 2 + 1; // e.g. 1025 bins for 2048 samples
     std::vector<float> mag(nBins, 0.0f);
     
-    // Bin 0
+    // Bin 0 (DC)
     mag[0] = std::abs(fftBuffer[0]);
     // Bins 1 to N-1
     for (int k = 1; k < nBins - 1; ++k) {
@@ -237,8 +258,8 @@ std::vector<float> RepresentationIntelligenceEngine::computeMagnitudeSpectrum(co
         float imagPart = fftBuffer[2 * k + 1];
         mag[k] = std::sqrt(realPart * realPart + imagPart * imagPart);
     }
-    // Bin N
-    mag[nBins - 1] = std::abs(fftBuffer[numSamples]);
+    // Bin N (Nyquist) - in JUCE real FFT layout, this is at index 1
+    mag[nBins - 1] = std::abs(fftBuffer[1]);
 
     return mag;
 }
@@ -387,17 +408,26 @@ float RepresentationIntelligenceEngine::computeKurtosis(const float* frame, int 
     return fourthMoment / (var * var + 1e-12f);
 }
 
-float RepresentationIntelligenceEngine::computeSpectralCentroid(const std::vector<float>& mag, double sampleRate)
+float RepresentationIntelligenceEngine::computeModulation(const float* frame, int numSamples)
 {
-    float numSum = 0.0f;
-    float denSum = 0.0f;
-    float binWidth = static_cast<float>(sampleRate / (2.0 * (mag.size() - 1)));
+    int subSize = numSamples / 4;
+    if (subSize <= 0) return 0.0f;
 
-    for (int i = 0; i < (int)mag.size(); ++i) {
-        float freq = i * binWidth;
-        numSum += mag[i] * freq;
-        denSum += mag[i];
+    float rmsVals[4];
+    for (int q = 0; q < 4; ++q) {
+        float sumSq = 0.0f;
+        for (int i = 0; i < subSize; ++i) {
+            float val = frame[q * subSize + i];
+            sumSq += val * val;
+        }
+        rmsVals[q] = std::sqrt(sumSq / subSize);
     }
-    if (denSum < 1e-12f) return 0.0f;
-    return numSum / denSum;
+
+    float meanRms = (rmsVals[0] + rmsVals[1] + rmsVals[2] + rmsVals[3]) / 4.0f;
+    float sumSqDiff = 0.0f;
+    for (int q = 0; q < 4; ++q) {
+        float diff = rmsVals[q] - meanRms;
+        sumSqDiff += diff * diff;
+    }
+    return std::sqrt(sumSqDiff / 4.0f);
 }
