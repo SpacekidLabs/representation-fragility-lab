@@ -60,7 +60,7 @@ float AutocorrelationPitchTracker::detectPitch(const float* samples, int numSamp
                 periodLag = tau;
             }
         }
-        if (minVal > 0.30f) {
+        if (minVal > 0.60f) {
             return 0.0f;
         }
     }
@@ -111,10 +111,41 @@ void DelayPitchShifter::clear()
     phase = 0.0f;
 }
 
-float DelayPitchShifter::processSample(float inputSample, float pitchShiftSemitones)
+float DelayPitchShifter::processSample(float inputSample, float pitchShiftSemitones, float currentF0)
 {
     // Write input sample
     delayBuffer[writeIndex] = inputSample;
+
+    // Dynamically adjust window size to be an even multiple of the pitch period
+    if (currentF0 > 50.0f && currentF0 < 1000.0f)
+    {
+        float periodSamples = (float)(sampleRate / currentF0);
+        // Target a window size around 40 ms (e.g. 1764 samples at 44.1 kHz)
+        float targetWindow = 0.04f * (float)sampleRate;
+        int K = 2 * (int)std::round (targetWindow / (2.0f * periodSamples));
+        if (K < 2) K = 2;
+        float targetWindowSamples = (float)K * periodSamples;
+
+        // Smoothly adjust windowSize to targetWindowSamples
+        float targetWindowSmooth = windowSize + 0.05f * (targetWindowSamples - windowSize);
+        
+        // Scale phase to avoid jumps when windowSize changes
+        if (std::abs (targetWindowSmooth - windowSize) > 1e-4f)
+        {
+            phase = phase * (targetWindowSmooth / windowSize);
+            windowSize = targetWindowSmooth;
+        }
+    }
+    else
+    {
+        // Smoothly return to default window size of 2048
+        float targetWindowSmooth = windowSize + 0.05f * (2048.0f - windowSize);
+        if (std::abs (targetWindowSmooth - windowSize) > 1e-4f)
+        {
+            phase = phase * (targetWindowSmooth / windowSize);
+            windowSize = targetWindowSmooth;
+        }
+    }
 
     // Calculate shift ratio and delay rate of change
     float ratio = std::pow(2.0f, pitchShiftSemitones / 12.0f);

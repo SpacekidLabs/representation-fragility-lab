@@ -22,7 +22,7 @@ public:
     void clear();
 
     // Process a single sample, returning the pitch-shifted output
-    float processSample (float inputSample, float pitchShiftSemitones);
+    float processSample (float inputSample, float pitchShiftSemitones, float currentF0 = 0.0f);
 
 private:
     double sampleRate { 44100.0 };

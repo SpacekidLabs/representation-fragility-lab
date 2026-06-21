@@ -231,6 +231,28 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         detectedF0 = pitchTracker.detectPitch (pitchFrame.data(), curWindowSize, sampleRate, currentTrough);
     }
 
+    // Octave jump detection and correction relative to the last valid target pitch
+    if (lastTargetPitch >= 80.0f && lastTargetPitch <= 1000.0f && detectedF0 >= 80.0f && detectedF0 <= 1000.0f)
+    {
+        float ratio = detectedF0 / lastTargetPitch;
+        if (std::abs (ratio - 0.5f) < 0.08f)
+        {
+            detectedF0 *= 2.0f;
+        }
+        else if (std::abs (ratio - 2.0f) < 0.30f)
+        {
+            detectedF0 *= 0.5f;
+        }
+        else if (std::abs (ratio - 0.25f) < 0.04f)
+        {
+            detectedF0 *= 4.0f;
+        }
+        else if (std::abs (ratio - 4.0f) < 0.60f)
+        {
+            detectedF0 *= 0.25f;
+        }
+    }
+
     // 1. Determine raw voicing state
     bool rawIsVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
     float currentConf = safetyACF.load();
@@ -363,7 +385,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         {
             if (channelPointers[channel] != nullptr && channel < (int)pitchShifters.size())
             {
-                channelPointers[channel][i] = pitchShifters[channel].processSample (channelPointers[channel][i], finalShift);
+                channelPointers[channel][i] = pitchShifters[channel].processSample (channelPointers[channel][i], finalShift, detectedF0);
             }
         }
     }
