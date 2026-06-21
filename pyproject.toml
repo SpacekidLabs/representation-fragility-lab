@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "representation-intelligence"
+version = "1.0.0"
+description = "A physics-inspired audio state space framework for adaptive, self-aware DSP routing"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "SpacekidLabs Team" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+]
+dependencies = [
+    "numpy>=1.20.0",
+    "scipy>=1.6.0",
+    "librosa>=0.8.0",
+]
+
+[tool.setuptools]
+packages = [
+    "representation_intelligence",
+    "representation_intelligence.plugins"
+]
+
+[tool.setuptools.package-dir]
+representation_intelligence = "src/framework"
+"representation_intelligence.plugins" = "src/framework/plugins"

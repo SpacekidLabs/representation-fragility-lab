@@ -4,6 +4,35 @@ A research project mapping the blind spots, failure modes, and musical potential
 
 ---
 
+## Developer Installation & Quickstart
+
+You can install the **Representation Intelligence** library directly from this repository to drop the engine into your audio plugin or DSP project in just a few lines of code:
+
+### 1. Install via pip
+```bash
+pip install git+https://github.com/SpacekidLabs/representation-fragility-lab.git
+```
+
+### 2. Five-Line Integration Example
+```python
+from representation_intelligence import RepresentationIntelligenceEngine
+
+# Load the engine instantly with pre-trained physical weights
+engine = RepresentationIntelligenceEngine()
+
+# Analyze any time-domain audio frame on-the-fly
+state = engine.analyze(frame, sr=16000)
+
+# Adapt parameters dynamically based on signal region and safety scores
+if state.region == "noise_collapse":
+    dsp_algorithm.window_size = 4096
+    dsp_algorithm.trough_threshold = state.recommended_parameters["pitch_tracking"]["yin_trough"]
+```
+
+See [quickstart.py](file:///Users/user/Desktop/representation-fragility-lab/quickstart.py) for a complete, runnable integration example.
+
+---
+
 ## What This Is
 
 We started with a simple question:
