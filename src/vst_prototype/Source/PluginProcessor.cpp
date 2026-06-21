@@ -231,43 +231,69 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         detectedF0 = pitchTracker.detectPitch (pitchFrame.data(), curWindowSize, sampleRate, currentTrough);
     }
 
-    // 5-point median filter to reject spikes and dropouts
-    for (size_t i = 0; i < pitchHistory.size() - 1; ++i)
-    {
-        pitchHistory[i] = pitchHistory[i + 1];
-    }
-    pitchHistory[pitchHistory.size() - 1] = detectedF0;
-
-    std::vector<float> sortedHistory = pitchHistory;
-    std::sort (sortedHistory.begin(), sortedHistory.end());
-    detectedF0 = sortedHistory[2];
-
-    float targetCorrection = 0.0f;
-
-    // Apply confidence gate based on ACF safety score
+    // 1. Determine raw voicing state
+    bool rawIsVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
     float currentConf = safetyACF.load();
-    bool trackerIsVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
     if (stateAware && currentConf < confThresh)
     {
-        trackerIsVoiced = false;
+        rawIsVoiced = false;
     }
 
-    bool isVoiced = trackerIsVoiced;
+    if (rawIsVoiced)
+    {
+        // Check if history is currently empty (all zeros)
+        bool isHistoryEmpty = true;
+        for (float val : pitchHistory)
+        {
+            if (val > 0.0f)
+            {
+                isHistoryEmpty = false;
+                break;
+            }
+        }
 
-    if (trackerIsVoiced)
+        if (isHistoryEmpty)
+        {
+            std::fill (pitchHistory.begin(), pitchHistory.end(), detectedF0);
+        }
+        else
+        {
+            // Shift and append new voiced pitch
+            for (size_t i = 0; i < pitchHistory.size() - 1; ++i)
+            {
+                pitchHistory[i] = pitchHistory[i + 1];
+            }
+            pitchHistory[pitchHistory.size() - 1] = detectedF0;
+        }
+
+        // Apply 5-point median filter to clean voiced estimates
+        std::vector<float> sortedHistory = pitchHistory;
+        std::sort (sortedHistory.begin(), sortedHistory.end());
+        detectedF0 = sortedHistory[2];
+    }
+
+    // 2. Apply release gate hysteresis
+    bool isVoiced = rawIsVoiced;
+    if (rawIsVoiced)
     {
         unvoicedConsecutiveFrames = 0;
     }
     else
     {
         unvoicedConsecutiveFrames++;
-        // Release gate hysteresis: hold last pitch for up to 6 blocks (~35 ms)
         if (unvoicedConsecutiveFrames < 6 && lastTargetPitch >= 80.0f && lastTargetPitch <= 1000.0f)
         {
             isVoiced = true;
             detectedF0 = lastTargetPitch;
         }
+        else
+        {
+            // Fully unvoiced/silent after hysteresis release: clear history
+            std::fill (pitchHistory.begin(), pitchHistory.end(), 0.0f);
+        }
     }
+
+    float targetCorrection = 0.0f;
 
     if (isVoiced)
     {
@@ -307,7 +333,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         stableSnappedMidi = 0.0f;
     }
 
-    // Retune speed smoothing constant calculation
+    // Retune speed smoothing constant calculation (sample-level smoothing)
     float activeSpeed = speed;
     if (hardTune)
     {
@@ -318,12 +344,29 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         // Slow down retune speed in low-confidence regions (scale retune time constant up to 4x)
         activeSpeed = speed * (1.0f + 3.0f * (1.0f - currentConf));
     }
-    float alpha = 1.0f - std::exp (-numSamples / (activeSpeed * sampleRate / 1000.0f));
-    
-    smoothedCorrectionSemitones += alpha * (targetCorrection - smoothedCorrectionSemitones);
+    float alphaSample = 1.0f - std::exp (-1.0f / (activeSpeed * sampleRate / 1000.0f));
 
-    // Apply Correction Amount scalar (force 1.0 for hardTune)
-    float finalShift = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
+    // Get write pointers for all channels to avoid calling getWritePointer inside sample loop
+    std::vector<float*> channelPointers (totalNumInputChannels);
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        channelPointers[channel] = buffer.getWritePointer (channel);
+    }
+
+    // Process audio buffer sample-by-sample, smoothing pitch shifts continuously
+    for (int i = 0; i < numSamples; ++i)
+    {
+        smoothedCorrectionSemitones += alphaSample * (targetCorrection - smoothedCorrectionSemitones);
+        float finalShift = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
+
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            if (channelPointers[channel] != nullptr && channel < (int)pitchShifters.size())
+            {
+                channelPointers[channel][i] = pitchShifters[channel].processSample (channelPointers[channel][i], finalShift);
+            }
+        }
+    }
 
     static int debugCounter = 0;
     if (++debugCounter >= 100)
@@ -332,28 +375,15 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         std::ofstream logFile ("/Users/user/Desktop/representation-fragility-lab/scratch/debug_vst.txt", std::ios::app);
         if (logFile.is_open())
         {
+            float finalShiftLog = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
             logFile << "F0: " << detectedF0 
                     << " | Conf: " << currentConf 
-                    << " | Shift: " << finalShift 
+                    << " | Shift: " << finalShiftLog 
                     << " | Voiced: " << (isVoiced ? "yes" : "no")
                     << " | Hard: " << (hardTune ? "yes" : "no")
                     << " | Scale: " << scaleIndex
                     << " | Root: " << rootIndex
                     << "\n";
-        }
-    }
-
-    // Process audio buffer sample-by-sample (multi-channel independent pitch shifters)
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        float* channelData = buffer.getWritePointer (channel);
-        
-        if (channel < (int)pitchShifters.size())
-        {
-            for (int i = 0; i < numSamples; ++i)
-            {
-                channelData[i] = pitchShifters[channel].processSample (channelData[i], finalShift);
-            }
         }
     }
 }
