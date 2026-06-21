@@ -155,13 +155,26 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
 
     // Scale Selector ComboBox
     scaleSelector.addItem ("Chromatic", 1);
-    scaleSelector.addItem ("C Major", 2);
-    scaleSelector.addItem ("C Natural Minor", 3);
-    scaleSelector.addItem ("C Major Pentatonic", 4);
-    scaleSelector.addItem ("C Minor Pentatonic", 5);
-    scaleSelector.addItem ("G Major", 6);
-    scaleSelector.addItem ("A Natural Minor", 7);
+    scaleSelector.addItem ("Major", 2);
+    scaleSelector.addItem ("Natural Minor", 3);
+    scaleSelector.addItem ("Pentatonic Major", 4);
+    scaleSelector.addItem ("Pentatonic Minor", 5);
     addAndMakeVisible (scaleSelector);
+
+    // Root Note Selector ComboBox
+    rootSelector.addItem ("C", 1);
+    rootSelector.addItem ("C#", 2);
+    rootSelector.addItem ("D", 3);
+    rootSelector.addItem ("D#", 4);
+    rootSelector.addItem ("E", 5);
+    rootSelector.addItem ("F", 6);
+    rootSelector.addItem ("F#", 7);
+    rootSelector.addItem ("G", 8);
+    rootSelector.addItem ("G#", 9);
+    rootSelector.addItem ("A", 10);
+    rootSelector.addItem ("A#", 11);
+    rootSelector.addItem ("B", 12);
+    addAndMakeVisible (rootSelector);
 
     // Attachments
     amountAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (audioProcessor.apvts, "amount", amountSlider);
@@ -173,6 +186,7 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
     adaptiveWindowAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "adaptiveWindow", adaptiveWindowToggle);
 
     scaleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (audioProcessor.apvts, "scale", scaleSelector);
+    rootAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (audioProcessor.apvts, "root", rootSelector);
     hardTuneAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "hardTune", hardTuneToggle);
 
     // Add state space visualizer
@@ -283,7 +297,8 @@ void AdaptiveAutoTuneAudioProcessorEditor::resized()
     // Position main toggles
     hardTuneToggle.setBounds (330, 205, 150, 24);
     stateAwareToggle.setBounds (330, 235, 150, 24);
-    scaleSelector.setBounds (330, 280, 140, 24);
+    rootSelector.setBounds (330, 280, 50, 24);
+    scaleSelector.setBounds (385, 280, 100, 24);
     advancedButton.setBounds (330, 315, 140, 26);
 
     // Display Advanced options dynamically

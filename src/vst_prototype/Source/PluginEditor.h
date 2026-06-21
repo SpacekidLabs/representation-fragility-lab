@@ -51,6 +51,7 @@ private:
     juce::ToggleButton hardTuneToggle;
 
     juce::ComboBox scaleSelector;
+    juce::ComboBox rootSelector;
 
     juce::TextButton advancedButton;
     bool isAdvancedOpen { false };
@@ -66,6 +67,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> hardTuneAttachment;
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> scaleAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> rootAttachment;
 
     // State space plot component
     StateSpaceVisualizer visualizer;

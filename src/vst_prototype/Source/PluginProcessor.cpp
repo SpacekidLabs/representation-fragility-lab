@@ -5,22 +5,27 @@
 #include <algorithm>
 #include <fstream>
 
-static float snapToScale (float rawMidiNote, int scaleIndex)
+static float snapToScale (float rawMidiNote, int scaleIndex, int rootIndex)
 {
     if (scaleIndex == 0) // Chromatic
         return std::round (rawMidiNote);
 
-    // Get valid pitch classes for the selected scale
-    std::vector<int> validClasses;
+    // Scale patterns relative to root
+    std::vector<int> pattern;
     switch (scaleIndex)
     {
-        case 1: validClasses = { 0, 2, 4, 5, 7, 9, 11 }; break; // C Major
-        case 2: validClasses = { 0, 2, 3, 5, 7, 8, 10 }; break; // C Minor
-        case 3: validClasses = { 0, 2, 4, 7, 9 };         break; // C Pentatonic Major
-        case 4: validClasses = { 0, 3, 5, 7, 10 };        break; // C Pentatonic Minor
-        case 5: validClasses = { 0, 2, 4, 6, 7, 9, 11 }; break; // G Major (contains F# = 6)
-        case 6: validClasses = { 0, 2, 4, 5, 7, 9, 11 }; break; // A Minor (same as C Major)
+        case 1: pattern = { 0, 2, 4, 5, 7, 9, 11 }; break; // Major
+        case 2: pattern = { 0, 2, 3, 5, 7, 8, 10 }; break; // Natural Minor
+        case 3: pattern = { 0, 2, 4, 7, 9 };         break; // Pentatonic Major
+        case 4: pattern = { 0, 3, 5, 7, 10 };        break; // Pentatonic Minor
         default: return std::round (rawMidiNote);
+    }
+
+    // Transpose pattern by rootIndex modulo 12
+    std::vector<int> validClasses;
+    for (int pc : pattern)
+    {
+        validClasses.push_back ((pc + rootIndex) % 12);
     }
 
     // Find the nearest note in validClasses
@@ -94,6 +99,7 @@ void AdaptiveAutoTuneAudioProcessor::prepareToPlay (double sampleRate, int sampl
     lastCandidateMidi = 0.0f;
     candidateConsecutiveFrames = 0;
     stableSnappedMidi = 0.0f;
+    unvoicedConsecutiveFrames = 0;
 }
 
 void AdaptiveAutoTuneAudioProcessor::releaseResources()
@@ -132,6 +138,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     float speed = *apvts.getRawParameterValue ("speed");
     bool stateAware = *apvts.getRawParameterValue ("stateAware") > 0.5f;
     int scaleIndex = (int)(*apvts.getRawParameterValue ("scale"));
+    int rootIndex = (int)(*apvts.getRawParameterValue ("root"));
     bool hardTune = *apvts.getRawParameterValue ("hardTune") > 0.5f;
     float confThresh = *apvts.getRawParameterValue ("confThresh");
     bool adaptiveRetune = *apvts.getRawParameterValue ("adaptiveRetune") > 0.5f;
@@ -226,17 +233,34 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
 
     // Apply confidence gate based on ACF safety score
     float currentConf = safetyACF.load();
-    bool isVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
+    bool trackerIsVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f && !isSilent);
     if (stateAware && currentConf < confThresh)
     {
-        isVoiced = false;
+        trackerIsVoiced = false;
+    }
+
+    bool isVoiced = trackerIsVoiced;
+
+    if (trackerIsVoiced)
+    {
+        unvoicedConsecutiveFrames = 0;
+    }
+    else
+    {
+        unvoicedConsecutiveFrames++;
+        // Release gate hysteresis: hold last pitch for up to 6 blocks (~35 ms)
+        if (unvoicedConsecutiveFrames < 6 && lastTargetPitch >= 80.0f && lastTargetPitch <= 1000.0f)
+        {
+            isVoiced = true;
+            detectedF0 = lastTargetPitch;
+        }
     }
 
     if (isVoiced)
     {
         // Find nearest MIDI note in selected scale
         float rawMidi = 12.0f * std::log2 (detectedF0 / 440.0f) + 69.0f;
-        float snappedMidi = snapToScale (rawMidi, scaleIndex);
+        float snappedMidi = snapToScale (rawMidi, scaleIndex, rootIndex);
 
         // Stabilize snapped MIDI note (debounce)
         if (snappedMidi == lastCandidateMidi)
@@ -301,6 +325,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
                     << " | Voiced: " << (isVoiced ? "yes" : "no")
                     << " | Hard: " << (hardTune ? "yes" : "no")
                     << " | Scale: " << scaleIndex
+                    << " | Root: " << rootIndex
                     << "\n";
         }
     }
@@ -354,14 +379,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout AdaptiveAutoTuneAudioProcess
     // Scale selector choice parameter
     juce::StringArray scaleChoices = {
         "Chromatic",
-        "C Major",
-        "C Natural Minor",
-        "C Major Pentatonic",
-        "C Minor Pentatonic",
-        "G Major",
-        "A Natural Minor"
+        "Major",
+        "Natural Minor",
+        "Pentatonic Major",
+        "Pentatonic Minor"
     };
-    params.push_back (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID ("scale", 1), "Scale", scaleChoices, 0));
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID ("scale", 1), "Scale Key/Type", scaleChoices, 0));
+
+    // Root Note choice parameter
+    juce::StringArray rootChoices = {
+        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+    };
+    params.push_back (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID ("root", 1), "Root Note", rootChoices, 0));
     params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID ("hardTune", 1), "Hard Autotune", false));
 
     // Advanced controls

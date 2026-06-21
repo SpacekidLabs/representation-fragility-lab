@@ -67,6 +67,7 @@ private:
     float lastCandidateMidi { 0.0f };
     int candidateConsecutiveFrames { 0 };
     float stableSnappedMidi { 0.0f };
+    int unvoicedConsecutiveFrames { 0 };
     
     // Hop counter to trigger engine analysis (e.g. every 256 samples)
     int samplesSinceLastAnalysis { 0 };
