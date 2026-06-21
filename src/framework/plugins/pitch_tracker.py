@@ -42,6 +42,8 @@ class AdaptivePitchTracker:
         
         pitches = np.zeros(N_frames)
         last_valid_pitch = 220.0  # Safe initial anchor
+        pitch_history = [0.0] * 5
+        unvoiced_consecutive_frames = 0
         
         for idx, hop_idx in enumerate(hop_indices):
             center_idx = hop_idx
@@ -81,16 +83,70 @@ class AdaptivePitchTracker:
                 pitch = float(pitch_array[0])
             except Exception:
                 pitch = 0.0
+
+            # Step 1: Octave correction and continuity constraint relative to last_valid_pitch
+            if last_valid_pitch > 0.0 and pitch > 0.0:
+                ratio = pitch / last_valid_pitch
                 
-            # Apply dynamic gating/hold logic
-            if hold_pitch and state.assumptions.get("acf", 1.0) < 0.20:
+                # Detect and correct octave tracking errors
+                if abs(ratio - 0.5) < 0.08:
+                    pitch *= 2.0
+                    ratio *= 2.0
+                elif abs(ratio - 2.0) < 0.30:
+                    pitch *= 0.5
+                    ratio *= 0.5
+                elif abs(ratio - 0.25) < 0.04:
+                    pitch *= 4.0
+                    ratio *= 4.0
+                elif abs(ratio - 4.0) < 0.60:
+                    pitch *= 0.25
+                    ratio *= 0.25
+                
+                # Enforce absolute continuity limit: max 3.0 semitones change per frame
+                max_ratio = 2**(3/12)
+                min_ratio = 2**(-3/12)
+                if ratio > max_ratio or ratio < min_ratio:
+                    pitch = last_valid_pitch
+
+            # Step 2: Determine raw voicing state
+            raw_is_voiced = (pitch > fmin and pitch < fmax)
+            
+            # Apply Engine recommendations and confidence constraints
+            acf_conf = state.assumptions.get("acf", 1.0)
+            if voicing_gate and acf_conf < 0.35:
+                raw_is_voiced = False
+            if hold_pitch and acf_conf < 0.20:
                 pitch = last_valid_pitch
-            elif pitch > fmin and pitch < fmax:
+                raw_is_voiced = (pitch > fmin and pitch < fmax)
+
+            # Step 3: Run voiced-only median filter
+            if raw_is_voiced:
+                # Initialize history if empty to avoid onset lag
+                if all(val == 0.0 for val in pitch_history):
+                    pitch_history = [pitch] * 5
+                else:
+                    pitch_history.pop(0)
+                    pitch_history.append(pitch)
+                
+                # Set pitch to median of history
+                pitch = float(np.median(pitch_history))
                 last_valid_pitch = pitch
-                
-            if voicing_gate and state.assumptions.get("acf", 1.0) < 0.35:
-                pitch = 0.0  # Treat as unvoiced/silence
-                
-            pitches[idx] = pitch
+            else:
+                pitch = 0.0
+
+            # Step 4: Apply release gate hysteresis (hold last pitch for up to 3 frames ~35 ms)
+            is_voiced = raw_is_voiced
+            if raw_is_voiced:
+                unvoiced_consecutive_frames = 0
+            else:
+                unvoiced_consecutive_frames += 1
+                if unvoiced_consecutive_frames < 3 and last_valid_pitch > fmin and last_valid_pitch < fmax:
+                    is_voiced = True
+                    pitch = last_valid_pitch
+                else:
+                    # Reset pitch history after full release
+                    pitch_history = [0.0] * 5
+            
+            pitches[idx] = pitch if is_voiced else 0.0
             
         return pitches
