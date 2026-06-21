@@ -1,57 +1,105 @@
-# Representation Fragility Lab
+# Representation Intelligence
 
-A research project mapping the blind spots, failure modes, and musical potential of audio signal representations — evolving from DSP science into an audio product prototype.
+A lightweight, zero-shot Python library that dynamically guides DSP parameters using the **Universal Audio State Space**.
+
+[![PyPI version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://github.com/SpacekidLabs/representation-fragility-lab)
 
 ---
 
-## Developer Installation & Quickstart
+## ⚡ Quickstart (The 5-Minute Guide)
 
-You can install the **Representation Intelligence** library directly from this repository to drop the engine into your audio plugin or DSP project in just a few lines of code:
+The core framework analyzes time-domain audio frames on-the-fly, projects them onto a physical state space, and recommends optimal parameters.
 
-### 1. Install via pip
+### 1. Installation
 ```bash
 pip install git+https://github.com/SpacekidLabs/representation-fragility-lab.git
 ```
 
-### 2. Five-Line Integration Example
+### 2. Basic Usage (5 Lines of Code)
 ```python
 from representation_intelligence import RepresentationIntelligenceEngine
 
-# Load the engine instantly with pre-trained physical weights
 engine = RepresentationIntelligenceEngine()
+state = engine.analyze(audio_frame, sr=16000)
 
-# Analyze any time-domain audio frame on-the-fly
-state = engine.analyze(frame, sr=16000)
-
-# Adapt parameters dynamically based on signal region and safety scores
-if state.region == "noise_collapse":
-    dsp_algorithm.window_size = 4096
-    dsp_algorithm.trough_threshold = state.recommended_parameters["pitch_tracking"]["yin_trough"]
+print(f"Region: {state.region}") # e.g. 'noise_collapse', 'periodic_harmonic'
+print(f"Recommended Window: {state.recommended_window} samples")
 ```
-
-See [quickstart.py](file:///Users/user/Desktop/representation-fragility-lab/quickstart.py) for a complete, runnable integration example.
 
 ---
 
-## What This Is
+## 🛠️ API Quick Reference
 
-We started with a simple question:
+The `engine.analyze(frame, sr)` call returns a `FrameworkState` object containing:
 
-> **Do different audio representations fail in different ways?**
+| Property | Type | Description |
+| :--- | :--- | :--- |
+| `state.coordinate` | `tuple[float, float]` | $(z_1, z_2)$ coordinates mapping Order ↔ Disorder and Harmonic ↔ Transient. |
+| `state.region` | `str` | Semantic region: `periodic_harmonic`, `noise_collapse`, `transient_overloaded`, `smooth_lowpass`, or `transition_zone`. |
+| `state.safe_representations` | `list[str]` | List of valid representation algorithms (from `stft`, `acf`, `cepstrum`, `cqt`, `wavelet`). |
+| `state.recommended_window` | `int` | Optimal window size (1024, 2048, or 4096 samples). |
+| `state.recommended_parameters`| `dict` | Pre-calibrated parameters for `denoising`, `pitch_tracking`, and `onset_detection`. |
 
-After 33 experiments, that question has expanded into four distinct research arcs:
+---
 
-**Arc 1 — Blind Spot Atlas** (Exp 001–013)
-Map where ACF, STFT, and Cepstrum representations fail under noise, filtering, harmonic removal, pitch shifts, and targeted adversarial probes.
+## 🎯 Killer Examples (Real-World Gains)
 
-**Arc 2 — Representation Intelligence** (Exp 014–026)
-Use those failure maps to build a system where representations know their own weaknesses, communicate uncertainty, cooperate to make better decisions, learn their own failure manifolds, and transfer failure knowledge across tasks.
+### Example 1: Adaptive YIN Pitch Tracking
+Improve YIN tracking under extreme noise blocks and transients by dynamically scaling the window size and trough threshold based on engine state.
 
-**Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
-Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
+```python
+import librosa
+from representation_intelligence import RepresentationIntelligenceEngine
 
-**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–041)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, deploy the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings, automatically learn optimal control surfaces to minimize Log Spectral Distance, package the architecture into a reusable coordinate-gated library (Framework V1) with three adaptive reference plugins (denoiser, pitch tracker, onset detector), validate that State Compatibility Index correlation predicts framework benefit, and verify zero-shot validation across five external black-box library algorithms.
+engine = RepresentationIntelligenceEngine()
+st = engine.analyze(frame, sr=22050)
+
+# Dynamically adapt YIN parameters
+pitch = librosa.yin(
+    frame, fmin=80, fmax=500, sr=22050,
+    frame_length=st.recommended_window,
+    hop_length=st.recommended_window,
+    trough_threshold=st.recommended_parameters["pitch_tracking"]["yin_trough"],
+    center=False
+)[0]
+```
+* **Performance Gain**: **+5.8% tracking accuracy improvement** under noise/transient blocks, with **zero regressions** on clean audio.
+
+### Example 2: Adaptive Wiener Denoising
+Adapt local window filter size and noise power estimations in a standard Wiener filter on-the-fly to prevent transient smearing.
+
+```python
+import scipy.signal
+from representation_intelligence import RepresentationIntelligenceEngine
+
+engine = RepresentationIntelligenceEngine()
+st = engine.analyze(frame, sr=16000)
+
+# Adapt parameters based on physical region
+if st.region == "noise_collapse":
+    mysize, noise_power = 17, np.var(frame) * 0.75
+elif st.region == "transient_overloaded":
+    mysize, noise_power = 3, 1e-4
+else:
+    mysize, noise_power = 7, None
+
+denoised_frame = scipy.signal.wiener(frame, mysize=mysize, noise=noise_power)
+```
+* **Performance Gain**: **+2.6% denoising performance improvement** ($\Delta P = +0.0259$) with no phase artifacts.
+
+---
+
+## 🔬 The Evidence: 41 Experiments
+
+The framework is backed by a 41-experiment research database proving the **Local State Hypothesis**: *DSP failures are governed by the physical state of the signal.*
+
+We have structured the research into five coherent arcs:
+
+* **Arc 1 — Failure Atlas** (Exp 001–013): Mapping the mathematical blind spots of STFT, ACF, and Cepstrum under noise, filtering, and clipping.
+* **Arc 2 — Failure Manifold** (Exp 014–030): Discovering and mapping the 2D task-independent failure coordinates and trajectories.
+* **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
+* **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
+* **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
 
 ---
 
@@ -64,7 +112,7 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── experiments/      # All 29 experiment scripts (exp001–exp029)
+│   └── framework/        # [Asset A] The Framework source code
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -88,8 +136,6 @@ Three audio representations are studied throughout:
 | **Cepstrum** | Harmonic structure | Elevated noise floor (DC shift), sparse harmonics |
 
 ---
-
-## Experiment Log
 
 ### Phase 1 — Blind Spot Atlas (Exp 001–013)
 
