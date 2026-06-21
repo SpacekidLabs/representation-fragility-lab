@@ -145,6 +145,9 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
     adaptiveWindowToggle.setButtonText ("Adaptive Window Scaling");
     addChildComponent (adaptiveWindowToggle);
 
+    hardTuneToggle.setButtonText ("Hard Autotune (T-Pain)");
+    addAndMakeVisible (hardTuneToggle);
+
     // Advanced Trigger Button
     advancedButton.setButtonText ("Advanced Tools ▼");
     advancedButton.addListener (this);
@@ -170,6 +173,7 @@ AdaptiveAutoTuneAudioProcessorEditor::AdaptiveAutoTuneAudioProcessorEditor(Adapt
     adaptiveWindowAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "adaptiveWindow", adaptiveWindowToggle);
 
     scaleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (audioProcessor.apvts, "scale", scaleSelector);
+    hardTuneAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment> (audioProcessor.apvts, "hardTune", hardTuneToggle);
 
     // Add state space visualizer
     addAndMakeVisible (visualizer);
@@ -248,7 +252,7 @@ void AdaptiveAutoTuneAudioProcessorEditor::paint(juce::Graphics& g)
     // Scale Selector Label
     g.setColour (juce::Colours::white.withAlpha(0.7f));
     g.setFont (juce::Font("sans-serif", 10.5f, juce::Font::bold));
-    g.drawText ("Scale Key/Type:", colX, 248, 140, 14, juce::Justification::left, true);
+    g.drawText ("Scale Key/Type:", colX, 263, 140, 14, juce::Justification::left, true);
 
     // Advanced Section Label
     if (isAdvancedOpen)
@@ -277,9 +281,10 @@ void AdaptiveAutoTuneAudioProcessorEditor::resized()
     speedSlider.setBounds (dialX, 205, 110, 110);
 
     // Position main toggles
-    stateAwareToggle.setBounds (330, 220, 150, 24);
-    scaleSelector.setBounds (330, 265, 140, 24);
-    advancedButton.setBounds (330, 310, 140, 28);
+    hardTuneToggle.setBounds (330, 205, 150, 24);
+    stateAwareToggle.setBounds (330, 235, 150, 24);
+    scaleSelector.setBounds (330, 280, 140, 24);
+    advancedButton.setBounds (330, 315, 140, 26);
 
     // Display Advanced options dynamically
     if (isAdvancedOpen)

@@ -48,6 +48,7 @@ private:
     juce::ToggleButton stateAwareToggle;
     juce::ToggleButton adaptiveRetuneToggle;
     juce::ToggleButton adaptiveWindowToggle;
+    juce::ToggleButton hardTuneToggle;
 
     juce::ComboBox scaleSelector;
 
@@ -62,6 +63,7 @@ private:
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> stateAwareAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> adaptiveRetuneAttachment;
     std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> adaptiveWindowAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> hardTuneAttachment;
 
     std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> scaleAttachment;
 

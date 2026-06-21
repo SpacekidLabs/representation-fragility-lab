@@ -128,6 +128,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     float speed = *apvts.getRawParameterValue ("speed");
     bool stateAware = *apvts.getRawParameterValue ("stateAware") > 0.5f;
     int scaleIndex = (int)(*apvts.getRawParameterValue ("scale"));
+    bool hardTune = *apvts.getRawParameterValue ("hardTune") > 0.5f;
     float confThresh = *apvts.getRawParameterValue ("confThresh");
     bool adaptiveRetune = *apvts.getRawParameterValue ("adaptiveRetune") > 0.5f;
     bool adaptiveWindow = *apvts.getRawParameterValue ("adaptiveWindow") > 0.5f;
@@ -214,7 +215,7 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     // Apply confidence gate based on ACF safety score
     float currentConf = safetyACF.load();
     bool isVoiced = (detectedF0 >= 80.0f && detectedF0 <= 1000.0f);
-    if (stateAware && currentConf < confThresh)
+    if (!hardTune && stateAware && currentConf < confThresh)
     {
         isVoiced = false;
     }
@@ -236,24 +237,28 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     }
 
     // Apply voicing gate to mute correction in noise/silence
-    if (stateAware && activeVoicingGate && !isVoiced)
+    if (!hardTune && stateAware && activeVoicingGate && !isVoiced)
     {
         targetCorrection = 0.0f;
     }
 
     // Retune speed smoothing constant calculation
-    float activeSpeed = speed;
-    if (stateAware && adaptiveRetune)
+    float alpha = 1.0f;
+    if (!hardTune)
     {
-        // Slow down retune speed in low-confidence regions (scale retune time constant up to 4x)
-        activeSpeed = speed * (1.0f + 3.0f * (1.0f - currentConf));
+        float activeSpeed = speed;
+        if (stateAware && adaptiveRetune)
+        {
+            // Slow down retune speed in low-confidence regions (scale retune time constant up to 4x)
+            activeSpeed = speed * (1.0f + 3.0f * (1.0f - currentConf));
+        }
+        alpha = 1.0f - std::exp (-numSamples / (activeSpeed * sampleRate / 1000.0f));
     }
-
-    float alpha = 1.0f - std::exp (-numSamples / (activeSpeed * sampleRate / 1000.0f));
+    
     smoothedCorrectionSemitones += alpha * (targetCorrection - smoothedCorrectionSemitones);
 
-    // Apply Correction Amount scalar
-    float finalShift = smoothedCorrectionSemitones * amount;
+    // Apply Correction Amount scalar (force 1.0 for hardTune)
+    float finalShift = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
 
     // Process audio buffer sample-by-sample (multi-channel independent pitch shifters)
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -317,6 +322,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout AdaptiveAutoTuneAudioProcess
         "A Natural Minor"
     };
     params.push_back (std::make_unique<juce::AudioParameterChoice> (juce::ParameterID ("scale", 1), "Scale", scaleChoices, 0));
+    params.push_back (std::make_unique<juce::AudioParameterBool> (juce::ParameterID ("hardTune", 1), "Hard Autotune", false));
 
     // Advanced controls
     params.push_back (std::make_unique<juce::AudioParameterFloat> (juce::ParameterID ("confThresh", 1), "Confidence Threshold", 0.0f, 1.0f, 0.40f));
