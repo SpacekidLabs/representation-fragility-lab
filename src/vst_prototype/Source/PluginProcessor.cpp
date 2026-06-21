@@ -62,6 +62,7 @@ AdaptiveAutoTuneAudioProcessor::AdaptiveAutoTuneAudioProcessor()
       apvts (*this, nullptr, "Parameters", createParameterLayout())
 {
     inputCircularBuffer.resize(8192, 0.0f);
+    pitchHistory.resize(5, 0.0f);
 }
 
 AdaptiveAutoTuneAudioProcessor::~AdaptiveAutoTuneAudioProcessor()
@@ -92,6 +93,7 @@ void AdaptiveAutoTuneAudioProcessor::prepareToPlay (double sampleRate, int sampl
         ps.clear();
     }
     std::fill (inputCircularBuffer.begin(), inputCircularBuffer.end(), 0.0f);
+    std::fill (pitchHistory.begin(), pitchHistory.end(), 0.0f);
     circularBufferWritePos = 0;
     samplesSinceLastAnalysis = 0;
     smoothedCorrectionSemitones = 0.0f;
@@ -229,6 +231,17 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         detectedF0 = pitchTracker.detectPitch (pitchFrame.data(), curWindowSize, sampleRate, currentTrough);
     }
 
+    // 5-point median filter to reject spikes and dropouts
+    for (size_t i = 0; i < pitchHistory.size() - 1; ++i)
+    {
+        pitchHistory[i] = pitchHistory[i + 1];
+    }
+    pitchHistory[pitchHistory.size() - 1] = detectedF0;
+
+    std::vector<float> sortedHistory = pitchHistory;
+    std::sort (sortedHistory.begin(), sortedHistory.end());
+    detectedF0 = sortedHistory[2];
+
     float targetCorrection = 0.0f;
 
     // Apply confidence gate based on ACF safety score
@@ -295,17 +308,17 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
     }
 
     // Retune speed smoothing constant calculation
-    float alpha = 1.0f;
-    if (!hardTune)
+    float activeSpeed = speed;
+    if (hardTune)
     {
-        float activeSpeed = speed;
-        if (stateAware && adaptiveRetune)
-        {
-            // Slow down retune speed in low-confidence regions (scale retune time constant up to 4x)
-            activeSpeed = speed * (1.0f + 3.0f * (1.0f - currentConf));
-        }
-        alpha = 1.0f - std::exp (-numSamples / (activeSpeed * sampleRate / 1000.0f));
+        activeSpeed = 4.0f; // very fast snap but smoothed to prevent clicks
     }
+    else if (stateAware && adaptiveRetune)
+    {
+        // Slow down retune speed in low-confidence regions (scale retune time constant up to 4x)
+        activeSpeed = speed * (1.0f + 3.0f * (1.0f - currentConf));
+    }
+    float alpha = 1.0f - std::exp (-numSamples / (activeSpeed * sampleRate / 1000.0f));
     
     smoothedCorrectionSemitones += alpha * (targetCorrection - smoothedCorrectionSemitones);
 

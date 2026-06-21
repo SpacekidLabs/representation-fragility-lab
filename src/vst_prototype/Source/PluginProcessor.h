@@ -55,6 +55,7 @@ private:
     RepresentationIntelligenceEngine engine;
     AutocorrelationPitchTracker pitchTracker;
     std::vector<DelayPitchShifter> pitchShifters;
+    std::vector<float> pitchHistory;
 
     // Circular input buffer for 2048-sample analysis
     std::vector<float> inputCircularBuffer;
