@@ -21,8 +21,8 @@ Use those failure maps to build a system where representations know their own we
 **Arc 3 — Failure Manifold Geometry & Trajectories** (Exp 027–029)
 Map the task-independent multidimensional boundaries of representation failure directly, validate its universality, trace signal trajectories over time, and build an active DSP control layer.
 
-**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–040)
-Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, deploy the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings, automatically learn optimal control surfaces to minimize Log Spectral Distance, package the architecture into a reusable coordinate-gated library (Framework V1) with three adaptive reference plugins (denoiser, pitch tracker, onset detector), and validate that State Compatibility Index correlation predicts framework benefit.
+**Arc 4 — Universal Audio State Space, Practical Gains, & Limits** (Exp 030–041)
+Prove that the geometry belongs to the physics of audio itself (not the representations), map assumption surfaces, compile a production framework API, demonstrate measurable gains on established DSP algorithms, validate zero-shot transfer across five tasks, map the boundaries of applicability, formally validate the Local State Hypothesis, deploy the engine into a real-time adaptive spectral subtraction denoiser on real vocal recordings, automatically learn optimal control surfaces to minimize Log Spectral Distance, package the architecture into a reusable coordinate-gated library (Framework V1) with three adaptive reference plugins (denoiser, pitch tracker, onset detector), validate that State Compatibility Index correlation predicts framework benefit, and verify zero-shot validation across five external black-box library algorithms.
 
 ---
 
@@ -505,6 +505,20 @@ Evaluates the core hypothesis of the Local State Hypothesis: **Does a task's Sta
 
 ---
 
+### Phase 21 — External Validation (Exp 041)
+
+#### Exp 041 — External Validation
+Performs zero-shot external validation on five completely external algorithms from `librosa` and `scipy` without modifying their internal source code.
+- **YIN Pitch Tracking**: Dynamically scaled analysis window (1024 to 4096) and adjusted trough threshold, gating silence and holding pitch. ($\Delta P = +0.0581$).
+- **pYIN Pitch Tracking**: Post-gated Viterbi tracking to suppress noise hallucinations in `noise_collapse` regions. ($\Delta P = +0.0139$).
+- **Onset Detection**: Mapped recommended threshold as a per-frame peak-picking `delta` (0.15 for notes, 0.30 for noise bursts). ($\Delta P = +0.0514$).
+- **HPSS (Source Separation)**: Precomputed kernels and selected them per-frame based on state ($H_{81}, P_{15}$ for noise collapse, $H_{17}$ for transient overloaded) with a power=2.0 softmask. ($\Delta P = +0.0106$).
+- **Wiener Denoising**: Adapted filter local window size and estimated noise power from frame variance. ($\Delta P = +0.0259$).
+- **Overall Improvement**: Positive benefit across all 5 algorithms ($\Delta P_{\text{avg}} = +0.0320$), verifying out-of-sample generalization.
+- **Dashboard Plot**: Saved to [exp041_external_validation.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp041_external_validation.png).
+
+---
+
 
 ## Listen Tests
 
@@ -550,6 +564,7 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 20. **Universal DSP State Sensor**: Experiment 034 validates the framework zero-shot across five structurally different tasks (Pitch Tracking, Onset Detection, Voicing Detection, Transient Detection, Spectral Denoising). 4/5 tasks improved without any retraining. The engine was trained once on audio physics and generalizes because the physical state space is universal — not task-specific.
 21. **Learned DSP Controller**: Experiment 038 demonstrates that we can automatically learn optimal parameter mapping functions $g(z_1, z_2) \to (\alpha, \beta)$ from grid-searched frame-level training data using a Random Forest Regressor. When evaluated out-of-sample on the test split of a real noisy vocal recording, the learned controller minimized Log Spectral Distance (LSD) down to 17.85 dB (a -0.08 dB delta improvement over the hand-crafted rule), confirming that the Universal Audio State Space contains enough structure to automatically discover superior DSP parameter mappings.
 22. **Framework V1 Library**: Experiment 039 completes the transition of the Universal Audio State Space architecture into a reusable coordinate-gated DSP library. By wrapping the core engine with importable reference plugins (denoiser, pitch tracker, onset detector), we demonstrated that JUCE/DSP developers can deploy this technology using a few simple lines of code to achieve immediate, out-of-sample improvements without any retraining.
+23. **Zero-Shot External Validation**: Experiment 041 demonstrates that the state-space engine can act as a zero-shot manager and post-filter for external library algorithms (such as librosa and scipy) with zero internal code changes. The framework achieved positive performance benefits ($\Delta P > 0$) across all 5 evaluated algorithms, yielding an average performance benefit of $+0.0320$.
 
 ### On the Product
 13. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
@@ -627,6 +642,9 @@ pip install -r requirements.txt
 # Run the framework generalization challenge
 .venv/bin/python3 src/experiments/exp040_generalization_challenge.py
 
+# Run the external validation challenge
+.venv/bin/python3 src/experiments/exp041_external_validation.py
+
 # Open listen tests
 open listen_test/index.html
 open listen_test/exp023.html
@@ -677,6 +695,7 @@ Exp 035–036:  Limits and formal theory validation (Local State Hypothesis)
 Exp 037–038:  Real audio integration & learned control surface optimization
 Exp 039:      Framework V1 package & reference plugins (Denoiser, Pitch Tracker, Onset Detector)
 Exp 040:      Framework Generalization Challenge (validation of the Local State Hypothesis)
+Exp 041:      External Validation (zero-shot validation on 5 external librosa/scipy algorithms)
 ```
 
 The coordinate-gated DSP library is the product.
