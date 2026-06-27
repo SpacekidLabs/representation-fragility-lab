@@ -1,0 +1,38 @@
+[
+  {
+    "signal": "sine",
+    "snr_db": Infinity,
+    "mel_similarity": 1.0,
+    "chroma_similarity": 1.0
+  },
+  {
+    "signal": "sine",
+    "snr_db": 20.0,
+    "mel_similarity": 0.9925362582010089,
+    "chroma_similarity": 0.9999973025183916
+  },
+  {
+    "signal": "sine",
+    "snr_db": 10.0,
+    "mel_similarity": 0.9894000760052193,
+    "chroma_similarity": 0.9997924147013432
+  },
+  {
+    "signal": "sine",
+    "snr_db": 5.0,
+    "mel_similarity": 0.9874987219727396,
+    "chroma_similarity": 0.9980556331333168
+  },
+  {
+    "signal": "sine",
+    "snr_db": 0.0,
+    "mel_similarity": 0.985016499162566,
+    "chroma_similarity": 0.983204274031661
+  },
+  {
+    "signal": "sine",
+    "snr_db": -5.0,
+    "mel_similarity": 0.9815039723225409,
+    "chroma_similarity": 0.8943636838452992
+  }
+]

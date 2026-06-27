@@ -1,0 +1,38 @@
+[
+  {
+    "signal": "chirp",
+    "snr_db": Infinity,
+    "mel_similarity": 1.0,
+    "chroma_similarity": 1.0
+  },
+  {
+    "signal": "chirp",
+    "snr_db": 20.0,
+    "mel_similarity": 0.9927523995534342,
+    "chroma_similarity": 0.9999945827903496
+  },
+  {
+    "signal": "chirp",
+    "snr_db": 10.0,
+    "mel_similarity": 0.9888553779242409,
+    "chroma_similarity": 0.9997087712117648
+  },
+  {
+    "signal": "chirp",
+    "snr_db": 5.0,
+    "mel_similarity": 0.9864614402969399,
+    "chroma_similarity": 0.9974025109728122
+  },
+  {
+    "signal": "chirp",
+    "snr_db": 0.0,
+    "mel_similarity": 0.9835439528846709,
+    "chroma_similarity": 0.978700083016382
+  },
+  {
+    "signal": "chirp",
+    "snr_db": -5.0,
+    "mel_similarity": 0.9795699597000054,
+    "chroma_similarity": 0.8809970833936599
+  }
+]

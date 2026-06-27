@@ -1,0 +1,38 @@
+[
+  {
+    "signal": "fm_tone",
+    "snr_db": Infinity,
+    "mel_similarity": 1.0000000000000002,
+    "chroma_similarity": 1.0
+  },
+  {
+    "signal": "fm_tone",
+    "snr_db": 20.0,
+    "mel_similarity": 0.9928796861996946,
+    "chroma_similarity": 0.9999968740862386
+  },
+  {
+    "signal": "fm_tone",
+    "snr_db": 10.0,
+    "mel_similarity": 0.9889250720875064,
+    "chroma_similarity": 0.9997795523738133
+  },
+  {
+    "signal": "fm_tone",
+    "snr_db": 5.0,
+    "mel_similarity": 0.9866284813902819,
+    "chroma_similarity": 0.9979262349484043
+  },
+  {
+    "signal": "fm_tone",
+    "snr_db": 0.0,
+    "mel_similarity": 0.9838660450363009,
+    "chroma_similarity": 0.9818225213541186
+  },
+  {
+    "signal": "fm_tone",
+    "snr_db": -5.0,
+    "mel_similarity": 0.9800884395339069,
+    "chroma_similarity": 0.8856501893669653
+  }
+]

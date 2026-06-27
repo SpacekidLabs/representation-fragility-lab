@@ -771,6 +771,7 @@ Exp 037–038:  Real audio integration & learned control surface optimization
 Exp 039:      Framework V1 package & reference plugins (Denoiser, Pitch Tracker, Onset Detector)
 Exp 040:      Framework Generalization Challenge (validation of the Local State Hypothesis)
 Exp 041:      External Validation (zero-shot validation on 5 external librosa/scipy algorithms)
+Exp 042:      Mel/Chroma blind-spot atlas under additive noise across the standard signal roster
 ```
 
 The coordinate-gated DSP library is the product.

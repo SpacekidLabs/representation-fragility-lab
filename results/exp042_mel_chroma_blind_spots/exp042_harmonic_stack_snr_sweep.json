@@ -1,0 +1,38 @@
+[
+  {
+    "signal": "harmonic_stack",
+    "snr_db": Infinity,
+    "mel_similarity": 1.0000000000000002,
+    "chroma_similarity": 1.0
+  },
+  {
+    "signal": "harmonic_stack",
+    "snr_db": 20.0,
+    "mel_similarity": 0.9855274366939526,
+    "chroma_similarity": 0.999996606630479
+  },
+  {
+    "signal": "harmonic_stack",
+    "snr_db": 10.0,
+    "mel_similarity": 0.9790234111388676,
+    "chroma_similarity": 0.999756362037134
+  },
+  {
+    "signal": "harmonic_stack",
+    "snr_db": 5.0,
+    "mel_similarity": 0.9751885753838632,
+    "chroma_similarity": 0.9977276848708004
+  },
+  {
+    "signal": "harmonic_stack",
+    "snr_db": 0.0,
+    "mel_similarity": 0.9704970288496735,
+    "chroma_similarity": 0.980460833059918
+  },
+  {
+    "signal": "harmonic_stack",
+    "snr_db": -5.0,
+    "mel_similarity": 0.9632857789912024,
+    "chroma_similarity": 0.880802265490308
+  }
+]
