@@ -8,12 +8,13 @@ version = "1.0.0"
 description = "A physics-inspired audio state space framework for adaptive, self-aware DSP routing"
 readme = "README.md"
 requires-python = ">=3.9"
-license = "MIT"
+license = { text = "MIT" }
 authors = [
     { name = "SpacekidLabs Team" }
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Multimedia :: Sound/Audio :: Analysis",
 ]
@@ -21,20 +22,14 @@ dependencies = [
     "numpy>=1.20.0",
     "scipy>=1.6.0",
     "librosa>=0.8.0",
-    "matplotlib>=3.5.0",
 ]
-
-[project.urls]
-Homepage = "https://github.com/SpacekidLabs/representation-fragility-lab"
 
 [tool.setuptools]
 packages = [
     "representation_intelligence",
-    "representation_intelligence.plugins",
+    "representation_intelligence.plugins"
 ]
 
 [tool.setuptools.package-dir]
 representation_intelligence = "src/framework"
-
-[tool.setuptools.package-data]
-representation_intelligence = ["py.typed"]
+"representation_intelligence.plugins" = "src/framework/plugins"
