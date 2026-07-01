@@ -3,7 +3,6 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
-#include <fstream>
 
 static float snapToScale (float rawMidiNote, int scaleIndex, int rootIndex)
 {
@@ -406,24 +405,6 @@ void AdaptiveAutoTuneAudioProcessor::processBlock (juce::AudioBuffer<float>& buf
         }
     }
 
-    static int debugCounter = 0;
-    if (++debugCounter >= 100)
-    {
-        debugCounter = 0;
-        std::ofstream logFile ("/Users/user/Desktop/representation-fragility-lab/scratch/debug_vst.txt", std::ios::app);
-        if (logFile.is_open())
-        {
-            float finalShiftLog = smoothedCorrectionSemitones * (hardTune ? 1.0f : amount);
-            logFile << "F0: " << detectedF0 
-                    << " | Conf: " << currentConf 
-                    << " | Shift: " << finalShiftLog 
-                    << " | Voiced: " << (isVoiced ? "yes" : "no")
-                    << " | Hard: " << (hardTune ? "yes" : "no")
-                    << " | Scale: " << scaleIndex
-                    << " | Root: " << rootIndex
-                    << "\n";
-        }
-    }
 }
 
 juce::AudioProcessorEditor* AdaptiveAutoTuneAudioProcessor::createEditor()

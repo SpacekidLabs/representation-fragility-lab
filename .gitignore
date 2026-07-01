@@ -2,6 +2,11 @@
 __pycache__/
 *.pyc
 .DS_Store
+.codex/
+.agents/
+.claude/
+.cursor/
+scratch/
 *.egg-info/
 .eggs/
 build/
