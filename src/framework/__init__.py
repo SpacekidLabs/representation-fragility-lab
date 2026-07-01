@@ -16,5 +16,5 @@ __all__ = [
     "FrameworkState",
     "AdaptiveDenoiser",
     "AdaptivePitchTracker",
-    "AdaptiveOnsetDetector"
+    "AdaptiveOnsetDetector",
 ]

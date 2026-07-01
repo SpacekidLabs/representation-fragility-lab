@@ -22,6 +22,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 from src.representations.acf import compute_acf
 from src.representations.cepstrum import compute_cepstrum
 from src.representations.stft import compute_stft
+from src.framework.descriptors import extract_physical_descriptors
 from src.experiments.exp028_failure_manifold_validation import (
     compute_cqt_frame,
     compute_morlet_cwt,
@@ -39,7 +40,6 @@ from src.experiments.exp030_universal_audio_state_space import (
     synthesize_fm_waves,
     synthesize_granular_textures,
     generate_noise_frames,
-    extract_10_physical_descriptors
 )
 from src.experiments.exp031_assumption_surfaces import (
     estimate_pitch_cwt,
@@ -128,7 +128,7 @@ def run():
             cwt = compute_morlet_cwt(frame, 64)
             clean_representations.append((acf, cep, mag, cqt, cwt))
             
-            feats = extract_10_physical_descriptors(frame, sr)
+            feats = extract_physical_descriptors(frame, sr)
             X_clean_feats.append(feats)
             corpus_labels.append(c_name)
 
@@ -163,7 +163,7 @@ def run():
     # Evaluate perturbed frames
     for i in range(N_total):
         frame_pert = perturbed_frames[i]
-        feats_pert = extract_10_physical_descriptors(frame_pert, sr)
+        feats_pert = extract_physical_descriptors(frame_pert, sr)
         feats_std = (np.array(feats_pert) - mu) / sigma
         coords_proj = feats_std @ Vt.T
         X_all_coords.append(coords_proj)

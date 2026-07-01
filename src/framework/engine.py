@@ -6,21 +6,42 @@ Defines the main class `RepresentationIntelligenceEngine` and the structured sta
 assumption safety predictions, and DSP routing recommendations.
 """
 
+from dataclasses import dataclass
+
 import numpy as np
-from src.experiments.exp030_universal_audio_state_space import extract_10_physical_descriptors
+from .descriptors import extract_physical_descriptors
 from .weights import MU, SIGMA, VT, W_STFT, W_ACF, W_CEP, W_CQT, W_CWT
 
+
+SAFE_REPRESENTATION_THRESHOLD = 0.50
+DEFAULT_WINDOW_SIZE = 2048
+REGION_WINDOW_SIZES = {
+    "noise_collapse": 4096,
+    "transient_overloaded": 1024,
+}
+REGION_DENOISING_BETA = {
+    "noise_collapse": 0.06,
+    "periodic_harmonic": 0.005,
+}
+DEFAULT_DENOISING_BETA = 0.02
+REGION_YIN_TROUGH = {
+    "noise_collapse": 0.25,
+    "transient_overloaded": 0.08,
+}
+DEFAULT_YIN_TROUGH = 0.15
+VOICED_REGIONS = {"periodic_harmonic", "smooth_lowpass"}
+
+
+@dataclass
 class FrameworkState:
     """
     Structured state object returned by RepresentationIntelligenceEngine.
     Encapsulates all mapping parameters, valid assumptions, and DSP recommendations.
     """
-    def __init__(self, coordinate: tuple[float, float], region: str, 
-                 assumptions: dict[str, float], recommendations: dict):
-        self.coordinate = coordinate  # (z1, z2) PCA coordinates
-        self.region = region          # Semantic region string
-        self.assumptions = assumptions  # dict mapping rep name -> float safety score [0, 1]
-        self.recommendations = recommendations  # dict containing active reps, window size, etc.
+    coordinate: tuple[float, float]
+    region: str
+    assumptions: dict[str, float]
+    recommendations: dict
 
     @property
     def coordinates(self) -> tuple[float, float]:
@@ -30,7 +51,11 @@ class FrameworkState:
     @property
     def safe_representations(self) -> list[str]:
         """List of representation names with safety score >= 0.50."""
-        return [name for name, score in self.assumptions.items() if score >= 0.50]
+        return [
+            name
+            for name, score in self.assumptions.items()
+            if score >= SAFE_REPRESENTATION_THRESHOLD
+        ]
 
     @property
     def recommended_window(self) -> int:
@@ -52,38 +77,32 @@ class FrameworkState:
         """
         stft_s = self.assumptions.get("stft", 1.0)
         alpha = 0.5 + 3.5 * (1.0 - stft_s)
-        if self.region == "noise_collapse":
-            beta = 0.06
-        elif self.region == "periodic_harmonic":
-            beta = 0.005
-        else:
-            beta = 0.02
-            
-        yin_trough = 0.25 if self.region == "noise_collapse" else (0.08 if self.region == "transient_overloaded" else 0.15)
-        voicing_gate = self.region in ("periodic_harmonic", "smooth_lowpass")
+        beta = REGION_DENOISING_BETA.get(self.region, DEFAULT_DENOISING_BETA)
+        yin_trough = REGION_YIN_TROUGH.get(self.region, DEFAULT_YIN_TROUGH)
+        voicing_gate = self.region in VOICED_REGIONS
         hold_pitch = self.region == "transient_overloaded"
 
         fusion_weights = {
             "stft": self.assumptions.get("stft", 0.0),
             "acf": self.assumptions.get("acf", 0.0),
-            "cepstrum": self.assumptions.get("cepstrum", 0.0)
+            "cepstrum": self.assumptions.get("cepstrum", 0.0),
         }
         onset_threshold = 0.3 if self.region == "noise_collapse" else 0.15
 
         return {
             "denoising": {
                 "alpha": alpha,
-                "beta": beta
+                "beta": beta,
             },
             "pitch_tracking": {
                 "yin_trough": yin_trough,
                 "voicing_gate": voicing_gate,
-                "hold_pitch": hold_pitch
+                "hold_pitch": hold_pitch,
             },
             "onset_detection": {
                 "fusion_weights": fusion_weights,
-                "threshold": onset_threshold
-            }
+                "threshold": onset_threshold,
+            },
         }
 
     def __repr__(self) -> str:
@@ -131,7 +150,7 @@ class RepresentationIntelligenceEngine:
             raise ValueError("Empty audio frame provided.")
             
         # 1. Extract the 10 physical signal descriptors
-        feats = extract_10_physical_descriptors(frame, sr)
+        feats = extract_physical_descriptors(frame, sr)
         
         # 2. Project onto the pre-trained Universal Audio State Space
         feats_std = (np.array(feats) - self.mu) / self.sigma
@@ -157,21 +176,15 @@ class RepresentationIntelligenceEngine:
         poly = np.array([1.0, z1, z2, z1**2, z2**2, z1 * z2])
         assumptions = {}
         for name, w in self.w_models.items():
-            score = float(np.clip(poly @ w, 0.0, 1.0))
-            assumptions[name] = score
+            assumptions[name] = float(np.clip(poly @ w, 0.0, 1.0))
 
         # 5. Formulate DSP Routing Recommendations
         active_representations = {
-            name: (score >= 0.50) for name, score in assumptions.items()
+            name: score >= SAFE_REPRESENTATION_THRESHOLD
+            for name, score in assumptions.items()
         }
         
-        # Determine recommended window size based on region characteristics
-        if region == "noise_collapse":
-            window_size = 4096  # Increase window to average out random noise correlations
-        elif region == "transient_overloaded":
-            window_size = 1024  # Decrease window for high temporal precision
-        else:
-            window_size = 2048  # Default window size for stable conditions
+        window_size = REGION_WINDOW_SIZES.get(region, DEFAULT_WINDOW_SIZE)
 
         # Specific trust recommendation
         primary_representation = max(assumptions, key=assumptions.get)
@@ -179,7 +192,7 @@ class RepresentationIntelligenceEngine:
         recommendations = {
             "active_representations": active_representations,
             "window_size": window_size,
-            "primary_representation": primary_representation
+            "primary_representation": primary_representation,
         }
 
         return FrameworkState(
