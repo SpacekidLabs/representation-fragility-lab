@@ -176,7 +176,7 @@ representation-fragility-lab/
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
-├── listen_test/          # Listen-test HTML players + rendered audio
+├── listen_test/          # Listen-test HTML players + rendered audio (not tracked; see Listen Tests)
 ├── data/                 # Reserved for future datasets
 ├── docs/                 # VISION.md (project goal), taxonomy, research issue notes
 ├── requirements.txt
@@ -571,7 +571,7 @@ The results **empirically validate the Local State Hypothesis**. The coordinates
 ### Phase 17 — Real Plugin Integration (Exp 037)
 
 #### Exp 037 — State-Space Adaptive Spectral Subtraction
-Deployed the `RepresentationIntelligenceEngine` into a real-time spectral subtraction vocal denoiser, evaluating on a real vocal recording [Clean_vocal.wav](Clean_vocal.wav) corrupted with white noise at $+6$ dB SNR.
+Deployed the `RepresentationIntelligenceEngine` into a real-time spectral subtraction vocal denoiser, evaluating on a real vocal recording `Clean_vocal.wav` (not tracked in git; see Running Experiments) corrupted with white noise at $+6$ dB SNR.
 
 *   **Integration Strategy**: Downsampled 44100Hz audio frames to 22050Hz for engine state analysis, then continuously adapted the subtraction factor $\alpha_m$ based on the frame's `stft_safety` score and the spectral floor $\beta_m$ based on the mapped semantic region.
 *   **Audio Assets Generated** (available in `results/`):
@@ -596,7 +596,7 @@ Signal state feedback yields a superior DSP product. The adaptive denoiser succe
 ### Phase 18 — Learned DSP Controller (Exp 038)
 
 #### Exp 038 — Learned DSP Controller
-Learns the optimal DSP control surface mapping engine coordinates $(z_1, z_2)$ to over-subtraction factor $\alpha$ and spectral floor $\beta$, minimizing Log Spectral Distance (LSD) directly. Fits a Random Forest Regressor on local optimal alpha/beta parameters grid-searched on the first 50% (training split) of [Clean_vocal.wav](Clean_vocal.wav) corrupted with $+6$ dB noise.
+Learns the optimal DSP control surface mapping engine coordinates $(z_1, z_2)$ to over-subtraction factor $\alpha$ and spectral floor $\beta$, minimizing Log Spectral Distance (LSD) directly. Fits a Random Forest Regressor on local optimal alpha/beta parameters grid-searched on the first 50% (training split) of `Clean_vocal.wav` corrupted with $+6$ dB noise.
 
 * **Integration Strategy**: Frame-by-frame resampling to 22.05kHz, extracting coordinates, and passing to the learned `RandomForestRegressor` model to predict optimal $\alpha$ and $\beta$ values on the remaining 50% out-of-sample test split.
 * **Audio Assets Generated** (available in `results/`):
@@ -845,7 +845,10 @@ This replicates the main audio result on a new medium: comparing lenses tells yo
 
 ## Listen Tests
 
-Two interactive listen-test pages are included in `listen_test/`:
+The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
+`exp023.html` and its WAVs are written by Exp 023 (which needs `Clean_vocal.wav`, see Running Experiments).
+`index.html` and its A–D WAVs are not produced by any script; they are in the git history
+before issue #18 (`git checkout b93f90b -- listen_test`).
 
 ### `listen_test/index.html` — Four Tuner Comparison
 A/B/C/D comparison of: Raw vocal · V1 Frame-by-Frame · V2 Note Tracker · V3 Confidence-Gated.
@@ -924,7 +927,9 @@ cmake --build src/vst_prototype/build --target AdaptiveAutoTune_Standalone
 # Run the adaptive tuner on synthesised voice
 .venv/bin/python3 src/experiments/exp019_adaptive_tuner.py
 
-# Run on a real vocal (place Clean_vocal.wav in project root)
+# Run on a real vocal. Clean_vocal.wav is not tracked in git (issue #18): place your own
+# vocal recording at ./Clean_vocal.wav, or restore it with: git checkout b93f90b -- Clean_vocal.wav
+# Exp 020-023, 028-032, 037-039 and src/framework/export_weights.py need it.
 .venv/bin/python3 src/experiments/exp020_tuner_real_vocal.py
 
 # Run the retune dynamics atlas
@@ -987,7 +992,7 @@ cmake --build src/vst_prototype/build --target AdaptiveAutoTune_Standalone
 # Run the image (second medium) experiment
 .venv/bin/python3 src/experiments/exp044_image_disagreement.py
 
-# Open listen tests
+# Open listen tests (local only, see Listen Tests)
 open listen_test/index.html
 open listen_test/exp023.html
 ```

@@ -11,3 +11,7 @@ scratch/
 .eggs/
 build/
 dist/
+
+# Local audio and listen-test pages, not tracked (issue #18)
+Clean_vocal.wav
+listen_test/
