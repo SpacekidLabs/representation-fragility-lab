@@ -1,0 +1,683 @@
+{
+  "n_frames": 3330,
+  "n_pitched": 3240,
+  "features": [
+    "conf STFT",
+    "conf ACF",
+    "conf CEP",
+    "STFT/ACF (oct)",
+    "STFT/CEP (oct)",
+    "ACF/CEP (oct)"
+  ],
+  "silhouette_by_k": {
+    "3": 0.5228271916161641,
+    "4": 0.5681039414207628,
+    "5": 0.5477115215090218,
+    "6": 0.5934052838618703,
+    "7": 0.6108431388513933,
+    "8": 0.6228872185020287,
+    "9": 0.6293551017963723,
+    "10": 0.6249991955637342
+  },
+  "k": 9,
+  "pca_variance_explained_2d": 0.7060017563088906,
+  "patterns": [
+    {
+      "name": "all agree, all confident",
+      "n_frames": 1525,
+      "share": 0.45795795795795796,
+      "purity": 0.9967213114754099,
+      "median_vector": {
+        "conf STFT": 0.999,
+        "conf ACF": 0.994,
+        "conf CEP": 1.0,
+        "STFT/ACF (oct)": -0.001,
+        "STFT/CEP (oct)": -0.003,
+        "ACF/CEP (oct)": -0.002
+      },
+      "gross_error_rate": {
+        "STFT": 0.0006557377049180328,
+        "ACF": 0.0,
+        "CEP": 0.0019672131147540984
+      },
+      "top_true_failures": [
+        [
+          "none",
+          1521
+        ],
+        [
+          "CEP",
+          3
+        ],
+        [
+          "STFT",
+          1
+        ]
+      ],
+      "top_conditions": [
+        [
+          "lowpass",
+          357
+        ],
+        [
+          "pitch_shift",
+          355
+        ],
+        [
+          "clipping",
+          301
+        ],
+        [
+          "time_stretch",
+          259
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          794
+        ],
+        [
+          "vibrato",
+          373
+        ],
+        [
+          "pulse_train",
+          196
+        ]
+      ],
+      "top_regions": [
+        [
+          "periodic_harmonic",
+          1091
+        ],
+        [
+          "smooth_lowpass",
+          204
+        ],
+        [
+          "noise_collapse",
+          165
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.0
+    },
+    {
+      "name": "all agree, CEP unsure",
+      "n_frames": 702,
+      "share": 0.21081081081081082,
+      "purity": 0.9216524216524217,
+      "median_vector": {
+        "conf STFT": 0.995,
+        "conf ACF": 0.989,
+        "conf CEP": 0.123,
+        "STFT/ACF (oct)": -0.0,
+        "STFT/CEP (oct)": -0.016,
+        "ACF/CEP (oct)": -0.013
+      },
+      "gross_error_rate": {
+        "STFT": 0.0,
+        "ACF": 0.037037037037037035,
+        "CEP": 0.21225071225071226
+      },
+      "top_true_failures": [
+        [
+          "none",
+          542
+        ],
+        [
+          "CEP",
+          134
+        ],
+        [
+          "ACF+CEP",
+          15
+        ]
+      ],
+      "top_conditions": [
+        [
+          "noise",
+          256
+        ],
+        [
+          "lowpass",
+          129
+        ],
+        [
+          "pitch_shift",
+          114
+        ],
+        [
+          "lowpass+noise",
+          84
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          492
+        ],
+        [
+          "vibrato",
+          123
+        ],
+        [
+          "glide",
+          79
+        ]
+      ],
+      "top_regions": [
+        [
+          "periodic_harmonic",
+          362
+        ],
+        [
+          "noise_collapse",
+          268
+        ],
+        [
+          "smooth_lowpass",
+          72
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.0
+    },
+    {
+      "name": "CEP an octave low (unsure), others agree",
+      "n_frames": 463,
+      "share": 0.13903903903903903,
+      "purity": 0.3693304535637149,
+      "median_vector": {
+        "conf STFT": 0.874,
+        "conf ACF": 0.758,
+        "conf CEP": 0.043,
+        "STFT/ACF (oct)": -0.002,
+        "STFT/CEP (oct)": 1.068,
+        "ACF/CEP (oct)": 1.117
+      },
+      "gross_error_rate": {
+        "STFT": 0.025974025974025976,
+        "ACF": 0.06060606060606061,
+        "CEP": 0.974025974025974
+      },
+      "top_true_failures": [
+        [
+          "CEP",
+          434
+        ],
+        [
+          "ACF+CEP",
+          16
+        ],
+        [
+          "STFT+ACF",
+          12
+        ]
+      ],
+      "top_conditions": [
+        [
+          "noise",
+          308
+        ],
+        [
+          "lowpass+noise",
+          89
+        ],
+        [
+          "clipping",
+          53
+        ],
+        [
+          "missing_fund",
+          12
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          343
+        ],
+        [
+          "vibrato",
+          59
+        ],
+        [
+          "glide",
+          35
+        ]
+      ],
+      "top_regions": [
+        [
+          "noise_collapse",
+          360
+        ],
+        [
+          "smooth_lowpass",
+          76
+        ],
+        [
+          "periodic_harmonic",
+          27
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.035
+    },
+    {
+      "name": "all agree, none confident",
+      "n_frames": 220,
+      "share": 0.06606606606606606,
+      "purity": 0.3,
+      "median_vector": {
+        "conf STFT": 0.449,
+        "conf ACF": 0.275,
+        "conf CEP": 0.017,
+        "STFT/ACF (oct)": -0.02,
+        "STFT/CEP (oct)": -0.002,
+        "ACF/CEP (oct)": 0.001
+      },
+      "gross_error_rate": {
+        "STFT": 0.0,
+        "ACF": 0.328125,
+        "CEP": 0.4479166666666667
+      },
+      "top_true_failures": [
+        [
+          "none",
+          89
+        ],
+        [
+          "ACF+CEP",
+          46
+        ],
+        [
+          "CEP",
+          40
+        ]
+      ],
+      "top_conditions": [
+        [
+          "noise",
+          192
+        ],
+        [
+          "white_noise",
+          28
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          104
+        ],
+        [
+          "vibrato",
+          44
+        ],
+        [
+          "white_noise",
+          28
+        ]
+      ],
+      "top_regions": [
+        [
+          "noise_collapse",
+          220
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.0
+    },
+    {
+      "name": "STFT an octave high (confident), others agree",
+      "n_frames": 195,
+      "share": 0.05855855855855856,
+      "purity": 0.5743589743589743,
+      "median_vector": {
+        "conf STFT": 0.618,
+        "conf ACF": 0.97,
+        "conf CEP": 1.0,
+        "STFT/ACF (oct)": 0.999,
+        "STFT/CEP (oct)": 0.995,
+        "ACF/CEP (oct)": -0.004
+      },
+      "gross_error_rate": {
+        "STFT": 0.6358974358974359,
+        "ACF": 0.3641025641025641,
+        "CEP": 0.08205128205128205
+      },
+      "top_true_failures": [
+        [
+          "STFT",
+          124
+        ],
+        [
+          "ACF",
+          55
+        ],
+        [
+          "ACF+CEP",
+          16
+        ]
+      ],
+      "top_conditions": [
+        [
+          "missing_fund",
+          123
+        ],
+        [
+          "pitch_shift",
+          45
+        ],
+        [
+          "noise",
+          10
+        ],
+        [
+          "time_stretch",
+          8
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          78
+        ],
+        [
+          "pulse_train",
+          61
+        ],
+        [
+          "vibrato",
+          35
+        ]
+      ],
+      "top_regions": [
+        [
+          "periodic_harmonic",
+          96
+        ],
+        [
+          "noise_collapse",
+          61
+        ],
+        [
+          "smooth_lowpass",
+          20
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.06666666666666667
+    },
+    {
+      "name": "CEP off-pitch (unsure), others agree",
+      "n_frames": 139,
+      "share": 0.04174174174174174,
+      "purity": 0.9496402877697842,
+      "median_vector": {
+        "conf STFT": 0.999,
+        "conf ACF": 0.999,
+        "conf CEP": 0.148,
+        "STFT/ACF (oct)": -0.006,
+        "STFT/CEP (oct)": -1.5,
+        "ACF/CEP (oct)": -1.5
+      },
+      "gross_error_rate": {
+        "STFT": 0.02158273381294964,
+        "ACF": 0.07194244604316546,
+        "CEP": 1.0
+      },
+      "top_true_failures": [
+        [
+          "CEP",
+          129
+        ],
+        [
+          "ACF+CEP",
+          7
+        ],
+        [
+          "STFT+ACF+CEP",
+          3
+        ]
+      ],
+      "top_conditions": [
+        [
+          "lowpass",
+          54
+        ],
+        [
+          "pitch_shift",
+          26
+        ],
+        [
+          "time_stretch",
+          22
+        ],
+        [
+          "noise",
+          12
+        ]
+      ],
+      "top_signals": [
+        [
+          "harmonic",
+          116
+        ],
+        [
+          "vibrato",
+          14
+        ],
+        [
+          "pulse_train",
+          6
+        ]
+      ],
+      "top_regions": [
+        [
+          "periodic_harmonic",
+          120
+        ],
+        [
+          "noise_collapse",
+          13
+        ],
+        [
+          "smooth_lowpass",
+          6
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.02158273381294964
+    },
+    {
+      "name": "scattered, none confident",
+      "n_frames": 86,
+      "share": 0.025825825825825825,
+      "purity": 0.9767441860465116,
+      "median_vector": {
+        "conf STFT": 0.07,
+        "conf ACF": 0.064,
+        "conf CEP": 0.0,
+        "STFT/ACF (oct)": -1.266,
+        "STFT/CEP (oct)": -0.129,
+        "ACF/CEP (oct)": 0.346
+      },
+      "gross_error_rate": {
+        "STFT": 0.0,
+        "ACF": 1.0,
+        "CEP": 0.84
+      },
+      "top_true_failures": [
+        [
+          "unpitched",
+          61
+        ],
+        [
+          "ACF+CEP",
+          21
+        ],
+        [
+          "ACF",
+          4
+        ]
+      ],
+      "top_conditions": [
+        [
+          "white_noise",
+          61
+        ],
+        [
+          "noise",
+          25
+        ]
+      ],
+      "top_signals": [
+        [
+          "white_noise",
+          61
+        ],
+        [
+          "harmonic",
+          17
+        ],
+        [
+          "pulse_train",
+          8
+        ]
+      ],
+      "top_regions": [
+        [
+          "noise_collapse",
+          86
+        ]
+      ],
+      "consensus_gross_error_when_answering": 0.0
+    }
+  ],
+  "co_failure": {
+    "STFT+ACF": {
+      "both_wrong": 0.004629629629629629,
+      "if_independent": 0.0029740131077579633,
+      "lift": 1.5566944266495837,
+      "by_family": {
+        "clean": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "clipping": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "lowpass": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "lowpass+noise": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "missing_fund": {
+          "both_wrong": 0.08333333333333333,
+          "lift": 1.111111111111111
+        },
+        "noise": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "pitch_shift": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        },
+        "time_stretch": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        }
+      }
+    },
+    "STFT+CEP": {
+      "both_wrong": 0.000925925925925926,
+      "if_independent": 0.011522633744855966,
+      "lift": 0.08035714285714286,
+      "by_family": {
+        "clean": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "clipping": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "lowpass": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "lowpass+noise": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "missing_fund": {
+          "both_wrong": 0.016666666666666666,
+          "lift": 0.44444444444444436
+        },
+        "noise": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "pitch_shift": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        },
+        "time_stretch": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        }
+      }
+    },
+    "ACF+CEP": {
+      "both_wrong": 0.03827160493827161,
+      "if_independent": 0.018353909465020576,
+      "lift": 2.085201793721973,
+      "by_family": {
+        "clean": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        },
+        "clipping": {
+          "both_wrong": 0.016666666666666666,
+          "lift": 6.101694915254237
+        },
+        "lowpass": {
+          "both_wrong": 0.0,
+          "lift": null
+        },
+        "lowpass+noise": {
+          "both_wrong": 0.10555555555555556,
+          "lift": 0.8278867102396514
+        },
+        "missing_fund": {
+          "both_wrong": 0.016666666666666666,
+          "lift": 3.3333333333333326
+        },
+        "noise": {
+          "both_wrong": 0.10444444444444445,
+          "lift": 1.4185110663983904
+        },
+        "pitch_shift": {
+          "both_wrong": 0.003703703703703704,
+          "lift": 0.4330392943063352
+        },
+        "time_stretch": {
+          "both_wrong": 0.0,
+          "lift": 0.0
+        }
+      }
+    }
+  },
+  "all_three_wrong": 0.000925925925925926,
+  "state_map_comparison": {
+    "nmi_true_failure_vs_disagreement_patterns": 0.5459312734455454,
+    "nmi_true_failure_vs_disagreement_clusters": 0.536849866628462,
+    "nmi_true_failure_vs_engine_regions": 0.16639733392678382,
+    "nmi_true_failure_vs_state_kmeans_same_k": 0.2229074007443604,
+    "nmi_disagreement_patterns_vs_engine_regions": 0.205988627734922,
+    "pattern_from_z1z2_knn_accuracy": 0.654054054054054,
+    "pattern_majority_baseline": 0.45795795795795796
+  }
+}

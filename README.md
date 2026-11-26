@@ -693,6 +693,56 @@ The first test of the project's core principle ([docs/VISION.md](docs/VISION.md)
 
 ---
 
+### Phase 23 — Patterns in Disagreement (Exp 043)
+
+#### Exp 043 — Which Lenses Fail Together, and When?
+Exp 042 showed that disagreement warns when a lens is blind. This experiment asks whether the disagreement itself has structure (issue #3, [docs/VISION.md](docs/VISION.md) roadmap step 2).
+
+- **Disagreement vector** (6 inspectable numbers per frame): the confidence of STFT, ACF and Cepstrum, plus the signed pitch ratio of each pair in octaves (`log2(f_a / f_b)`, clipped to ±1.5; +1 means *a* is an octave above *b*).
+- **Method**: k-means on the 3,240 pitched frames of Exp 042 plus its 90 white-noise frames (k = 9, chosen by silhouette 0.63). Each cluster gets a rule-based name from its median vector, and clusters with the same name are merged. **Purity** = share of a pattern's frames whose own vector earns the same name. Each pattern is then checked against the true pitch: which lenses are actually wrong in it, and which conditions produce it.
+
+**Discovered patterns:**
+
+| Pattern (share of frames) | Purity | Actually wrong (STFT / ACF / CEP) | Mainly produced by | What it means |
+|---|---|---|---|---|
+| All agree, all confident (45.8%) | 100% | 0% / 0% / 0% | clean, clipping, low-pass, pitch shift, time stretch | Trustworthy: not one gross error |
+| All agree, CEP unsure (21.1%) | 92% | 0% / 4% / 21% | noise, low-pass + noise | Cepstrum losing its grip; others still right |
+| CEP an octave low, others agree (13.9%) | 37% | 3% / 6% / 97% | noise (34% of noise frames), low-pass + noise (49%) | Really "cepstrum wrong, others agree": only 37% are exact octaves, the rest are other off-pitch cepstrum errors |
+| All agree, none confident (6.6%) | 30% | 0% / 33% / 45% | strong noise, white noise | Mixed low-confidence frames. Agreement without confidence is **not** evidence. |
+| STFT an octave high, others agree (5.9%) | 57% | 64% / 36% / 8% | missing fundamental (68% of those frames) | Really "STFT and ACF an octave apart": usually STFT jumps up to the 2nd harmonic, sometimes ACF drops down; Cepstrum is the tie-breaker |
+| CEP off-pitch, others agree (4.2%) | 95% | 2% / 7% / 100% | low-pass, pitch shift, time stretch | Cepstrum fails on sparse or processed harmonics |
+| Scattered, none confident (2.6%) | 98% | 0% / 100% / 84% | white noise (68% of it) | All lenses blind: the correct answer is "no pitch" |
+
+**Which lenses fail together** (pitched frames, both wrong vs. expected if independent):
+- **ACF + Cepstrum** fail together **2.1× more often than chance** (3.8% vs 1.8%), most strongly under clipping (6.1×) and missing fundamental (3.3×). They share a blind spot, which makes sense because both measure periodicity.
+- **STFT + Cepstrum** almost never fail together (**0.08×**, 0.09% vs 1.15%). They are the most complementary pair.
+- **STFT + ACF**: 1.6× (0.5% vs 0.3%). All three wrong at once: 0.09% of frames.
+
+**Relation to the existing state map** (engine regions and z₁/z₂, Exp 025–031):
+
+| How much each partition tells us about the true failure pattern (NMI) | |
+|---|---|
+| Disagreement patterns | **0.546** |
+| k-means on (z₁, z₂) with the same k | 0.223 |
+| Engine regions | 0.166 |
+
+- The disagreement patterns and engine regions overlap only weakly (NMI 0.206). A pattern can be predicted from (z₁, z₂) 65% of the time (k-NN), against 46% by always guessing the most common one. So the state map holds part of the information but misses most of it.
+- **On the state map, the error patterns pile up in the `noise_collapse` region**, together with "all agree, all confident" frames from the same region. The input-only state map cannot tell them apart; the disagreement pattern can.
+
+**Key findings:**
+1. Disagreement is structured. About two-thirds of frames fall into two "all agree" patterns where the consensus answer is never wrong. In the second one, the unsure cepstrum is wrong 21% of the time, but it is outvoted. The rest falls into a handful of named failure patterns, each with a clear culprit and a clear cause.
+2. Lens failures are not independent. ACF and Cepstrum share a periodicity blind spot, while STFT and Cepstrum almost never fail together. That makes STFT + Cepstrum the most valuable pair to compare.
+3. The patterns explain 2.5× more of the true failure structure than the existing state space does (NMI 0.546 vs 0.223). This is the clearest evidence yet that comparing lenses holds information the input-only state map lacks.
+4. Agreement is only evidence when the lenses are also confident. Low-confidence agreement (white noise, very low SNR) is a separate pattern with a high error rate.
+5. Limits: 3 of the 7 names are loose (purity 30–57%), so the names describe the cluster's typical frame, not every frame. There are only three lenses, and everything is synthetic. The next steps are more lenses (CQT, wavelet) and real recordings (issue #7).
+
+- **Run**: `.venv/bin/python src/experiments/exp043_disagreement_patterns.py` (about 20 s)
+- **Outputs**: [results/exp043_disagreement_patterns.png](results/exp043_disagreement_patterns.png), [results/exp043_summary.json](results/exp043_summary.json)
+
+![Exp 043](results/exp043_disagreement_patterns.png)
+
+---
+
 
 ## Listen Tests
 
@@ -821,6 +871,9 @@ pip install -r requirements.txt
 
 # Run the disagreement-as-information experiment
 .venv/bin/python3 src/experiments/exp042_disagreement_prediction.py
+
+# Run the disagreement-pattern discovery experiment
+.venv/bin/python3 src/experiments/exp043_disagreement_patterns.py
 
 # Open listen tests
 open listen_test/index.html
