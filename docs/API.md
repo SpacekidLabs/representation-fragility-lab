@@ -4,7 +4,9 @@ Reference for the audio library. Overview in the [README](../README.md), experim
 
 The current Python library is the first practical application of the idea, for audio only. It reads physical descriptors of each audio frame, places the frame on a learned 2D state map, predicts which representations are blind there, and recommends DSP parameters.
 
-> **Known gap:** this library does not yet compare representations side by side or learn from their disagreements. Moving that comparison to the centre is the next step (see [docs/VISION.md](VISION.md#6-roadmap-direction)).
+It also runs STFT, ACF and Cepstrum side by side on every frame and reports where they disagree (`state.disagreement`, on by default; see [Cross-representation disagreement](#cross-representation-disagreement)).
+
+> **Known gap:** the library compares representations but does not yet learn from their disagreements. The pattern model exists only as an interface in [`src/core`](../src/core/interfaces.py) and in the Exp 043 script, and the recommended parameters still come from the state map alone, not from the disagreement. See [VISION.md](VISION.md#6-roadmap-direction).
 
 ## Install
 
