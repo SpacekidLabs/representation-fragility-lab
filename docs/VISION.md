@@ -1,0 +1,141 @@
+# Vision — Multi-Representation Blind-Spot Intelligence
+
+> **Every representation of a signal is a lens with blind spots.
+> Look through many lenses at once, compare what they see, and the
+> disagreements themselves reveal what the signal really is.**
+
+This document is the north star of the project. Everything in this repository —
+experiments, the framework, the plugins — should be read as a step toward it.
+
+---
+
+## 1. The Goal
+
+Build a **medium-agnostic, multi-representation system** that:
+
+1. **Represents** any signal — audio, image, video, text, sensor data — through
+   several complementary representations at the same time.
+2. **Detects blind spots** — knows, for each representation, where and when it
+   is unreliable on *this* signal.
+3. **Compares** the representations against each other. Agreement is evidence.
+   Disagreement is information: it locates a blind spot and tells us what kind
+   it is.
+4. **Finds patterns** in those agreements and disagreements, learning a
+   structured map of how and why representations fail.
+5. **Understands the signal better** than any single representation can, by
+   combining the lenses according to what each one can and cannot see.
+
+Audio is the **first medium**, not the destination.
+
+---
+
+## 2. Core Principles
+
+| Principle | Meaning |
+|---|---|
+| **No representation is complete** | Every transform makes assumptions (stationarity, periodicity, locality, smoothness…). Where an assumption breaks, the representation is blind. |
+| **Failures are structured, not random** | Each representation has a specific, repeatable failure signature. Blind spots can be mapped, predicted and deliberately probed. |
+| **Disagreement is signal** | When representations disagree, that difference carries information about the signal that none of them carries alone. |
+| **Patterns in failure are knowledge** | The geometry of where representations fail (and fail together) is itself a description of the signal's state. |
+| **Self-awareness over guessing** | A system that knows when it is blind (and abstains, holds, or reroutes) beats one that always answers. |
+| **Medium-agnostic core** | The comparison and pattern-finding machinery must not depend on audio. Each medium plugs in its own representations. |
+
+---
+
+## 3. The Loop
+
+```
+                 ┌──────────────────────────────────────────┐
+  Signal  ──►    │  Representation set (per medium)         │
+ (any medium)    │  R1   R2   R3   …   Rn                    │
+                 └──────────────┬───────────────────────────┘
+                                ▼
+                 ┌──────────────────────────────────────────┐
+                 │  Blind-spot detection                    │
+                 │  per-representation confidence / safety  │
+                 └──────────────┬───────────────────────────┘
+                                ▼
+                 ┌──────────────────────────────────────────┐
+                 │  Cross-representation comparison         │
+                 │  agreement / disagreement maps           │
+                 └──────────────┬───────────────────────────┘
+                                ▼
+                 ┌──────────────────────────────────────────┐
+                 │  Pattern discovery                       │
+                 │  structure in failures & disagreements   │
+                 └──────────────┬───────────────────────────┘
+                                ▼
+                 ┌──────────────────────────────────────────┐
+                 │  Understanding & action                  │
+                 │  fused estimate · signal state ·         │
+                 │  routing · abstain when blind            │
+                 └──────────────────────────────────────────┘
+```
+
+---
+
+## 4. Vocabulary
+
+- **Medium** — a kind of signal: audio, image, video, text, time-series…
+- **Representation** — a transform of the signal that exposes some structure
+  (e.g. STFT, autocorrelation, cepstrum, wavelets for audio; pixels, DCT/FFT,
+  wavelets, edges, learned embeddings for images).
+- **Blind spot** — a region of signal conditions where a representation's
+  assumptions break and its output becomes unreliable.
+- **Disagreement** — a measurable difference between what two or more
+  representations say about the same signal.
+- **Failure / state map** — the learned, structured space in which signals,
+  blind spots and disagreements are organised.
+
+---
+
+## 5. Where We Are — Audio as Medium #1
+
+The 41 audio experiments are the proof of concept for this vision:
+
+| Vision component | Status in audio | Evidence |
+|---|---|---|
+| Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel | Exp 001–013, 028, 031 |
+| Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
+| Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens | Exp 015–016 |
+| Comparison & fusion | 🟡 Learned fusion weights across representations, but no explicit disagreement model | Exp 014, 017–018 |
+| Pattern discovery | 🟡 Failures form a structured low-dimensional manifold | Exp 025–031 |
+| Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
+| Medium-agnostic core | ❌ Everything is audio-specific | — |
+
+**Honest gap:** the current framework (`src/framework`) measures physical
+descriptors of the raw signal and recommends parameters. It does **not** yet
+run representations side by side and learn from their disagreements. The
+comparison between lenses — the heart of the vision — must move back to the
+centre of the architecture.
+
+---
+
+## 6. Roadmap Direction
+
+High-level steps; concrete tickets will be opened against these.
+
+1. **Make disagreement first-class (audio).** Run representations in parallel,
+   compute explicit agreement/disagreement measures, and show that
+   disagreement predicts blind spots and errors.
+2. **Pattern discovery on disagreement.** Learn the structure of
+   disagreements (which lenses fail together, under which conditions) instead
+   of only raw signal descriptors.
+3. **Medium-agnostic core.** Define abstract interfaces — `Medium`,
+   `Representation`, `BlindSpotDetector`, `Comparator`, `PatternModel` — with
+   audio as the first implementation.
+4. **Second medium.** Implement images (or another medium) on the same core
+   to prove the idea generalises beyond audio.
+5. **Real-world validation.** Move from mostly synthetic signals to real
+   datasets with ground truth, in every medium.
+6. **Applications.** Keep shipping practical tools (e.g. the adaptive tuner)
+   as demonstrations of the core, not as the core itself.
+
+---
+
+## 7. Non-Goals
+
+- Not a single "best representation" — the point is that no single one exists.
+- Not an audio-only parameter recommender — that is one application.
+- Not a black-box model that hides *why* it trusts a representation —
+  blind spots and disagreements must stay inspectable.

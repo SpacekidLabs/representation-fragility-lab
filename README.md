@@ -1,6 +1,30 @@
-# Representation Intelligence
+# Representation Fragility Lab
 
-A lightweight, zero-shot Python library that dynamically guides DSP parameters using the **Universal Audio State Space**.
+> **Every representation of a signal is a lens with blind spots.
+> Look through many lenses at once, compare what they see, and the
+> disagreements themselves reveal what the signal really is.**
+
+## 🧭 The Goal
+
+We are building a **medium-agnostic, multi-representation system** that:
+
+1. **Represents** any signal (audio, image, video, text, sensor data) through several complementary representations at once.
+2. **Detects blind spots**: it knows where and when each representation is unreliable on *this* signal.
+3. **Compares** the representations. Agreement is evidence; **disagreement is information** that locates a blind spot and tells us what kind it is.
+4. **Finds patterns** in those agreements and disagreements, learning a structured map of how and why representations fail.
+5. **Understands the signal better** than any single representation can.
+
+**Audio is the first medium, not the destination.** The 41 experiments below are the audio proof of concept.
+
+➡️ **Read the full vision, current status and roadmap direction in [docs/VISION.md](docs/VISION.md).**
+
+---
+
+## 🎧 Audio Reference Implementation: `representation_intelligence`
+
+The current Python library is the first practical application of the idea, for audio only. It reads physical descriptors of each audio frame, places the frame on a learned 2D state map, predicts which representations are blind there, and recommends DSP parameters.
+
+> **Known gap:** this library does not yet compare representations side by side or learn from their disagreements. Moving that comparison to the centre is the next step (see [docs/VISION.md](docs/VISION.md#6-roadmap-direction)).
 
 [![PyPI version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://github.com/SpacekidLabs/representation-fragility-lab)
 
@@ -91,7 +115,7 @@ denoised_frame = scipy.signal.wiener(frame, mysize=mysize, noise=noise_power)
 
 ## 🔬 The Evidence: 41 Experiments
 
-The framework is backed by a 41-experiment research database proving the **Local State Hypothesis**: *DSP failures are governed by the physical state of the signal.*
+The 41 experiments are the audio proof of concept for the goal above: mapping each representation's blind spots, showing that failures are structured rather than random, and turning that knowledge into self-aware DSP. Along the way they support the **Local State Hypothesis**: *DSP failures are governed by the physical state of the signal.*
 
 We have structured the research into five coherent arcs:
 
@@ -118,7 +142,7 @@ representation-fragility-lab/
 │   └── *.png             # Visualisation plots for each experiment
 ├── listen_test/          # Listen-test HTML players + rendered audio
 ├── data/                 # Reserved for future datasets
-├── docs/                 # Reserved for future documentation
+├── docs/                 # VISION.md (project goal), taxonomy, research issue notes
 ├── requirements.txt
 └── README.md
 ```
