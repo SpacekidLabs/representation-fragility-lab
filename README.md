@@ -144,6 +144,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](docs/VISION.md).
 
 ---
 
@@ -638,6 +639,44 @@ Performs zero-shot external validation on five completely external algorithms fr
 
 ---
 
+### Phase 22 — Disagreement as Information (Exp 042)
+
+#### Exp 042 — Does Disagreement Predict Blind Spots?
+The first test of the project's core principle ([docs/VISION.md](docs/VISION.md)): *disagreement between representations is information*. STFT, ACF and Cepstrum run side by side on each frame (`src/framework/disagreement.py`, issue #1). For each lens we ask: **can we tell in advance that it is about to make a gross pitch error (> 50 cents)?**
+
+- **Data**: 1,404 synthetic frames with known f0 (6 pitches × 6 harmonic counts from a pure sine to 20 harmonics × 13 conditions × 3 seeds) at 22.05 kHz. Conditions: clean, noise (20 to −5 dB SNR), low-pass (1.5/2.5/4.5 × f0), missing fundamental, clipping (×3, ×10), low-pass + noise.
+- **Warning signals compared**: the current framework's descriptor-only state space (`1 − assumption` score, and a model on z₁/z₂), the lens's own confidence, and the new cross-lens disagreement (`divergence`, and a model on disagreement features). Models are logistic regressions, cross-validated so every test signal is unseen.
+
+**ROC AUC for predicting a gross error (0.5 = chance):**
+
+| Lens | Gross error rate | Assumption (existing) | State model (existing) | Own confidence | Divergence (new) | Disagreement model (new) | Combined |
+|---|---|---|---|---|---|---|---|
+| STFT | 5.3% | 0.408 | 0.890 | 0.835 | 0.974 | 0.986 | **0.997** |
+| ACF | 7.4% | 0.816 | 0.801 | 0.860 | 0.724 | **0.911** | 0.905 |
+| Cepstrum | 38.1% | 0.784 | 0.796 | 0.805 | 0.943 | 0.982 | **0.988** |
+
+**By condition** (all lenses pooled, AUC): divergence beats the existing assumption score on clean (1.000 vs 0.911), clipping (1.000 vs 0.886), low-pass (1.000 vs 0.879), noise (0.848 vs 0.767) and especially missing fundamental (0.901 vs 0.296, where the existing score is worse than chance). It is **worse** on low-pass + noise (0.796 vs 0.843).
+
+**Better answers, not just better warnings** (gross error rate when answering):
+
+| STFT | ACF | Cepstrum | Engine-routed lens | **Disagreement consensus** | Oracle best lens |
+|---|---|---|---|---|---|
+| 5.3% | 7.4% | 38.1% | 10.5% | **1.2%** (abstains on 7.7%) | 0.2% |
+
+**Key findings:**
+1. Disagreement is a strong warning signal. A model on disagreement features predicts gross errors with AUC 0.91–0.99 for all three lenses, beating both the existing state-space predictors and each lens's own confidence.
+2. Divergence alone, with no training, is excellent for STFT (0.974) and Cepstrum (0.943) but weak for ACF (0.724), where ACF's own confidence is better (0.860). ACF errors often come with mild disagreement, so the full disagreement model is needed there.
+3. The existing framework's assumption score fails badly in some places: it is below chance for STFT (0.408) and for missing-fundamental signals (0.296). Disagreement does not have this failure.
+4. Comparing lenses gives a better answer. The confidence-weighted consensus is wrong 1.2% of the time when it answers, versus 5.3% for the best single lens and 10.5% for the lens the engine would route to. The cost is declining to answer on 7.7% of frames: exactly the 108 frames at −5 dB SNR, where no lens is confident. Counting those abstentions as errors, the consensus is wrong 8.8% of the time, still better than the engine-routed lens (10.5%).
+5. Limits: all signals are synthetic and harmonic, the error threshold and confidence calibrations are hand-set, and disagreement is weaker than the existing state space when filtering and noise combine. Validation on real recordings is tracked in issue #7.
+
+- **Run**: `.venv/bin/python src/experiments/exp042_disagreement_prediction.py`
+- **Outputs**: [results/exp042_disagreement_prediction.png](results/exp042_disagreement_prediction.png), [results/exp042_summary.json](results/exp042_summary.json)
+
+![Exp 042](results/exp042_disagreement_prediction.png)
+
+---
+
 
 ## Listen Tests
 
@@ -763,6 +802,9 @@ pip install -r requirements.txt
 
 # Run the external validation challenge
 .venv/bin/python3 src/experiments/exp041_external_validation.py
+
+# Run the disagreement-as-information experiment
+.venv/bin/python3 src/experiments/exp042_disagreement_prediction.py
 
 # Open listen tests
 open listen_test/index.html
