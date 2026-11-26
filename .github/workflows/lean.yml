@@ -30,13 +30,13 @@ jobs:
           printf 'theorem guard_test : False := sorry\n' > "$RUNNER_TEMP/Guard.lean"
           lake env lean "$RUNNER_TEMP/Guard.lean" > guard.log 2>&1 || true
           cat guard.log
-          grep -q "declaration uses 'sorry'" guard.log
+          grep -q "declaration uses .sorry." guard.log
 
       - name: Build (fails on any warning, including sorry)
         run: |
           set -o pipefail
           lake build --wfail 2>&1 | tee build.log
-          if grep -q "declaration uses 'sorry'" build.log; then
+          if grep -q "declaration uses .sorry." build.log; then
             echo "::error::A declaration uses sorry; proofs on main must be complete."
             exit 1
           fi
