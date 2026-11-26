@@ -19,3 +19,6 @@ data/processed/
 # Local audio and listen-test pages, not tracked (issue #18)
 Clean_vocal.wav
 listen_test/
+
+# Lean build output (Mathlib cache, ~5 GB)
+lean/.lake/

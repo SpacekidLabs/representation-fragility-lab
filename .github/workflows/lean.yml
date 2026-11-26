@@ -1,0 +1,42 @@
+name: Lean
+
+on:
+  push:
+    paths: ["lean/**", ".github/workflows/lean.yml"]
+  pull_request:
+    paths: ["lean/**", ".github/workflows/lean.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lean
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan (Lean version manager)
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Fetch the Mathlib build cache
+        run: lake exe cache get
+
+      - name: Check that the sorry guard detects a sorry
+        run: |
+          printf 'theorem guard_test : False := sorry\n' > "$RUNNER_TEMP/Guard.lean"
+          lake env lean "$RUNNER_TEMP/Guard.lean" > guard.log 2>&1 || true
+          cat guard.log
+          grep -q "declaration uses 'sorry'" guard.log
+
+      - name: Build (fails on any warning, including sorry)
+        run: |
+          set -o pipefail
+          lake build --wfail 2>&1 | tee build.log
+          if grep -q "declaration uses 'sorry'" build.log; then
+            echo "::error::A declaration uses sorry; proofs on main must be complete."
+            exit 1
+          fi
