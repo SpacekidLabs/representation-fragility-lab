@@ -60,9 +60,9 @@ class AdaptiveOnsetDetector:
             # Downsample to 22.05kHz for engine analyze consistency
             if sr != 22050:
                 frame_22k = scipy.signal.resample(frame, frame_len // 2)
-                state = self.engine.analyze(frame_22k, 22050)
+                state = self.engine.analyze(frame_22k, 22050, compute_disagreement=False)
             else:
-                state = self.engine.analyze(frame, sr)
+                state = self.engine.analyze(frame, sr, compute_disagreement=False)
                 
             # Extract fusion weights from recommended_parameters
             weights = state.recommended_parameters["onset_detection"]["fusion_weights"]

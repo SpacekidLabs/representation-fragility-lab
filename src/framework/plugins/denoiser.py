@@ -74,9 +74,9 @@ class AdaptiveDenoiser:
         # Downsample frame to 22.05kHz to match engine weights
         if sr != 22050:
             frame_22k = scipy.signal.resample(time_frame, nperseg // 2)
-            state = self.engine.analyze(frame_22k, 22050)
+            state = self.engine.analyze(frame_22k, 22050, compute_disagreement=False)
         else:
-            state = self.engine.analyze(time_frame, sr)
+            state = self.engine.analyze(time_frame, sr, compute_disagreement=False)
             
         # Extract recommended alpha and beta
         params = state.recommended_parameters["denoising"]

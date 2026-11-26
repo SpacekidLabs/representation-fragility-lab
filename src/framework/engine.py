@@ -7,9 +7,11 @@ assumption safety predictions, and DSP routing recommendations.
 """
 
 from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 from .descriptors import extract_physical_descriptors
+from .disagreement import DisagreementReport, analyze_disagreement
 from .weights import MU, SIGMA, VT, W_STFT, W_ACF, W_CEP, W_CQT, W_CWT
 
 
@@ -42,6 +44,7 @@ class FrameworkState:
     region: str
     assumptions: dict[str, float]
     recommendations: dict
+    disagreement: Optional[DisagreementReport] = None
 
     @property
     def coordinates(self) -> tuple[float, float]:
@@ -110,7 +113,9 @@ class FrameworkState:
                 f"  coordinate={self.coordinate},\n"
                 f"  region='{self.region}',\n"
                 f"  assumptions={self.assumptions},\n"
-                f"  recommendations={self.recommendations}\n"
+                f"  recommendations={self.recommendations},\n"
+                f"  disagreement_overall={self.disagreement.overall if self.disagreement else None},\n"
+                f"  disagreement_outlier={self.disagreement.outlier if self.disagreement else None}\n"
                 f")")
 
 
@@ -133,13 +138,16 @@ class RepresentationIntelligenceEngine:
             "wavelet": W_CWT
         }
 
-    def analyze(self, frame: np.ndarray, sr: int) -> FrameworkState:
+    def analyze(self, frame: np.ndarray, sr: int, compute_disagreement: bool = True) -> FrameworkState:
         """
         Analyzes a single frame of audio.
         
         Parameters:
             frame: np.ndarray, 1D array of time-domain audio samples.
             sr: int, sample rate of the audio.
+            compute_disagreement: bool, also run STFT, ACF and Cepstrum side by
+                side and attach their cross-representation disagreement as
+                ``state.disagreement`` (default True).
             
         Returns:
             FrameworkState: The structured state object with coordinates and recommendations.
@@ -195,9 +203,13 @@ class RepresentationIntelligenceEngine:
             "primary_representation": primary_representation,
         }
 
+        # 6. Cross-representation disagreement (see docs/VISION.md)
+        disagreement = analyze_disagreement(frame, sr) if compute_disagreement else None
+
         return FrameworkState(
             coordinate=(z1, z2),
             region=region,
             assumptions=assumptions,
-            recommendations=recommendations
+            recommendations=recommendations,
+            disagreement=disagreement,
         )

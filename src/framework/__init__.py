@@ -7,6 +7,13 @@ optimal representations and window sizes.
 """
 
 from .engine import RepresentationIntelligenceEngine, FrameworkState
+from .disagreement import (
+    DisagreementReport,
+    PairDisagreement,
+    RepresentationReading,
+    analyze_disagreement,
+    compare_readings,
+)
 from .plugins.denoiser import AdaptiveDenoiser
 from .plugins.pitch_tracker import AdaptivePitchTracker
 from .plugins.onset_detector import AdaptiveOnsetDetector
@@ -14,6 +21,11 @@ from .plugins.onset_detector import AdaptiveOnsetDetector
 __all__ = [
     "RepresentationIntelligenceEngine",
     "FrameworkState",
+    "DisagreementReport",
+    "PairDisagreement",
+    "RepresentationReading",
+    "analyze_disagreement",
+    "compare_readings",
     "AdaptiveDenoiser",
     "AdaptivePitchTracker",
     "AdaptiveOnsetDetector",

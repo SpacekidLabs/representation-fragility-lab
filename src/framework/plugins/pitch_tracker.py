@@ -57,9 +57,9 @@ class AdaptivePitchTracker:
             # Downsample to 22.05kHz for engine analyze consistency
             if sr != 22050:
                 f_frame_22k = scipy.signal.resample(f_frame, f_win // 2)
-                state = self.engine.analyze(f_frame_22k, 22050)
+                state = self.engine.analyze(f_frame_22k, 22050, compute_disagreement=False)
             else:
-                state = self.engine.analyze(f_frame, sr)
+                state = self.engine.analyze(f_frame, sr, compute_disagreement=False)
                 
             # Retrieve recommendations from engine
             win_size = state.recommended_window

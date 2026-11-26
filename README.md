@@ -63,6 +63,26 @@ The `engine.analyze(frame, sr)` call returns a `FrameworkState` object containin
 | `state.safe_representations` | `list[str]` | List of valid representation algorithms (from `stft`, `acf`, `cepstrum`, `cqt`, `wavelet`). |
 | `state.recommended_window` | `int` | Optimal window size (1024, 2048, or 4096 samples). |
 | `state.recommended_parameters`| `dict` | Pre-calibrated parameters for `denoising`, `pitch_tracking`, and `onset_detection`. |
+| `state.disagreement` | `DisagreementReport` | Cross-representation disagreement: STFT, ACF and Cepstrum run side by side on the frame (see below). `None` when `analyze(..., compute_disagreement=False)`. |
+
+### Cross-Representation Disagreement
+
+The core idea of the project: run several lenses on the same frame and treat their disagreement as information. Each representation is reduced to a shared form (`f0`, `confidence`, `voiced`) and every pair is compared.
+
+```python
+from representation_intelligence import analyze_disagreement
+
+report = analyze_disagreement(frame, sr=16000)      # or engine.analyze(...).disagreement
+
+report.readings["cepstrum"]          # RepresentationReading(name, f0, confidence) + .voiced
+report.pair("acf", "cepstrum")       # cents, octave_related, pitch_term, confidence_gap, voicing_conflict, score
+report.overall                       # mean pair score, 0 (all agree) .. 1
+report.divergence                    # per representation: how much it disagrees with the others
+report.outlier                       # the lens most likely in a blind spot, or None
+report.consensus_f0                  # confidence-weighted median of the voiced readings
+```
+
+Pair score = `0.5 * min(cents / 1200, 1) + 0.5 * |confidence_a - confidence_b|`. Definitions and calibration notes are in [`src/framework/disagreement.py`](src/framework/disagreement.py); tests in [`tests/test_disagreement.py`](tests/test_disagreement.py) (`pytest tests`).
 
 ---
 
