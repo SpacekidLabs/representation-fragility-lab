@@ -10,6 +10,10 @@ import scipy.signal
 import librosa
 from ..engine import RepresentationIntelligenceEngine
 
+# Consecutive, mutually consistent raw estimates (~70 ms at hop 512 / 22.05 kHz)
+# needed to override the continuity / octave constraints.
+REACQUIRE_FRAMES = 3
+
 class AdaptivePitchTracker:
     """
     State-Space Adaptive YIN Pitch Tracker.
@@ -41,9 +45,13 @@ class AdaptivePitchTracker:
         N_frames = len(hop_indices)
         
         pitches = np.zeros(N_frames)
-        last_valid_pitch = 220.0  # Safe initial anchor
+        # No made-up starting anchor: continuity constraints only apply once a
+        # real pitch has been tracked (a fixed 220 Hz anchor kept the tracker
+        # stuck whenever the signal started more than 3 semitones away; #10).
+        last_valid_pitch = 0.0
         pitch_history = [0.0] * 5
         unvoiced_consecutive_frames = 0
+        override_run = []  # consecutive raw estimates overridden by Step 1
         
         for idx, hop_idx in enumerate(hop_indices):
             center_idx = hop_idx
@@ -85,6 +93,7 @@ class AdaptivePitchTracker:
                 pitch = 0.0
 
             # Step 1: Octave correction and continuity constraint relative to last_valid_pitch
+            raw_pitch = pitch
             if last_valid_pitch > 0.0 and pitch > 0.0:
                 ratio = pitch / last_valid_pitch
                 
@@ -107,6 +116,22 @@ class AdaptivePitchTracker:
                 min_ratio = 2**(-3/12)
                 if ratio > max_ratio or ratio < min_ratio:
                     pitch = last_valid_pitch
+
+                # Re-acquisition: if Step 1 keeps overriding the raw estimate and
+                # the raw estimates agree with each other, the pitch really moved
+                # (note change, octave leap, new phrase). Accept it instead of
+                # holding the old pitch forever.
+                if abs(12.0 * np.log2(pitch / raw_pitch)) > 1.0:
+                    if override_run and abs(12.0 * np.log2(raw_pitch / override_run[-1])) < 1.0:
+                        override_run.append(raw_pitch)
+                    else:
+                        override_run = [raw_pitch]
+                    if len(override_run) >= REACQUIRE_FRAMES:
+                        pitch = raw_pitch
+                        pitch_history = [0.0] * 5  # restart the median filter at the new pitch
+                        override_run = []
+                else:
+                    override_run = []
 
             # Step 2: Determine raw voicing state
             raw_is_voiced = (pitch > fmin and pitch < fmax)
@@ -144,8 +169,11 @@ class AdaptivePitchTracker:
                     is_voiced = True
                     pitch = last_valid_pitch
                 else:
-                    # Reset pitch history after full release
+                    # Full release: reset the median filter and forget the anchor,
+                    # so the next phrase is tracked from scratch.
                     pitch_history = [0.0] * 5
+                    last_valid_pitch = 0.0
+                    override_run = []
             
             pitches[idx] = pitch if is_voiced else 0.0
             

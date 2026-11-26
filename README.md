@@ -618,7 +618,7 @@ Structures the core code into a production-ready package (Framework V1) with cle
 * **API Validation**: Asserts that `coordinates`, `safe_representations`, `recommended_window`, `recommended_latency`, and `recommended_parameters` are correctly typed and returned.
 * **Metrics Verification**:
     * **AdaptiveDenoiser**: SegSNR = 8.58 dB (vs 8.21 dB static), LSD = 18.19 dB (vs 18.53 dB static).
-    * **AdaptivePitchTracker**: GER = 0.00% (vs 0.00% static baseline; no regressions).
+    * **AdaptivePitchTracker**: GER = 0.78% (vs 0.00% static baseline): 1 of 129 frames, where the 5-frame median filter lags a fast 6 Hz, ±30 Hz vibrato swing (20.3% error against a 20% tolerance). The original V1 tracker scored 0.00%. Commit 635e0e6 added continuity / octave filtering that got stuck at a fixed 220 Hz starting anchor (GER 17.83%, issue #10). The fix removes the anchor and re-acquires the pitch when 3 consecutive consistent estimates disagree with the held one. On `Clean_vocal.wav`, compared with pYIN: the original tracker had 0% gross errors and 6 steps > 1 semitone; 635e0e6 was stuck (100% gross errors); the fixed tracker has 3.9% gross errors (a 3-frame re-acquisition lag after a 5-semitone note change) and 2 steps > 1 semitone.
     * **AdaptiveOnsetDetector**: F1 Score = 0.471 (vs 0.421 static flux baseline; +0.05 F1 improvement).
 * **Dashboard Plot**: Saved to [exp039_framework_v1.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp039_framework_v1.png).
 
