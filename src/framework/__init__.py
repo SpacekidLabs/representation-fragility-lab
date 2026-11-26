@@ -7,6 +7,12 @@ optimal representations and window sizes.
 """
 
 from .engine import RepresentationIntelligenceEngine, FrameworkState
+from .audio import (
+    ALL_LENSES,
+    AudioFrame,
+    PitchComparator,
+    make_audio_analyzer,
+)
 from .disagreement import (
     DisagreementReport,
     PairDisagreement,
@@ -21,6 +27,10 @@ from .plugins.onset_detector import AdaptiveOnsetDetector
 __all__ = [
     "RepresentationIntelligenceEngine",
     "FrameworkState",
+    "ALL_LENSES",
+    "AudioFrame",
+    "PitchComparator",
+    "make_audio_analyzer",
     "DisagreementReport",
     "PairDisagreement",
     "RepresentationReading",

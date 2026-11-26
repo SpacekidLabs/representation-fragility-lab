@@ -38,24 +38,46 @@ So a medium is: one `Medium`, n `Representation`s, one `estimate_distance`, and 
 
 ## Worked example: audio pitch
 
-This maps today's audio code onto the interfaces. Porting it is issue #5, so
-the class names below are the planned ones; the behaviour they describe is
-already implemented in `src/framework/disagreement.py`.
+Audio is implemented on the core in [`src/framework/audio.py`](../src/framework/audio.py) (issue #5).
+The pitch readers live in `src/framework/disagreement.py`. Its original API
+(`analyze_disagreement`, `compare_readings`, `DisagreementReport`) is kept as
+an adapter over the core and gives identical results: Exp 039, 041, 042 and 043
+were re-run before and after the port, with no differences.
 
 | Interface | Audio implementation |
 |---|---|
 | `Medium` | `AudioFrame`: a 1-D float array; `context` must hold `sr`, and optionally `fmin`/`fmax`. `is_empty` = RMS below 1e-8 (silence). |
-| `Representation` | `StftPitch`: harmonic summation on the Hann-windowed spectrum; *assumes the frame is stationary and its harmonics are resolved*. `AcfPitch`: first strong normalised-autocorrelation peak; *assumes the signal repeats within the frame*. `CepstrumPitch`: real-cepstrum peak; *assumes many evenly spaced harmonics*. Each returns `Reading(estimate=f0_hz, confidence)`. |
-| `BlindSpotDetector` | `ConfidenceThresholdDetector(0.5)`: the current "voiced" rule. Exp 042 shows a learned detector on disagreement features does better (AUC 0.95–0.99), so a `LearnedDetector` is a natural next implementation. |
+| `Representation` | Five pitch lenses, each returning `Reading(estimate=f0_hz or None, confidence)` and listing its assumptions:<br>• `StftPitch`: harmonic summation on the Hann-windowed spectrum; *assumes a stationary frame and resolved harmonics*.<br>• `AcfPitch`: first strong normalised-autocorrelation peak; *assumes the waveform repeats within the frame*.<br>• `CepstrumPitch`: real-cepstrum peak; *assumes many evenly spaced harmonics*.<br>• `CqtPitch`: harmonic summation on a 24-bins/octave constant-Q transform, using only partials at least 2 bins apart (up to the 11th); *assumes resolved low harmonics*.<br>• `WaveletPitch`: harmonic summation on a 6-cycle Morlet scalogram, first 3 partials only; *assumes a strong fundamental and low partials*. |
+| `BlindSpotDetector` | `ConfidenceThresholdDetector(0.5)`: the "voiced" rule. Exp 042 shows a learned detector on disagreement features does better (AUC 0.95–0.99), so a `LearnedDetector` is a natural next implementation. |
 | `Comparator` | `PitchComparator(PairwiseComparator)`: `estimate_distance` = `min(cents / 1200, 1)`, relation `"agree"` / `"octave above"` / `"octave below"` / `"off"`; `fuse` = confidence-weighted median f0. |
-| `PatternModel` | The Exp 043 model: `vectorize` = 3 confidences + 3 signed pair ratios in octaves; `fit` = k-means with silhouette-chosen k; `assign` = rule-based names such as "CEP an octave low, others agree". |
+| `PatternModel` | The Exp 043 model: `vectorize` = confidences + signed pair ratios in octaves; `fit` = k-means with silhouette-chosen k; `assign` = rule-based names such as "CEP an octave low, others agree". (Still in the experiment script; moving it into the library is future work.) |
 
 ```python
-from core import Analyzer
-analyzer = Analyzer(AudioFrame(), [StftPitch(), AcfPitch(), CepstrumPitch()], PitchComparator())
+from representation_intelligence import make_audio_analyzer, ALL_LENSES
+
+analyzer = make_audio_analyzer()               # STFT + ACF + Cepstrum (default)
 analysis = analyzer.analyze(frame, {"sr": 22050})
 analysis.report.outlier, analysis.report.consensus, analysis.report.pair("acf", "cepstrum").relation
+
+make_audio_analyzer(ALL_LENSES)                # all five lenses
 ```
+
+**CQT and wavelet calibration.** On 2048-sample frames at 22.05 kHz, both new
+lenses have a median pitch error under 1 cent on clean harmonic tones
+(110–660 Hz, 1–20 harmonics). Their confidence maps the peak contrast of the
+harmonic-summation curve to 0..1, with the loudest of 60 white-noise frames at
+0 and the weakest 5% of clean tones at 1. CQT filters are kept at full length:
+shortening them to fit the frame skews the peaks and biased the pitch by about
+−11 cents.
+
+**More lenses are not more independent votes.** When the fundamental is
+missing, STFT, CQT and wavelet (all spectral, all leaning on the low partials)
+jump an octave up together. With the default three lenses, ACF + Cepstrum
+outvote STFT and the consensus is right. With all five, the spectral trio wins
+and the consensus is wrong (`tests/test_audio_core.py`). This is Exp 043's
+co-failure finding seen from the other side. Adding lenses only helps when
+their blind spots differ, so the default stays at three until a fusion rule
+accounts for shared blind spots.
 
 ## Sketch: images (issue #6)
 

@@ -84,6 +84,18 @@ report.consensus_f0                  # confidence-weighted median of the voiced 
 
 Pair score = `0.5 * min(cents / 1200, 1) + 0.5 * |confidence_a - confidence_b|`. Definitions and calibration notes are in [`src/framework/disagreement.py`](src/framework/disagreement.py); tests in [`tests/test_disagreement.py`](tests/test_disagreement.py) (`pytest tests`).
 
+Under the hood this runs on the medium-agnostic core ([`src/core`](src/core), [design note](docs/core_interfaces.md)), with audio as the first medium ([`src/framework/audio.py`](src/framework/audio.py)). Five pitch lenses are available: STFT, ACF and Cepstrum (the default) plus CQT and wavelet:
+
+```python
+from representation_intelligence import make_audio_analyzer, analyze_disagreement, ALL_LENSES
+
+analysis = make_audio_analyzer(ALL_LENSES).analyze(frame, {"sr": 22050})
+analysis.report.consensus, analysis.report.outlier
+analyze_disagreement(frame, sr=22050, representations=ALL_LENSES)   # same, in the original report format
+```
+
+Adding lenses is not free: STFT, CQT and wavelet share the missing-fundamental blind spot and can outvote the other two (see the design note), so the default stays at three.
+
 ---
 
 ## 🎯 Killer Examples (Real-World Gains)

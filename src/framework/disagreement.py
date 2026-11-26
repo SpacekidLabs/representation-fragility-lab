@@ -47,8 +47,8 @@ Only NumPy is required.
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import asdict, dataclass, field
-from itertools import combinations
 
 import numpy as np
 
@@ -275,85 +275,177 @@ def read_cepstrum(frame: np.ndarray, sr: int,
     return RepresentationReading("cepstrum", f0, confidence)
 
 
+CQT_BINS_PER_OCTAVE = 24
+WAVELET_CYCLES = 6.0
+
+
+def _log_grid_salience(profile: np.ndarray, B: int, n_cand: int, max_harm: int) -> np.ndarray:
+    """Weighted harmonic summation on a log-frequency profile with B bins/octave."""
+    pos = np.arange(len(profile))
+    sal = np.zeros(n_cand)
+    for b in range(n_cand):
+        k = np.arange(1, max_harm + 1)
+        at = b + B * np.log2(k)
+        k, at = k[at <= len(profile) - 1], at[at <= len(profile) - 1]
+        sal[b] = np.sum(np.interp(at, pos, profile) / k)
+    return sal
+
+
+def _refine_on_profile(profile: np.ndarray, best: int) -> float:
+    """Sub-bin position of the profile peak nearest to candidate bin ``best``."""
+    lo, hi = max(best - 1, 0), min(best + 2, len(profile))
+    i = lo + int(np.argmax(profile[lo:hi]))
+    return _refine_peak(profile, i)
+
+
+def _contrast_confidence(sal: np.ndarray, best: int, levels: tuple[float, float]) -> float:
+    """How much the best candidate stands out from the typical one, mapped to 0..1."""
+    contrast = 1.0 - np.median(sal) / (sal[best] + 1e-12)
+    lo, hi = levels
+    return float(np.clip((contrast - lo) / (hi - lo + 1e-12), 0.0, 1.0))
+
+
+def read_cqt(frame: np.ndarray, sr: int,
+             fmin: float = DEFAULT_FMIN, fmax: float = DEFAULT_FMAX) -> RepresentationReading:
+    """Pitch + confidence from a constant-Q transform (24 bins/octave).
+
+    Harmonic summation on the log-frequency axis. Only harmonics that stay at
+    least 2 bins apart are used (up to the 11th at 24 bins/octave): on a
+    constant-Q axis higher partials merge. Full-length filters are used (the
+    frame is zero-padded); shortening them to fit the frame skews the peaks
+    and biases the pitch by about -11 cents.
+    """
+    import librosa  # optional dependency: only needed for this lens
+
+    B = CQT_BINS_PER_OCTAVE
+    f_lim = min(5000.0, 0.45 * sr)
+    n_bins = int(np.floor(B * np.log2(f_lim / fmin))) + 1
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")  # librosa warns about short low-octave buffers
+        C = np.abs(librosa.cqt(frame.astype(float), sr=sr, hop_length=256, fmin=fmin, n_bins=n_bins,
+                               bins_per_octave=B))
+    profile = C.mean(axis=1)
+    if profile.max() <= 0.0:
+        return _empty("cqt")
+    profile = profile / profile.max()
+    max_harm = int(np.floor(1.0 / (2.0 ** (2.0 / B) - 1.0)))  # partials >= 2 bins apart
+    n_cand = int(np.floor(B * np.log2(fmax / fmin))) + 1
+    sal = _log_grid_salience(profile, B, n_cand, max_harm)
+    best = int(np.argmax(sal))
+    f0 = float(fmin * 2.0 ** (_refine_on_profile(profile, best) / B))
+    return RepresentationReading("cqt", f0, _contrast_confidence(sal, best, CQT_CONTRAST))
+
+
+def read_wavelet(frame: np.ndarray, sr: int,
+                 fmin: float = DEFAULT_FMIN, fmax: float = DEFAULT_FMAX) -> RepresentationReading:
+    """Pitch + confidence from a Morlet wavelet scalogram (6 cycles, 24 voices/octave).
+
+    The wavelets are broad (relative bandwidth 1/6), so only the lowest
+    harmonics are resolved: this lens leans on a strong fundamental and low
+    partials, and is robust to time-local changes inside the frame.
+    """
+    x = frame - np.mean(frame)
+    n = len(x)
+    B = CQT_BINS_PER_OCTAVE
+    f_lim = min(5000.0, 0.45 * sr)
+    centers = fmin * 2.0 ** (np.arange(int(np.floor(B * np.log2(f_lim / fmin))) + 1) / B)
+    X = np.fft.fft(x)
+    nu = np.fft.fftfreq(n, d=1.0 / sr)
+    lo, hi = n // 4, 3 * n // 4  # ignore edge effects
+    raw = np.empty(len(centers))
+    for i, fc in enumerate(centers):
+        sigma = fc / WAVELET_CYCLES
+        G = np.exp(-0.5 * ((nu - fc) / sigma) ** 2) * (nu > 0)  # analytic Morlet in frequency
+        w = np.fft.ifft(X * G)
+        raw[i] = np.mean(np.abs(w[lo:hi]))
+    # Divide by sqrt(bandwidth) so white noise gives a flat profile.
+    profile = raw / np.sqrt(centers / WAVELET_CYCLES)
+    if profile.max() <= 0.0:
+        return _empty("wavelet")
+    profile = profile / profile.max()
+    max_harm = 3  # resolved at 6 cycles
+    n_cand = int(np.floor(B * np.log2(fmax / fmin))) + 1
+    sal = _log_grid_salience(profile, B, n_cand, max_harm)
+    best = int(np.argmax(sal))
+    # Refine on the raw (un-whitened) response, whose peak sits exactly on the partial.
+    f0 = float(fmin * 2.0 ** (_refine_on_profile(raw, best) / B))
+    return RepresentationReading("wavelet", f0, _contrast_confidence(sal, best, WAVELET_CONTRAST))
+
+
+# (noise level, clean level) of the salience contrast that map to confidence
+# 0 and 1. Calibrated on 22.05 kHz, 2048-sample frames: maximum over 60 white-
+# noise frames (CQT 0.405, wavelet 0.385) and 5th percentile over clean
+# harmonic tones at 110-660 Hz with 1-20 harmonics (CQT 0.912, wavelet 0.712).
+CQT_CONTRAST = (0.45, 0.90)
+WAVELET_CONTRAST = (0.40, 0.70)
+
 READERS = {
     "stft": read_stft,
     "acf": read_acf,
     "cepstrum": read_cepstrum,
+    "cqt": read_cqt,
+    "wavelet": read_wavelet,
 }
 
 
 # ---------------------------------------------------------------------------
-# Comparison
+# Comparison — adapters over the medium-agnostic core (issue #5)
 # ---------------------------------------------------------------------------
+# The comparison logic lives in src/core (PairwiseComparator) plus the audio
+# PitchComparator in framework/audio.py. The functions below keep the original
+# API and DisagreementReport format, converting to and from the core types.
 
-def compare_pair(a: RepresentationReading, b: RepresentationReading) -> PairDisagreement:
-    """Disagreement between two readings."""
-    if a.f0 > 0.0 and b.f0 > 0.0:
-        cents = float(1200.0 * abs(np.log2(a.f0 / b.f0)))
-        nearest_octave = 1200.0 * round(cents / 1200.0)
-        octave_related = cents >= 600.0 and abs(cents - nearest_octave) <= OCTAVE_TOLERANCE_CENTS
-        pitch_term = float(min(cents / 1200.0, 1.0))
-    elif a.f0 <= 0.0 and b.f0 <= 0.0:
-        cents, octave_related, pitch_term = None, False, 0.0
-    else:
-        cents, octave_related, pitch_term = None, False, 1.0
+def _core():
+    from . import audio  # lazy: audio imports this module
+    return audio
 
-    confidence_gap = float(abs(a.confidence - b.confidence))
+
+def _to_core(r: RepresentationReading):
+    return _core().Reading(r.name, r.f0 if r.f0 > 0.0 else None, r.confidence)
+
+
+def _comparator():
+    audio = _core()
+    detector = audio.ConfidenceThresholdDetector(VOICING_THRESHOLD)
+    return audio.PitchComparator(outlier_margin=OUTLIER_MARGIN, detector=detector)
+
+
+def _from_core_pair(p, a: RepresentationReading, b: RepresentationReading) -> PairDisagreement:
     return PairDisagreement(
-        a=a.name,
-        b=b.name,
-        cents=cents,
-        octave_related=octave_related,
-        pitch_term=pitch_term,
-        confidence_gap=confidence_gap,
+        a=p.a,
+        b=p.b,
+        cents=p.details.get("cents"),
+        octave_related=bool(p.details.get("octave_related", False)),
+        pitch_term=p.distance,
+        confidence_gap=p.confidence_gap,
         voicing_conflict=a.voiced != b.voiced,
-        score=0.5 * pitch_term + 0.5 * confidence_gap,
+        score=p.score,
     )
 
 
-def _weighted_median(values: np.ndarray, weights: np.ndarray) -> float:
-    order = np.argsort(values)
-    v, w = values[order], weights[order]
-    cum = np.cumsum(w)
-    return float(v[np.searchsorted(cum, 0.5 * cum[-1])])
+def compare_pair(a: RepresentationReading, b: RepresentationReading) -> PairDisagreement:
+    """Disagreement between two readings."""
+    return _from_core_pair(_comparator().compare_pair(_to_core(a), _to_core(b)), a, b)
+
+
+def _from_core_report(report, readings: dict[str, RepresentationReading],
+                      silent: bool = False) -> DisagreementReport:
+    return DisagreementReport(
+        readings=readings,
+        pairs=[_from_core_pair(p, readings[p.a], readings[p.b]) for p in report.pairs],
+        overall=float(report.overall),
+        divergence={k: float(v) for k, v in report.divergence.items()},
+        outlier=report.outlier,
+        consensus_f0=float(report.consensus) if report.consensus is not None else 0.0,
+        silent=silent,
+    )
 
 
 def compare_readings(readings: dict[str, RepresentationReading],
                      silent: bool = False) -> DisagreementReport:
     """Build a disagreement report from already-computed readings."""
-    names = list(readings)
-    pairs = [compare_pair(readings[a], readings[b]) for a, b in combinations(names, 2)]
-    overall = float(np.mean([p.score for p in pairs])) if pairs else 0.0
-
-    divergence = {}
-    for name in names:
-        scores = [p.score for p in pairs if name in (p.a, p.b)]
-        divergence[name] = float(np.mean(scores)) if scores else 0.0
-
-    # An outlier needs a reference: if no lens is confident (e.g. pure noise),
-    # all of them are blind and none is singled out.
-    outlier = None
-    if len(names) >= 3 and any(r.voiced for r in readings.values()):
-        ranked = sorted(divergence, key=divergence.get, reverse=True)
-        if divergence[ranked[0]] - divergence[ranked[1]] >= OUTLIER_MARGIN:
-            outlier = ranked[0]
-
-    voiced = [r for r in readings.values() if r.voiced and r.f0 > 0.0]
-    consensus_f0 = (
-        _weighted_median(np.array([r.f0 for r in voiced]),
-                         np.array([r.confidence for r in voiced]))
-        if voiced else 0.0
-    )
-
-    return DisagreementReport(
-        readings=readings,
-        pairs=pairs,
-        overall=overall,
-        divergence=divergence,
-        outlier=outlier,
-        consensus_f0=consensus_f0,
-        silent=silent,
-    )
+    report = _comparator().compare({k: _to_core(r) for k, r in readings.items()})
+    return _from_core_report(report, readings, silent)
 
 
 def analyze_disagreement(frame: np.ndarray, sr: int,
@@ -362,29 +454,34 @@ def analyze_disagreement(frame: np.ndarray, sr: int,
     """
     Run each representation on ``frame`` and measure their disagreement.
 
+    Runs the core ``Analyzer`` for the audio medium (framework/audio.py) and
+    returns the result in the original ``DisagreementReport`` format.
+
     Parameters:
         frame: 1D time-domain audio frame.
         sr: sample rate in Hz.
         fmin, fmax: pitch search range in Hz.
-        representations: names from ``READERS`` to run (default: all).
+        representations: names from ``READERS`` to run (default: STFT, ACF, Cepstrum;
+            "cqt" and "wavelet" are also available).
 
     Returns:
         DisagreementReport
     """
-    frame = np.asarray(frame, dtype=float).flatten()
-    if frame.size == 0:
-        raise ValueError("Empty audio frame provided.")
-
     names = list(representations)
     unknown = [r for r in names if r not in READERS]
     if unknown:
         raise ValueError(f"Unknown representations: {unknown}. Available: {list(READERS)}")
 
-    if np.sqrt(np.mean(frame ** 2)) < SILENCE_RMS:
+    analysis = _core().make_audio_analyzer(names).analyze(frame, {"sr": sr, "fmin": fmin, "fmax": fmax})
+    if analysis.empty:
         report = compare_readings({name: _empty(name) for name in names}, silent=True)
     else:
-        readings = {name: READERS[name](frame, sr, fmin, fmax) for name in names}
-        report = compare_readings(readings)
+        readings = {
+            name: RepresentationReading(name, r.estimate if r.estimate is not None else 0.0, r.confidence)
+            for name, r in analysis.report.readings.items()
+        }
+        report = _from_core_report(analysis.report, readings)
 
-    report.meta = {"sr": sr, "fmin": fmin, "fmax": fmax, "frame_length": int(frame.size)}
+    report.meta = {"sr": sr, "fmin": fmin, "fmax": fmax,
+                   "frame_length": int(np.asarray(frame).size)}
     return report
