@@ -32,10 +32,12 @@ jobs:
           cat guard.log
           grep -q "declaration uses .sorry." guard.log
 
-      - name: Build (fails on any warning, including sorry)
+      # Not --wfail: Lean v4.36 warns that every file importing Mathlib should
+      # opt into the module system, which is out of scope for #12.
+      - name: Build (fails on errors and on sorry)
         run: |
           set -o pipefail
-          lake build --wfail 2>&1 | tee build.log
+          lake build 2>&1 | tee build.log
           if grep -q "declaration uses .sorry." build.log; then
             echo "::error::A declaration uses sorry; proofs on main must be complete."
             exit 1

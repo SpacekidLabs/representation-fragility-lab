@@ -44,5 +44,7 @@ matching release). Upgrade both together.
   the model makes a test fail.
 - **Real numbers, not floats.** The model works over ℝ (or ℚ). Floating-point
   behaviour of NumPy is not proven; where it matters, the gap is stated in the docs.
-- **No `sorry` on `main`.** CI builds with `--wfail` and fails on any
-  "declaration uses sorry" warning (it also checks that this guard works).
+- **No `sorry` on `main`.** CI fails on any "declaration uses sorry" warning
+  (it also checks that this guard works). It does not use `--wfail`: Lean v4.36
+  warns that files importing Mathlib should use the module system (`module` at the
+  top of the file), and the project has not adopted it yet.
