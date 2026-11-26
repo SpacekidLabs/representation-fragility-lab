@@ -157,7 +157,8 @@ representation-fragility-lab/
 │   ├── representations/  # ACF, STFT, Cepstrum implementations
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
-│   └── framework/        # [Asset A] The Framework source code
+│   ├── core/             # Medium-agnostic interfaces and loop (see docs/core_interfaces.md)
+│   └── framework/        # [Asset A] The Framework source code (audio)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment

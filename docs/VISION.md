@@ -101,7 +101,7 @@ The 41 audio experiments are the proof of concept for this vision:
 | Comparison & fusion | 🟡 Learned fusion weights across representations, but no explicit disagreement model | Exp 014, 017–018 |
 | Pattern discovery | 🟡 Failures form a structured low-dimensional manifold | Exp 025–031 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
-| Medium-agnostic core | ❌ Everything is audio-specific | — |
+| Medium-agnostic core | 🟡 Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio not yet ported onto it (issue #5) | Issue #4 |
 
 **Honest gap:** the current framework (`src/framework`) measures physical
 descriptors of the raw signal and recommends parameters. It does **not** yet

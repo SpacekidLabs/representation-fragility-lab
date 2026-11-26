@@ -27,9 +27,11 @@ dependencies = [
 [tool.setuptools]
 packages = [
     "representation_intelligence",
-    "representation_intelligence.plugins"
+    "representation_intelligence.plugins",
+    "representation_core"
 ]
 
 [tool.setuptools.package-dir]
 representation_intelligence = "src/framework"
 "representation_intelligence.plugins" = "src/framework/plugins"
+representation_core = "src/core"
