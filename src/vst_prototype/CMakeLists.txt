@@ -5,13 +5,22 @@ project(AdaptiveAutoTune VERSION 1.0.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Point directly to the local JUCE installation in wavsynth to avoid downloads
-set(JUCE_DIR "/Users/user/Desktop/wavsynth/JUCE")
-if (NOT EXISTS ${JUCE_DIR})
-    message(FATAL_ERROR "JUCE directory not found at ${JUCE_DIR}. Please check the path.")
+# JUCE: use a local checkout if given, otherwise download a pinned release.
+#   cmake -B build -DJUCE_DIR=/path/to/JUCE     (or set the JUCE_DIR environment variable)
+set(JUCE_DIR "$ENV{JUCE_DIR}" CACHE PATH "Path to a local JUCE checkout (empty = download)")
+if (JUCE_DIR)
+    if (NOT EXISTS "${JUCE_DIR}/CMakeLists.txt")
+        message(FATAL_ERROR "JUCE_DIR=${JUCE_DIR} does not contain a JUCE checkout.")
+    endif()
+    add_subdirectory(${JUCE_DIR} JUCE)
+else()
+    include(FetchContent)
+    FetchContent_Declare(JUCE
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG 8.0.4
+        GIT_SHALLOW TRUE)
+    FetchContent_MakeAvailable(JUCE)
 endif()
-
-add_subdirectory(${JUCE_DIR} JUCE)
 
 juce_add_plugin(AdaptiveAutoTune
     COMPANY_NAME "Antigravity"

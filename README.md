@@ -26,7 +26,6 @@ The current Python library is the first practical application of the idea, for a
 
 > **Known gap:** this library does not yet compare representations side by side or learn from their disagreements. Moving that comparison to the centre is the next step (see [docs/VISION.md](docs/VISION.md#6-roadmap-direction)).
 
-[![PyPI version](https://img.shields.io/badge/pypi-v1.0.0-blue.svg)](https://github.com/SpacekidLabs/representation-fragility-lab)
 
 ---
 
@@ -170,7 +169,9 @@ representation-fragility-lab/
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
 │   ├── core/             # Medium-agnostic interfaces and loop (see docs/core_interfaces.md)
-│   └── framework/        # [Asset A] The Framework source code (audio)
+│   ├── framework/        # [Asset A] The Framework source code (audio)
+│   ├── experiments/      # One script per experiment (exp001–exp043, hpss_reconcile)
+│   └── vst_prototype/    # JUCE plugin prototype (CMake; see Setup)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
 │   └── *.png             # Visualisation plots for each experiment
@@ -531,6 +532,17 @@ Scientifically mapped the boundaries where physical audio state knowledge (the U
 **Key Finding**:
 The physical state space coordinates $(z_1, z_2)$ represent amplitude-normalized, instantaneous frame characteristics. The framework improves physics-driven tasks but fails on content-dependent, target-reference-dependent, temporally-global, and amplitude-domain tasks. The boundaries of applicability are precise, clean, and theoretically sound.
 
+> **HPSS: Exp 035 vs Exp 041.** Exp 035 reports a loss on HPSS (−1.51 dB) and Exp 041 a gain (+0.32 dB). They are not the same test: the signal, the baseline *and* what the framework does all differ. [`src/experiments/hpss_reconcile.py`](src/experiments/hpss_reconcile.py) crosses them (harmonic SDR, dB):
+>
+> | Signal | Exp 035 baseline (median 15) | Exp 035 framework (mask × ACF safety) | Exp 041 baseline (librosa, kernel 31) | Exp 041 framework (kernels per region) | Control: Exp 041 noise kernels on every frame, no engine |
+> |---|---|---|---|---|---|
+> | A: Exp 035 sweep + sparse clicks | **14.25** | 12.74 | 7.29 | 7.46 | 0.14 |
+> | B: Exp 041 tone + dense clicks + noise (5 seeds) | **16.96** | 14.84 | 16.53 | 16.82 | 16.82 |
+>
+> - The method decides the sign, not the signal: scaling the harmonic mask by ACF safety hurts on both signals (−1.51, −2.12 dB); choosing kernels per region helps a little on both (+0.18, +0.29 dB over librosa's default).
+> - On signal B the engine labels 98% of frames `noise_collapse`, so "kernels per region" is in effect one fixed kernel; the control without any engine scores the same (16.82). The Exp 041 HPSS gain is a better kernel, not state awareness. On signal A the routing does matter: it keeps the default kernel, where the fixed noise kernel would fail (0.14 dB).
+> - The plain median-15 baseline from Exp 035 beats every framework variant on both signals. So for HPSS the framework shows no gain over a well-chosen fixed method.
+
 ---
 
 ### Phase 16 — State-Space Theory Formalisation (Exp 036)
@@ -558,13 +570,13 @@ The results **empirically validate the Local State Hypothesis**. The coordinates
 ### Phase 17 — Real Plugin Integration (Exp 037)
 
 #### Exp 037 — State-Space Adaptive Spectral Subtraction
-Deployed the `RepresentationIntelligenceEngine` into a real-time spectral subtraction vocal denoiser, evaluating on a real vocal recording [Clean_vocal.wav](file:///Users/user/Desktop/representation-fragility-lab/Clean_vocal.wav) corrupted with white noise at $+6$ dB SNR.
+Deployed the `RepresentationIntelligenceEngine` into a real-time spectral subtraction vocal denoiser, evaluating on a real vocal recording [Clean_vocal.wav](Clean_vocal.wav) corrupted with white noise at $+6$ dB SNR.
 
 *   **Integration Strategy**: Downsampled 44100Hz audio frames to 22050Hz for engine state analysis, then continuously adapted the subtraction factor $\alpha_m$ based on the frame's `stft_safety` score and the spectral floor $\beta_m$ based on the mapped semantic region.
 *   **Audio Assets Generated** (available in `results/`):
-    *   [Noisy Vocal](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_noisy.wav): Input signal corrupted with hiss.
-    *   [Static Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_static.wav): Static baseline (fixed $\alpha=2.0$, $\beta=0.02$).
-    *   [Adaptive Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp037_vocal_adaptive.wav): State-Space adaptive.
+    *   [Noisy Vocal](results/exp037_vocal_noisy.wav): Input signal corrupted with hiss.
+    *   [Static Denoised](results/exp037_vocal_static.wav): Static baseline (fixed $\alpha=2.0$, $\beta=0.02$).
+    *   [Adaptive Denoised](results/exp037_vocal_adaptive.wav): State-Space adaptive.
 
 **Results:**
 
@@ -583,14 +595,14 @@ Signal state feedback yields a superior DSP product. The adaptive denoiser succe
 ### Phase 18 — Learned DSP Controller (Exp 038)
 
 #### Exp 038 — Learned DSP Controller
-Learns the optimal DSP control surface mapping engine coordinates $(z_1, z_2)$ to over-subtraction factor $\alpha$ and spectral floor $\beta$, minimizing Log Spectral Distance (LSD) directly. Fits a Random Forest Regressor on local optimal alpha/beta parameters grid-searched on the first 50% (training split) of [Clean_vocal.wav](file:///Users/user/Desktop/representation-fragility-lab/Clean_vocal.wav) corrupted with $+6$ dB noise.
+Learns the optimal DSP control surface mapping engine coordinates $(z_1, z_2)$ to over-subtraction factor $\alpha$ and spectral floor $\beta$, minimizing Log Spectral Distance (LSD) directly. Fits a Random Forest Regressor on local optimal alpha/beta parameters grid-searched on the first 50% (training split) of [Clean_vocal.wav](Clean_vocal.wav) corrupted with $+6$ dB noise.
 
 * **Integration Strategy**: Frame-by-frame resampling to 22.05kHz, extracting coordinates, and passing to the learned `RandomForestRegressor` model to predict optimal $\alpha$ and $\beta$ values on the remaining 50% out-of-sample test split.
 * **Audio Assets Generated** (available in `results/`):
-    * [Noisy Test Vocal](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp038_vocal_test_noisy.wav)
-    * [Static Test Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp038_vocal_test_static.wav)
-    * [Handcrafted Test Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp038_vocal_test_handcrafted.wav)
-    * [Learned Test Denoised](file:///Users/user/.gemini/antigravity/brain/f30000af-b580-4ac9-9dd6-8b10e93b89dc/exp038_vocal_test_learned.wav)
+    * [Noisy Test Vocal](results/exp038_vocal_test_noisy.wav)
+    * [Static Test Denoised](results/exp038_vocal_test_static.wav)
+    * [Handcrafted Test Denoised](results/exp038_vocal_test_handcrafted.wav)
+    * [Learned Test Denoised](results/exp038_vocal_test_learned.wav)
 
 **Results:**
 
@@ -620,7 +632,7 @@ Structures the core code into a production-ready package (Framework V1) with cle
     * **AdaptiveDenoiser**: SegSNR = 8.58 dB (vs 8.21 dB static), LSD = 18.19 dB (vs 18.53 dB static).
     * **AdaptivePitchTracker**: GER = 0.78% (vs 0.00% static baseline): 1 of 129 frames, where the 5-frame median filter lags a fast 6 Hz, ±30 Hz vibrato swing (20.3% error against a 20% tolerance). The original V1 tracker scored 0.00%. Commit 635e0e6 added continuity / octave filtering that got stuck at a fixed 220 Hz starting anchor (GER 17.83%, issue #10). The fix removes the anchor and re-acquires the pitch when 3 consecutive consistent estimates disagree with the held one. On `Clean_vocal.wav`, compared with pYIN: the original tracker had 0% gross errors and 6 steps > 1 semitone; 635e0e6 was stuck (100% gross errors); the fixed tracker has 3.9% gross errors (a 3-frame re-acquisition lag after a 5-semitone note change) and 2 steps > 1 semitone.
     * **AdaptiveOnsetDetector**: F1 Score = 0.471 (vs 0.421 static flux baseline; +0.05 F1 improvement).
-* **Dashboard Plot**: Saved to [exp039_framework_v1.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp039_framework_v1.png).
+* **Dashboard Plot**: Saved to [exp039_framework_v1.png](results/exp039_framework_v1.png).
 
 **Key Finding**:
 A single, frozen representation intelligence engine trained on physical signal attributes can successfully drive three structurally unrelated DSP plugins to outperform static baselines. This confirms that the Universal Audio State Space is a fundamental physical layout capable of general-purpose DSP routing.
@@ -634,7 +646,7 @@ Evaluates the core hypothesis of the Local State Hypothesis: **Does a task's Sta
 - **Dynamic Compatibility Index ($\eta^2$)**: Calculated dynamically via 5-fold cross-validation on 500 synthesized physical frames across 10 DSP tasks (covering classification and regression).
 - **Framework Benefit ($\Delta P$)**: Difference between normalized adaptive and baseline performances: $\Delta P = P_{\text{adaptive}} - P_{\text{baseline}}$.
 - **Hypothesis Verification**: Pearson correlation coefficient $r = 0.8629$ confirms a strong positive relationship between compatibility and performance benefit. Mapped low-compatibility task performance degradation ($\Delta P < 0.0$) as a direct consequence of state-space blind spots (loudness, reference alignment, long-term decay).
-- **Dashboard Plot**: Saved to [exp040_generalization_challenge.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp040_generalization_challenge.png).
+- **Dashboard Plot**: Saved to [exp040_generalization_challenge.png](results/exp040_generalization_challenge.png).
 
 ---
 
@@ -648,7 +660,8 @@ Performs zero-shot external validation on five completely external algorithms fr
 - **HPSS (Source Separation)**: Precomputed kernels and selected them per-frame based on state ($H_{81}, P_{15}$ for noise collapse, $H_{17}$ for transient overloaded) with a power=2.0 softmask. ($\Delta P = +0.0106$).
 - **Wiener Denoising**: Adapted filter local window size and estimated noise power from frame variance. ($\Delta P = +0.0259$).
 - **Overall Improvement**: Positive benefit across all 5 algorithms ($\Delta P_{\text{avg}} = +0.0320$), verifying out-of-sample generalization.
-- **Dashboard Plot**: Saved to [exp041_external_validation.png](file:///Users/user/Desktop/representation-fragility-lab/results/exp041_external_validation.png).
+- **Dashboard Plot**: Saved to [exp041_external_validation.png](results/exp041_external_validation.png).
+- **Caveat (HPSS):** the HPSS gain is small and comes from a different fixed kernel, not from the engine; a fixed median-15 HPSS beats it. See the cross-check under Exp 035.
 
 ---
 
@@ -801,12 +814,12 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 20. **Universal DSP State Sensor**: Experiment 034 validates the framework zero-shot across five structurally different tasks (Pitch Tracking, Onset Detection, Voicing Detection, Transient Detection, Spectral Denoising). 4/5 tasks improved without any retraining. The engine was trained once on audio physics and generalizes because the physical state space is universal — not task-specific.
 21. **Learned DSP Controller**: Experiment 038 demonstrates that we can automatically learn optimal parameter mapping functions $g(z_1, z_2) \to (\alpha, \beta)$ from grid-searched frame-level training data using a Random Forest Regressor. When evaluated out-of-sample on the test split of a real noisy vocal recording, the learned controller minimized Log Spectral Distance (LSD) down to 17.85 dB (a -0.08 dB delta improvement over the hand-crafted rule), confirming that the Universal Audio State Space contains enough structure to automatically discover superior DSP parameter mappings.
 22. **Framework V1 Library**: Experiment 039 completes the transition of the Universal Audio State Space architecture into a reusable coordinate-gated DSP library. By wrapping the core engine with importable reference plugins (denoiser, pitch tracker, onset detector), we demonstrated that JUCE/DSP developers can deploy this technology using a few simple lines of code to achieve immediate, out-of-sample improvements without any retraining.
-23. **Zero-Shot External Validation**: Experiment 041 demonstrates that the state-space engine can act as a zero-shot manager and post-filter for external library algorithms (such as librosa and scipy) with zero internal code changes. The framework achieved positive performance benefits ($\Delta P > 0$) across all 5 evaluated algorithms, yielding an average performance benefit of $+0.0320$.
+23. **Zero-Shot External Validation**: Experiment 041 demonstrates that the state-space engine can act as a zero-shot manager and post-filter for external library algorithms (such as librosa and scipy) with zero internal code changes. The framework achieved positive performance benefits ($\Delta P > 0$) across all 5 evaluated algorithms, yielding an average performance benefit of $+0.0320$. The HPSS part of that gain does not survive a fixed-kernel control (see Exp 035).
 
 ### On the Product
-13. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
-14. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
-15. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
+24. Pitch correction has two independent axes: **decision intelligence** (what note) and **correction dynamics** (how fast). They are orthogonal and should be controlled separately.
+25. For natural-sounding pitch correction on singing voice, slower retune speeds (~60–120 ms) sound more musical than instant snapping.
+26. The system that "knows when it is failing" produces more stable musical output than one that does not — even with simple downstream correction logic.
 
 ---
 
@@ -819,6 +832,13 @@ pip install -r requirements.txt
 ```
 
 **Requirements:** `numpy`, `scipy`, `matplotlib`, `librosa`
+
+**JUCE plugin prototype** (`src/vst_prototype`, optional; needs CMake ≥ 3.22 and a C++20 compiler). Without `JUCE_DIR`, CMake downloads JUCE 8.0.4:
+
+```bash
+cmake -S src/vst_prototype -B src/vst_prototype/build              # or add -DJUCE_DIR=/path/to/JUCE
+cmake --build src/vst_prototype/build --target AdaptiveAutoTune_Standalone
+```
 
 ---
 
@@ -882,6 +902,9 @@ pip install -r requirements.txt
 # Run the external validation challenge
 .venv/bin/python3 src/experiments/exp041_external_validation.py
 
+# Cross-check the HPSS results of Exp 035 and Exp 041
+.venv/bin/python3 src/experiments/hpss_reconcile.py
+
 # Run the disagreement-as-information experiment
 .venv/bin/python3 src/experiments/exp042_disagreement_prediction.py
 
@@ -897,48 +920,41 @@ open listen_test/exp023.html
 
 ## Where We Are
 
-The project has crossed from **DSP research** into **audio product territory**.
+The goal is in [docs/VISION.md](docs/VISION.md): look at a signal through many representations, compare where they disagree, and learn from the disagreement. Audio is the first medium.
 
-The representation intelligence pipeline is complete:
 ```
 Signal
   ↓
-ACF + Cepstrum + STFT
+Medium (validate, skip empty signals)                       src/core
   ↓
-Self-Confidence Signals
+Representations × n  (STFT, ACF, Cepstrum; CQT, wavelet opt-in)
   ↓
-Failure Forecasting
+Blind-spot detector per reading (confidence ≥ 0.5)
   ↓
-Meta-Representation Layer (learned fusion weights)
+Comparator: pairwise distance + relation, divergence, outlier, consensus
   ↓
-Confidence-Gated NoteTracker (UNDECIDED → TRACKING → LOCKED)
-  ↓
-IIR Correction Dynamics (retune speed)
-  ↓
-Output Audio
+Pattern model: which lenses fail together, and when     (Exp 043, still in the script)
 ```
 
-The remaining open questions are **product questions**, not research questions:
-- What retune speed feels right for different vocal styles?
-- Should the retune speed itself be confidence-adaptive (faster when very confident)?
-- What does the system sound like on polyphonic material?
-- Can the meta-layer be updated online (continuous learning from the incoming signal)?
-
-The framework API (`src/framework`) is ready for integration into any YIN-based or representation-based DSP pipeline.
-
-Exp 040 completes the validation of the Local State Hypothesis:
+**Done**
 
 ```
-Exp 001–013:  Atlas of failures
-Exp 014–026:  Representation intelligence
-Exp 027–031:  Failure manifold → Universal Audio State Space → Assumption surfaces
-Exp 032:      Production framework API
-Exp 033–034:  Practical gains & zero-shot validation across 5 tasks
-Exp 035–036:  Limits and formal theory validation (Local State Hypothesis)
-Exp 037–038:  Real audio integration & learned control surface optimization
-Exp 039:      Framework V1 package & reference plugins (Denoiser, Pitch Tracker, Onset Detector)
-Exp 040:      Framework Generalization Challenge (validation of the Local State Hypothesis)
-Exp 041:      External Validation (zero-shot validation on 5 external librosa/scipy algorithms)
+Exp 001–013:  Atlas of failures (each lens has a specific, structured blind spot)
+Exp 014–031:  Representation intelligence → failure manifold → state space → assumption surfaces
+Exp 032–041:  Framework API and DSP gains, limits (Exp 035) and external validation (Exp 041)
+Exp 042:      Disagreement predicts blind spots (AUC 0.95–0.99); consensus beats the routed lens
+Exp 043:      Disagreement has structure: ACF + cepstrum fail together, STFT + cepstrum rarely do
+Core:         medium-agnostic interfaces (src/core), audio ported onto them with identical results
 ```
 
-The coordinate-gated DSP library is the product.
+**Next** (GitHub issues)
+
+- Second medium: images, on the same core ([#6](https://github.com/SpacekidLabs/representation-fragility-lab/issues/6))
+- Real-world datasets with ground truth instead of synthetic signals ([#7](https://github.com/SpacekidLabs/representation-fragility-lab/issues/7))
+- Proofs in Lean 4 for the comparison machinery ([#11](https://github.com/SpacekidLabs/representation-fragility-lab/issues/11))
+
+**Known limits**
+
+- Almost all results are on synthetic signals; the one real vocal is short.
+- More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](docs/core_interfaces.md)).
+- The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
