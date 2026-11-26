@@ -155,7 +155,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](docs/VISION.md).
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](docs/VISION.md). Exp 044 repeats it on images, the second medium.
 
 ---
 
@@ -169,8 +169,9 @@ representation-fragility-lab/
 │   ├── metrics/          # Similarity metrics (cosine, etc.)
 │   ├── perturbations/    # Noise, filtering, pitch shift, harmonic removal
 │   ├── core/             # Medium-agnostic interfaces and loop (see docs/core_interfaces.md)
+│   ├── image_medium/     # Images on the core: five orientation lenses (Exp 044)
 │   ├── framework/        # [Asset A] The Framework source code (audio)
-│   ├── experiments/      # One script per experiment (exp001–exp043, hpss_reconcile)
+│   ├── experiments/      # One script per experiment (exp001–exp044, hpss_reconcile)
 │   └── vst_prototype/    # JUCE plugin prototype (CMake; see Setup)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
@@ -769,6 +770,78 @@ Exp 042 showed that disagreement warns when a lens is blind. This experiment ask
 
 ---
 
+### Phase 24 — A Second Medium: Images (Exp 044)
+
+#### Exp 044 — Image Blind Spots, Disagreement and Patterns on the Same Core
+The audio arc in miniature on images (issue #6, [docs/VISION.md](docs/VISION.md) roadmap step 4). Images run on the **same core code** as audio (`src/core`: `Analyzer`, `ConfidenceThresholdDetector`, `PairwiseComparator`). The only image-specific code is [`src/image_medium`](src/image_medium): a `Medium`, five lenses and an orientation distance.
+
+- **Quantity**: the dominant orientation of a 64×64 grayscale patch (degrees, mod 180). Gross error: more than 10° off.
+- **Lenses**: `tensor` (structure tensor, mean of squared gradients), `hog` (mode of the gradient-orientation histogram), `fft` (strongest 2-D spectral peak), `gabor` (oriented Gabor/wavelet bank, 4–16 px), `radon` (variance of line sums per angle). Each states its assumptions; confidences are calibrated like the audio CQT/wavelet lenses (strongest of 60 white-noise patches → 0, weakest 5% of clean patterns → 1). On clean patterns every lens is within 5° of the truth.
+- **Data**: 2,304 patches = 6 pattern variants (gratings with 6/12 px period, step edge, lines 1.5/3 px wide, oriented texture) × 12 orientations × 16 conditions × 2 seeds. The conditions are noise, blur, JPEG-like block DCT quantisation, low contrast with 8-bit quantisation, occlusion by a flat rectangle, and a weaker second grating at another orientation (scaled to 40% or 80% of the pattern's standard deviation, so the truth always has more variance). 16 patches at 1% contrast round to a flat image; the medium reports them as empty and they are left out.
+
+**1. Atlas: each lens family has its own blind spots** (gross error rate):
+
+| Condition | tensor | hog | fft | gabor | radon |
+|---|---|---|---|---|---|
+| clean, mild noise, blur ≤ 2.5, JPEG, low contrast | 0–6% | 0–15% | 0% | 0% | 0% |
+| noise σ = 0.6 | 31% | 47% | 1% | 1% | 0% |
+| blur σ = 4 (erases the 6 px grating) | 13% | 14% | 12% | 8% | 15% |
+| occlusion 25% / 50% | 8% / 17% | 6% / 22% | 32% / 57% | 27% / 51% | 14% / 45% |
+| second pattern 40% / 80% | 32% / 96% | 91% / 100% | 1% / 33% | 16% / 42% | 0% / 2% |
+
+- The **gradient lenses** (tensor, hog) are local: they survive occlusion best but fail on noise and on a weaker second pattern. Gradients weight fine detail by frequency², so a weaker but finer grating can win.
+- The **global lenses** (fft, gabor, radon) integrate over the whole patch: they shrug off noise and the second pattern (radon: 0–2%) but fail when an occluder breaks up the structure.
+
+**2. Disagreement predicts when a lens is wrong** (ROC AUC, grouped cross-validation as in Exp 042):
+
+| Lens | gross error | own confidence | divergence (no training) | disagreement model |
+|---|---|---|---|---|
+| tensor | 13.0% | 0.869 | 0.935 | **0.982** |
+| hog | 18.8% | 0.860 | 0.932 | **0.978** |
+| fft | 8.7% | 0.593 | 0.943 | **0.958** |
+| gabor | 9.2% | 0.599 | 0.937 | **0.959** |
+| radon | 4.8% | 0.890 | 0.912 | **0.964** |
+
+This replicates the main audio result on a new medium: comparing lenses tells you when one is blind, far better than its own confidence (fft and gabor are confidently wrong: AUC 0.59–0.60).
+
+**3. But the consensus is not the best answer here** (gross error rate, abstaining counts as wrong):
+
+| tensor | hog | fft | gabor | **radon** | most confident | consensus | learned pick | learned consensus | oracle |
+|---|---|---|---|---|---|---|---|---|---|
+| 13.0% | 18.8% | 8.7% | 9.2% | **4.8%** | 6.4% | 9.8% (abstains 2.1%) | 5.6% | 6.6% | 1.4% |
+
+- The confidence-weighted consensus (9.8%) loses to the best single lens (radon, 4.8%). On the second-pattern conditions three or four lenses are wrong together, so the median goes with them. Its abstentions are all at noise σ = 0.6, where the global lenses are right but not confident.
+- Using the disagreement model to choose whom to trust ("learned pick": the lens with the lowest predicted error, out-of-fold) gets to 5.6%, close to radon but not better. The oracle (1.4%) shows there is room: the right lens exists in most failure cases, but nothing tested here finds it reliably.
+
+**4. Patterns: lenses fail in families**
+
+| Most common failure sets | patches | mainly under |
+|---|---|---|
+| hog alone | 146 | second pattern 40%, noise |
+| tensor + hog | 114 | second pattern 80%, noise σ = 0.6 |
+| tensor + hog + gabor | 57 | second pattern |
+| all five | 32 | occlusion 50%, blur σ = 4 |
+| fft + gabor + radon | 29 | occlusion |
+
+- Raw co-failure lift is high for every pair (2.9–10.7×), because the hard conditions break several lenses at once. Within the same condition it drops to 1.3–3.0×. The strongest raw pairs are the global ones (fft + radon 10.7×, gabor + radon 8.9×, fft + gabor 7.5×).
+- Unsupervised clusters of the disagreement vector (5 confidences + 10 signed pair differences) are weak here: silhouette picks k = 3, and the clusters explain less of the failure structure than simply knowing the condition (NMI 0.22 vs 0.29). In audio it was the other way round (Exp 043: 0.546 vs 0.223 for the state map). A supervised k-NN on the same vectors does recover the failure set 89% of the time, against 76% for always guessing "none".
+
+**5. Unoriented input.** On white noise no lens is ever confident (0 of 45). On smooth isotropic noise (Gaussian-blurred white noise), **fft is confidently wrong on 96%** of patches: some random spectral peak is always the strongest. Because fft is then the only trusted lens, the consensus reports an orientation too, while the four other lenses are unconfident and disagree (mean disagreement 0.36 vs 0.22 on white noise). The core currently forms a consensus from a single trusted reading; a quorum rule would catch this.
+
+**Key findings:**
+1. The idea carries over to a second medium with no change to the core: a `Medium`, five lenses and one distance function were enough to run the same loop.
+2. Blind spots are structured by **lens family**: local gradient lenses versus global spectral/projection lenses, mirroring the audio split between spectral and periodicity lenses.
+3. Disagreement is again a strong warning signal (AUC 0.96–0.98 for every lens), much better than self-confidence for the lenses that are confidently wrong.
+4. Turning the warning into a better *answer* did not work here. Correlated failures outvote the right lens, and no fusion tested beats the best single lens. This matches the audio finding that more lenses are not more independent votes. Fusion needs to know which lenses share blind spots.
+5. Limits: everything is synthetic, there is one quantity (orientation) and one patch size, and the second-pattern truth depends on defining "dominant" by variance. Real images are tracked in issue #7.
+
+- **Run**: `.venv/bin/python src/experiments/exp044_image_disagreement.py` (about 30 s; `--calibrate` prints the lens calibration)
+- **Outputs**: [results/exp044_image_disagreement.png](results/exp044_image_disagreement.png), [results/exp044_summary.json](results/exp044_summary.json)
+
+![Exp 044](results/exp044_image_disagreement.png)
+
+---
+
 
 ## Listen Tests
 
@@ -911,6 +984,9 @@ cmake --build src/vst_prototype/build --target AdaptiveAutoTune_Standalone
 # Run the disagreement-pattern discovery experiment
 .venv/bin/python3 src/experiments/exp043_disagreement_patterns.py
 
+# Run the image (second medium) experiment
+.venv/bin/python3 src/experiments/exp044_image_disagreement.py
+
 # Open listen tests
 open listen_test/index.html
 open listen_test/exp023.html
@@ -920,7 +996,7 @@ open listen_test/exp023.html
 
 ## Where We Are
 
-The goal is in [docs/VISION.md](docs/VISION.md): look at a signal through many representations, compare where they disagree, and learn from the disagreement. Audio is the first medium.
+The goal is in [docs/VISION.md](docs/VISION.md): look at a signal through many representations, compare where they disagree, and learn from the disagreement. Audio is the first medium, images the second.
 
 ```
 Signal
@@ -945,16 +1021,17 @@ Exp 032–041:  Framework API and DSP gains, limits (Exp 035) and external valid
 Exp 042:      Disagreement predicts blind spots (AUC 0.95–0.99); consensus beats the routed lens
 Exp 043:      Disagreement has structure: ACF + cepstrum fail together, STFT + cepstrum rarely do
 Core:         medium-agnostic interfaces (src/core), audio ported onto them with identical results
+Exp 044:      Images on the same core: disagreement predicts blind spots (AUC 0.96–0.98), but no
+              fusion beats the best single lens because lenses fail in families
 ```
 
 **Next** (GitHub issues)
 
-- Second medium: images, on the same core ([#6](https://github.com/SpacekidLabs/representation-fragility-lab/issues/6))
 - Real-world datasets with ground truth instead of synthetic signals ([#7](https://github.com/SpacekidLabs/representation-fragility-lab/issues/7))
 - Proofs in Lean 4 for the comparison machinery ([#11](https://github.com/SpacekidLabs/representation-fragility-lab/issues/11))
 
 **Known limits**
 
 - Almost all results are on synthetic signals; the one real vocal is short.
-- More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](docs/core_interfaces.md)).
+- More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](docs/core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044).
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).

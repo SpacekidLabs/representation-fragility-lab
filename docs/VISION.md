@@ -98,16 +98,17 @@ The 41 audio experiments are the proof of concept for this vision:
 | Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel | Exp 001–013, 028, 031 |
 | Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
 | Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens | Exp 015–016 |
-| Comparison & fusion | 🟡 Learned fusion weights across representations, but no explicit disagreement model | Exp 014, 017–018 |
-| Pattern discovery | 🟡 Failures form a structured low-dimensional manifold | Exp 025–031 |
+| Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens | Exp 014, 017–018, 042 |
+| Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
-| Medium-agnostic core | 🟡 Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet). Only one medium so far (images: issue #6) | Issues #4, #5 |
+| Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
+| Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Synthetic patches only | Exp 044, issue #6 |
 
-**Honest gap:** the current framework (`src/framework`) measures physical
-descriptors of the raw signal and recommends parameters. It does **not** yet
-run representations side by side and learn from their disagreements. The
-comparison between lenses — the heart of the vision — must move back to the
-centre of the architecture.
+**Honest gaps:** almost everything is measured on synthetic signals (real data:
+issue #7). Disagreement reliably *warns* that a lens is blind, in both media, but
+turning that warning into a better *answer* only worked in audio: on images,
+lenses fail in families and the consensus loses to the best single lens. Fusion
+that knows which lenses share blind spots is the open problem.
 
 ---
 

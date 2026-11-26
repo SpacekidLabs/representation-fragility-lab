@@ -79,14 +79,43 @@ co-failure finding seen from the other side. Adding lenses only helps when
 their blind spots differ, so the default stays at three until a fusion rule
 accounts for shared blind spots.
 
-## Sketch: images (issue #6)
+## Second medium: images (issue #6)
+
+Images are implemented in [`src/image_medium`](../src/image_medium) with no change
+to the core. The comparable quantity is the dominant orientation of a patch,
+in degrees mod 180.
 
 | Interface | Image implementation |
 |---|---|
-| `Medium` | `ImagePatch`: a 2-D (or H×W×C) array; `is_empty` = near-zero variance. |
-| `Representation` | Lenses estimating the same quantity, e.g. dominant orientation from gradients (*assumes sharp, noise-free edges*), from the 2-D FFT (*assumes a periodic texture*) and from a wavelet decomposition (*assumes multiscale structure*). |
-| `Comparator` | `estimate_distance` = angular difference / 90°, relation `"agree"` / `"orthogonal"` / `"off"`. |
-| `PatternModel` | The same Exp 043 approach on image disagreement vectors. |
+| `Medium` | `ImagePatch`: a 2-D array (H×W×C is averaged to gray), at least 16×16, values ~[0, 1]. `is_empty` = standard deviation below 1e-3 (a third of an 8-bit grey level). |
+| `Representation` | Five orientation lenses, each returning `Reading(estimate=degrees or None, confidence)` with its assumptions:<br>• `TensorOrientation`: structure tensor; *assumes one dominant orientation; strong foreign edges pull the mean*.<br>• `HogOrientation`: mode of the gradient-orientation histogram; *assumes most gradient pixels share the orientation; per-pixel gradients not swamped by noise*.<br>• `FftOrientation`: strongest 2-D power-spectrum peak; *assumes a periodic texture with a peak well away from DC*.<br>• `GaborOrientation`: oriented Gabor bank, wavelengths 4–16 px, 16 orientations; *assumes structure at those scales*.<br>• `RadonOrientation`: variance of line sums per angle inside the inscribed disk; *assumes long straight structures not broken by occluders*. |
+| `BlindSpotDetector` | `ConfidenceThresholdDetector(0.5)`, as for audio. |
+| `Comparator` | `OrientationComparator(PairwiseComparator)`: `estimate_distance` = angular difference / 90°, relation `"agree"` (< 10°) / `"orthogonal"` (> 80°) / `"off"`; `fuse` = confidence-weighted circular median (the input that minimises the weighted angular distance to all others). |
+| `PatternModel` | Not in the library yet; Exp 044 uses the Exp 043 approach on 5 confidences + 10 signed pair differences. |
+
+Confidences are calibrated like the audio CQT and wavelet lenses: the strongest
+raw contrast over 60 white-noise patches maps to 0 and the weakest 5% of clean
+test patterns to 1 (`exp044_image_disagreement.py --calibrate`).
+
+```python
+from representation_image import make_image_analyzer
+
+report = make_image_analyzer().analyze(patch).report
+report.consensus, report.outlier, report.pair("fft", "radon").relation
+```
+
+**What the second medium showed about the core.** The loop, the detector and the
+aggregation carried over unchanged. Two limits of the generic logic showed up:
+
+- *A single trusted reading is enough for a consensus.* On smooth isotropic noise
+  the FFT lens is confidently wrong 96% of the time while the other four are
+  unconfident; the consensus follows the FFT lens. A quorum (e.g. at least two
+  trusted readings that agree) would catch this.
+- *Correlated lenses outvote the right one.* As with the spectral trio in audio,
+  lenses fail in families (local gradient lenses vs global spectral/projection
+  lenses), so the weighted median picks the family that is wrong. Exp 044's best
+  single lens (Radon, 4.8% gross errors) beats the consensus (9.8%) and a learned
+  choice of lens (5.6%).
 
 ## Design choices
 

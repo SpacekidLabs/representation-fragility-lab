@@ -31,6 +31,7 @@ from .medium import (
     RadonOrientation,
     TensorOrientation,
     angle_diff,
+    circular_weighted_median,
     make_image_analyzer,
 )
 
@@ -45,5 +46,6 @@ __all__ = [
     "RadonOrientation",
     "TensorOrientation",
     "angle_diff",
+    "circular_weighted_median",
     "make_image_analyzer",
 ]

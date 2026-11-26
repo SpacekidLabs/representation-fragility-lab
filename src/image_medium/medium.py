@@ -44,6 +44,16 @@ def angle_diff(a: float, b: float) -> float:
     return 90.0 if d == -90.0 else d
 
 
+def circular_weighted_median(values: Sequence[float], weights: Sequence[float]) -> float:
+    """Weighted median of orientations (mod 180°): the value that minimises the
+    weighted sum of angular distances to all values. The minimum is always at one
+    of the inputs; ties go to the earlier input."""
+    v = np.asarray(values, float)
+    w = np.asarray(weights, float)
+    cost = [np.sum(w * np.abs([angle_diff(x, c) for x in v])) for c in v]
+    return float(v[int(np.argmin(cost))] % 180.0)
+
+
 def _scale(raw: float, lo: float, hi: float) -> float:
     """Map a raw contrast to 0..1: ``lo`` (strongest of 60 white-noise patches) → 0,
     ``hi`` (weakest 5% of clean test patterns) → 1. See CALIBRATION below."""
@@ -256,11 +266,11 @@ class RadonOrientation(_OrientationLens):
 # lo = strongest raw contrast over 60 white-noise patches, hi = 5th percentile over
 # clean test patterns (all signal types, all orientations).
 CALIBRATION = {
-    "tensor": (0.0, 1.0),
-    "hog": (0.0, 1.0),
-    "fft": (0.0, 1.0),
-    "gabor": (0.0, 1.0),
-    "radon": (0.0, 1.0),
+    "tensor": (0.086, 0.974),
+    "hog": (0.171, 0.904),
+    "fft": (0.038, 0.506),
+    "gabor": (0.505, 0.997),
+    "radon": (0.575, 0.984),
 }
 
 LENSES = {cls.name: cls for cls in (TensorOrientation, HogOrientation, FftOrientation,
@@ -289,13 +299,9 @@ class OrientationComparator(PairwiseComparator):
         return d / 90.0, relation, {"degrees": d, "signed_degrees": signed}
 
     def fuse(self, readings: Sequence[Reading]) -> float:
-        """Confidence-weighted circular median: unwrap around the most confident reading."""
-        ref = max(readings, key=lambda r: r.confidence).estimate
-        v = np.array([ref + angle_diff(r.estimate, ref) for r in readings])
-        w = np.array([r.confidence for r in readings], float)
-        order = np.argsort(v, kind="stable")
-        cum = np.cumsum(w[order])
-        return float(v[order][np.searchsorted(cum, 0.5 * cum[-1])] % 180.0)
+        """Confidence-weighted circular median (see ``circular_weighted_median``)."""
+        ordered = sorted(readings, key=lambda r: -r.confidence)
+        return circular_weighted_median([r.estimate for r in ordered], [r.confidence for r in ordered])
 
 
 def make_image_analyzer(lenses: Sequence[str] = ALL_LENSES,
