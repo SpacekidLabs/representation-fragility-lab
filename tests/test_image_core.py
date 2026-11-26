@@ -121,3 +121,20 @@ def test_images_and_audio_share_the_same_core():
     assert type(image) is type(audio)
     assert type(image.detector) is type(audio.detector)
     assert type(image.comparator).compare is type(audio.comparator).compare  # generic aggregation
+
+
+def test_quorum_stops_the_fft_lens_answering_alone_on_smooth_noise():
+    """Issue #20: with the default quorum, one fooled lens is not a consensus."""
+    from core import ConfidenceThresholdDetector
+
+    legacy = make_image_analyzer()
+    legacy.comparator = OrientationComparator(min_agreeing=None, detector=ConfidenceThresholdDetector(0.5))
+    quorum = make_image_analyzer()
+    answered = {"legacy": 0, "quorum": 0}
+    for seed in range(10):
+        blob = ndimage.gaussian_filter(np.random.default_rng(seed).normal(size=(N, N)), 2.0)
+        x = 0.5 + 0.3 * blob / np.abs(blob).max()
+        answered["legacy"] += legacy.analyze(x).report.consensus is not None
+        answered["quorum"] += quorum.analyze(x).report.consensus is not None
+    assert answered["legacy"] >= 8
+    assert answered["quorum"] <= 2

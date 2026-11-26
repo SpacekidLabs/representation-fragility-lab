@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 25, Exp 001 to Exp 045)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 26, Exp 001 to Exp 046)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus.
 
 ## Representations
 
@@ -745,6 +745,38 @@ Everything up to Exp 044 rests on synthetic signals. This experiment re-runs the
 
 ---
 
+### Phase 26 — A Quorum Before the Consensus (Exp 046)
+
+#### Exp 046 — Should One Confident Lens Be Enough?
+Exp 044 and 045 found that the consensus follows any single confident lens: smooth noise fools the FFT lens, and breaths and consonants fool ACF or Cepstrum, so the system reports an orientation or a pitch that is not there. Issue #20 adds a quorum to the core's `PairwiseComparator`: the consensus is fused only from the **largest group of trusted readings that all agree pairwise** (ties go to the more confident group), and only if that group has at least `min_agreeing` members; otherwise there is no consensus. `min_agreeing=None` is the old rule (fuse every trusted reading).
+
+The experiment recomputes the consensus from the readings stored by Exp 042, 044 and 045 (the lenses are not re-run). The old rule reproduces Exp 045's stored consensus exactly. Unoriented inputs for BSDS500 are Exp 044's noise patches.
+
+| Dataset | False answers on unpitched / unoriented input | Answer rate (pitched / oriented) | Answer rate, clean only | Gross error when answering | Best lens on the same frames | Gross error, abstaining = wrong |
+|---|---|---|---|---|---|---|
+| Synthetic audio (Exp 042) | 0% → 0% | 94.4% → 88.8% | 100% → 100% | 1.0% → **0.6%** | 4.2% | 6.5% → 11.7% |
+| Synthetic images (Exp 044) | 47.8% → **3.3%** | 97.9% → 90.5% | 100% → 100% | 7.9% → 6.2% | 4.1% | 9.8% → 15.1% |
+| vocadito (Exp 045) | 36.3% → **6.6%** | 96.4% → 84.6% | 100% → 98.7% | 2.0% → **1.0%** | 1.2% | 5.6% → 16.3% |
+| MDB-stem-synth (Exp 045) | 99.0% → **0.0%** | 94.9% → 83.2% | 100% → 99.9% | 2.3% → **1.6%** | 2.3% | 7.3% → 18.2% |
+| BSDS500 (Exp 045) | 47.8% → **3.3%** | 94.0% → 67.2% | 99.2% → 86.0% | 19.6% → 14.1% | 13.6% | 24.4% → 42.3% |
+
+Old rule → quorum of 2 (the new default). The quorum's increase in gross error with abstentions counted as wrong is significant everywhere (+5 to +18 pts; group-bootstrap 95% CIs exclude 0, in `results/exp046_summary.json`). Other settings: `min_agreeing=1` (largest agreeing group, even of one) behaves like the old rule; `min_agreeing=3` is too strict (it answers only 37–48% of real voiced frames, 70–86% of clean ones).
+
+**Key findings:**
+1. **The quorum removes almost all false answers**: on unvoiced real audio from 36% to 7% (vocadito) and 99% to 0% (MDB-stem-synth); on unoriented noise from 48% to 3%. No single lens can make the system answer any more.
+2. **When it answers, it is more accurate**: gross error when answering falls on every dataset. On audio it beats the best single lens *on the same frames* (vocadito 1.0% vs 1.2%, MDB 1.6% vs 2.3%, synthetic 0.6% vs 4.2%), so it is not only skipping hard frames. On images it is level with the best lens (14.1% vs 13.6% on BSDS500), as expected from lenses that fail in families (Exp 044).
+3. **The price is abstention, mostly under heavy noise**: the clean answer rate stays at 99–100% for audio, but noisy frames are answered 66–75% of the time (35% on noisy photos). Counting every abstention as an error, the quorum is worse than the old rule and than the best lens. If an application needs an answer on every frame, `min_agreeing=None` keeps the old behaviour.
+4. **Photos pay the most**: the quorum answers 86% of clean BSDS500 patches, because real boundaries often split the lenses into a local and a global family that do not agree. On photos, an abstention is often the honest answer.
+
+**Decision:** `min_agreeing=2` is the core default for every medium (`PairwiseComparator`, the audio and image comparators, and the legacy `analyze_disagreement` API). The numbers reported for Exp 042–045 above used the old rule; to reproduce them, pass `min_agreeing=None`.
+
+- **Run**: `.venv/bin/python src/experiments/exp046_quorum.py` (uses Exp 045's cache in `data/processed/`; about 3 minutes)
+- **Outputs**: [results/exp046_quorum.png](../results/exp046_quorum.png), [results/exp046_summary.json](../results/exp046_summary.json)
+
+![Exp 046](../results/exp046_quorum.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -869,6 +901,8 @@ Exp 044:      Images on the same core: disagreement predicts blind spots (AUC 0.
               fusion beats the best single lens because lenses fail in families
 Exp 045:      Real data (vocadito, MDB-stem-synth, BSDS500): disagreement still predicts blind
               spots; the consensus gain holds on MDB only; the framework tracker does not beat YIN
+Exp 046:      A quorum (2 agreeing lenses) before the consensus: false answers on unpitched /
+              unoriented input fall to 0–7%, at the cost of abstaining on noisy frames
 ```
 
 **Next** (GitHub issues)
@@ -877,7 +911,7 @@ Exp 045:      Real data (vocadito, MDB-stem-synth, BSDS500): disagreement still 
 
 **Known limits**
 
-- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses, and the consensus follows them.
+- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044).
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
@@ -957,6 +991,9 @@ Exp 045:      Real data (vocadito, MDB-stem-synth, BSDS500): disagreement still 
 
 # Run the real-data experiment (data setup: data/README.md)
 .venv/bin/python3 src/experiments/exp045_real_data.py
+
+# Measure the consensus quorum (after Exp 045)
+.venv/bin/python3 src/experiments/exp046_quorum.py
 
 # Open listen tests (local only, see Listen Tests)
 open listen_test/index.html

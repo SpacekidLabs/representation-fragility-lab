@@ -166,3 +166,45 @@ def test_core_imports_no_medium_libraries():
     )
     out = subprocess.run([sys.executable, "-c", code, SRC], capture_output=True, text=True, check=True)
     assert out.stdout.strip() == ""
+
+
+# ---------------------------------------------------------------------------
+# Quorum (issue #20)
+# ---------------------------------------------------------------------------
+
+def _readings(**kw):
+    return {n: Reading(n, est, conf) for n, (est, conf) in kw.items()}
+
+
+def test_one_confident_lens_is_not_a_consensus():
+    rd = _readings(mean=(50.0, 0.9), median=(10.0, 0.2), trimmed=(12.0, 0.3))
+    assert LocationComparator().compare(rd).consensus is None  # default quorum: 2
+    legacy = LocationComparator(min_agreeing=None).compare(rd)
+    assert legacy.consensus == 50.0 and legacy.consensus_from == ("mean",)
+    assert LocationComparator(min_agreeing=1).compare(rd).consensus == 50.0
+
+
+def test_quorum_fuses_only_the_agreeing_group():
+    rd = _readings(mean=(50.0, 0.95), median=(10.0, 0.9), trimmed=(10.1, 0.8))
+    r = LocationComparator().compare(rd)
+    assert r.consensus_from == ("median", "trimmed")
+    assert r.consensus == pytest.approx(10.05)
+    # the legacy rule fuses the confident outlier in as well
+    assert LocationComparator(min_agreeing=None).compare(rd).consensus_from == ("mean", "median", "trimmed")
+    assert LocationComparator(min_agreeing=3).compare(rd).consensus is None
+
+
+def test_quorum_ignores_blind_readings_even_if_they_agree():
+    rd = _readings(mean=(10.0, 0.9), median=(10.0, 0.1), trimmed=(30.0, 0.2))
+    assert LocationComparator().compare(rd).consensus is None
+
+
+def test_quorum_tie_goes_to_the_more_confident_group():
+    rd = _readings(a=(10.0, 0.6), b=(10.1, 0.6), c=(50.0, 0.9), d=(50.2, 0.9))
+    r = LocationComparator().compare(rd)
+    assert r.consensus_from == ("c", "d")
+
+
+def test_min_agreeing_must_be_positive():
+    with pytest.raises(ValueError):
+        LocationComparator(min_agreeing=0)

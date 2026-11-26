@@ -29,9 +29,10 @@ Signal ─► Medium.validate ─► Representation.read × n ─► BlindSpotDe
 Most of the work is generic and already in `core.generic`:
 
 - `ConfidenceThresholdDetector`: blind when confidence < threshold (default 0.5) or there is no estimate.
-- `PairwiseComparator`: all the aggregation (pair score, overall, divergence, outlier, consensus over trusted readings). A medium only overrides
+- `PairwiseComparator`: all the aggregation (pair score, overall, divergence, outlier, consensus). The consensus needs a **quorum**: it is fused from the largest group of trusted readings that all agree pairwise, and only if at least `min_agreeing` (default 2) of them do; `report.consensus_from` names them. `min_agreeing=None` restores the old rule (fuse every trusted reading). A medium only overrides
   - `estimate_distance(a, b) -> (distance 0..1, relation label, details)`: how far apart two of its estimates are, and how they relate.
   - optionally `fuse(readings)`: how to combine trusted estimates (default: take the most confident).
+  - optionally `agrees(pair)`: what counts as agreement for the quorum (default: relation `"agree"`).
 - `Analyzer`: the loop. It also checks that every representation belongs to the medium and that names are unique.
 
 So a medium is: one `Medium`, n `Representation`s, one `estimate_distance`, and optionally a `PatternModel`.
@@ -107,10 +108,11 @@ report.consensus, report.outlier, report.pair("fft", "radon").relation
 **What the second medium showed about the core.** The loop, the detector and the
 aggregation carried over unchanged. Two limits of the generic logic showed up:
 
-- *A single trusted reading is enough for a consensus.* On smooth isotropic noise
+- *A single trusted reading was enough for a consensus.* On smooth isotropic noise
   the FFT lens is confidently wrong 96% of the time while the other four are
-  unconfident; the consensus follows the FFT lens. A quorum (e.g. at least two
-  trusted readings that agree) would catch this.
+  unconfident; the consensus followed the FFT lens (and on real unvoiced audio,
+  ACF or Cepstrum). Fixed by the quorum (issue #20, Exp 046): false answers fall
+  to 0–7%, at the cost of more abstentions under heavy noise.
 - *Correlated lenses outvote the right one.* As with the spectral trio in audio,
   lenses fail in families (local gradient lenses vs global spectral/projection
   lenses), so the weighted median picks the family that is wrong. Exp 044's best
@@ -122,6 +124,6 @@ aggregation carried over unchanged. Two limits of the generic logic showed up:
 - **One comparable quantity per medium task.** Representations only become comparable once reduced to the same estimate (f0, orientation…). The raw transforms stay in `Reading.details`.
 - **Assumptions are data.** `Representation.assumptions` lists the conditions under which a lens is valid, as plain text, so blind spots stay explainable.
 - **Empty is not disagreement.** `Medium.is_empty` signals are reported (`Analysis.empty`), not compared.
-- **No consensus without trust.** If every reading is blind, `consensus` and `outlier` are `None`: when all lenses are blind, none is singled out (Exp 042/043).
+- **No consensus without agreement.** The consensus needs at least two trusted readings that agree (Exp 046); one confident lens is not enough. If every reading is blind, `consensus` and `outlier` are `None`: when all lenses are blind, none is singled out (Exp 042/043).
 - **Inspectable patterns.** `PatternModel.vectorize` must return named, interpretable numbers, not opaque embeddings.
 - **Standard library only.** Numeric work belongs in a medium's implementation, so the core stays light and importable anywhere.

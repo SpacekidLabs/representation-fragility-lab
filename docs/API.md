@@ -54,7 +54,7 @@ report.pair("acf", "cepstrum")       # cents, octave_related, pitch_term, confid
 report.overall                       # mean pair score, 0 (all agree) .. 1
 report.divergence                    # per representation: how much it disagrees with the others
 report.outlier                       # the lens most likely in a blind spot, or None
-report.consensus_f0                  # confidence-weighted median of the voiced readings
+report.consensus_f0                  # confidence-weighted median of the agreeing voiced readings (0.0 without a quorum of 2)
 ```
 
 Pair score = `0.5 * min(cents / 1200, 1) + 0.5 * |confidence_a - confidence_b|`. Definitions and calibration notes are in [`src/framework/disagreement.py`](../src/framework/disagreement.py); tests in [`tests/test_disagreement.py`](../tests/test_disagreement.py) (`pytest tests`).

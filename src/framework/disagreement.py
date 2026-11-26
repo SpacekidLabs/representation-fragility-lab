@@ -40,7 +40,8 @@ Overall measures: ``overall`` (mean pair score), per-representation
 ``divergence`` (mean score of the pairs it is part of), ``outlier`` (the
 representation that diverges most, when the margin is clear and at least one
 representation is confident) and
-``consensus_f0`` (confidence-weighted median of the voiced readings).
+``consensus_f0`` (confidence-weighted median of the largest group of voiced
+readings that agree, and 0.0 unless at least two agree: the quorum of issue #20).
 
 Only NumPy is required.
 """

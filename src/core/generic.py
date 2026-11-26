@@ -52,14 +52,25 @@ class PairwiseComparator(Comparator):
     divergence   = per representation, mean score of the pairs it is part of
     outlier      = the most divergent representation, when it leads the next one
                    by ``outlier_margin`` and at least one reading is not blind
-    consensus    = ``fuse`` over the non-blind readings (None if all are blind)
+    consensus    = ``fuse`` over the quorum group (see below), else None
+
+    Quorum (issue #20). With ``min_agreeing = k`` the comparator looks for the
+    largest group of trusted (non-blind) readings that all agree with each other
+    pairwise (``agrees``; by default the medium's relation is "agree"). Ties go
+    to the group with the higher total confidence. If that group has at least
+    ``k`` members, the consensus is ``fuse`` over it; otherwise there is no
+    consensus. ``min_agreeing = None`` is the legacy rule: ``fuse`` over all
+    trusted readings, even a single one.
     """
 
     def __init__(self, distance_weight: float = 0.5, outlier_margin: float = 0.10,
-                 detector: BlindSpotDetector | None = None):
+                 detector: BlindSpotDetector | None = None, min_agreeing: int | None = 2):
+        if min_agreeing is not None and min_agreeing < 1:
+            raise ValueError("min_agreeing must be >= 1 or None")
         self.distance_weight = distance_weight
         self.outlier_margin = outlier_margin
         self.detector = detector or ConfidenceThresholdDetector()
+        self.min_agreeing = min_agreeing
 
     # -- medium-specific hooks ------------------------------------------------
 
@@ -71,7 +82,31 @@ class PairwiseComparator(Comparator):
         """Fuse trusted readings into one estimate. Default: the most confident one."""
         return max(readings, key=lambda r: r.confidence).estimate
 
+    def agrees(self, pair: PairComparison) -> bool:
+        """Whether two readings agree, for the quorum. Default: relation == "agree"."""
+        return pair.relation == "agree"
+
     # -- generic machinery ----------------------------------------------------
+
+    def quorum_group(self, readings: Mapping[str, Reading], trusted: Sequence[str],
+                     pairs: Sequence[PairComparison]) -> tuple[str, ...]:
+        """The largest group of trusted readings that pairwise agree (empty if none).
+
+        Ties go to the higher total confidence, then to the earlier names.
+        Exhaustive search: fine for the handful of lenses a medium has.
+        """
+        agree = {frozenset((p.a, p.b)) for p in pairs if self.agrees(p)}
+        for size in range(len(trusted), 0, -1):
+            best, best_conf = (), -1.0
+            for group in combinations(trusted, size):
+                if all(frozenset(ab) in agree for ab in combinations(group, 2)):
+                    conf = sum(readings[n].confidence for n in group)
+                    if conf > best_conf:
+                        best, best_conf = group, conf
+            if best:
+                return best
+        return ()
+
 
     def compare_pair(self, a: Reading, b: Reading) -> PairComparison:
         if a.estimate is None and b.estimate is None:
@@ -100,7 +135,13 @@ class PairwiseComparator(Comparator):
             scores = [p.score for p in pairs if n in (p.a, p.b)]
             divergence[n] = sum(scores) / len(scores) if scores else 0.0
 
-        trusted = [readings[n] for n in names if not assessments[n].blind]
+        trusted_names = [n for n in names if not assessments[n].blind]
+        trusted = [readings[n] for n in trusted_names]
+        if self.min_agreeing is None:
+            fused_from = tuple(trusted_names)
+        else:
+            group = self.quorum_group(readings, trusted_names, pairs)
+            fused_from = group if len(group) >= self.min_agreeing else ()
         outlier = None
         if len(names) >= 3 and trusted:
             ranked = sorted(names, key=divergence.get, reverse=True)
@@ -113,8 +154,9 @@ class PairwiseComparator(Comparator):
             overall=overall,
             divergence=divergence,
             outlier=outlier,
-            consensus=self.fuse(trusted) if trusted else None,
+            consensus=self.fuse([readings[n] for n in fused_from]) if fused_from else None,
             assessments=dict(assessments),
+            consensus_from=fused_from,
         )
 
 

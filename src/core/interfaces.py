@@ -80,8 +80,9 @@ class ComparisonReport:
     overall: float                   # mean pair score, 0 (all agree) .. 1
     divergence: dict[str, float]     # per representation: mean score of its pairs
     outlier: str | None              # the representation most likely blind, if clear
-    consensus: Any                   # fused estimate, or None when nobody is confident
+    consensus: Any                   # fused estimate, or None when there is no quorum
     assessments: dict[str, Assessment] = field(default_factory=dict)
+    consensus_from: tuple[str, ...] = ()  # the representations fused into the consensus
 
     def pair(self, a: str, b: str) -> PairComparison:
         for p in self.pairs:

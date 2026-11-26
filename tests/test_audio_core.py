@@ -98,3 +98,16 @@ def test_pitch_comparator_relations():
     assert c.compare_pair(Reading("a", 110.0, 1), Reading("b", 220.0, 1)).relation == "octave below"
     assert c.compare_pair(Reading("a", 221.0, 1), Reading("b", 220.0, 1)).relation == "agree"
     assert c.compare_pair(Reading("a", 300.0, 1), Reading("b", 220.0, 1)).relation == "off"
+
+
+def test_one_confident_lens_does_not_make_a_pitch():
+    """Issue #20: on unvoiced audio one lens is often wrongly sure (Exp 045)."""
+    from core import Reading
+
+    rd = {"stft": Reading("stft", None, 0.1), "acf": Reading("acf", 180.0, 0.8),
+          "cepstrum": Reading("cepstrum", 310.0, 0.3)}
+    assert PitchComparator().compare(rd).consensus is None
+    assert PitchComparator(min_agreeing=None).compare(rd).consensus == 180.0
+    # an octave relation is not agreement
+    rd["cepstrum"] = Reading("cepstrum", 360.0, 0.8)
+    assert PitchComparator().compare(rd).consensus is None

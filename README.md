@@ -78,7 +78,7 @@ The key claims re-run on vocadito (real singing), MDB-stem-synth (230 resynthesi
 | The consensus is a better answer (audio) | Holds on MDB-stem-synth (7.3% vs 9.9%); a tie on vocadito |
 | ACF + Cepstrum share a blind spot | Holds (2.6–3.0×); STFT + Cepstrum are no longer complementary (0.7–0.85×) |
 | The framework's pitch tracker beats fixed YIN | **Does not hold**: a loss, at best a tie once its delay is removed |
-| No confident answer when there is no pitch | **Fails**: breaths and consonants fool single lenses (36–99% of unvoiced frames) |
+| No confident answer when there is no pitch | **Failed**: breaths and consonants fool single lenses (36–99% of unvoiced frames). Fixed by a quorum of two agreeing lenses (Exp 046): 0–7%, at the cost of more abstentions in heavy noise |
 
 Full table with every dataset, metric and confidence interval: [Exp 045 in docs/EXPERIMENTS.md](docs/EXPERIMENTS.md#exp-045--do-the-claims-survive-real-recordings-and-photos).
 
@@ -93,7 +93,8 @@ flowchart LR
     C --> D["Exp 042–043<br/>Disagreement as<br/>information"]
     D --> E["Exp 044<br/>Second medium:<br/>images"]
     E --> G["Exp 045<br/>Real data"]
-    G --> F["Next: Lean proofs #11"]
+    G --> H["Exp 046<br/>Consensus<br/>quorum"]
+    H --> F["Next: Lean proofs #11"]
 ```
 
 | | | | |
