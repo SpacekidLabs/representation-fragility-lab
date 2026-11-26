@@ -1,0 +1,1069 @@
+{
+  "audio": {
+    "vocadito": {
+      "n_frames": 17955,
+      "gross_cents": 50.0,
+      "per_rep": {
+        "stft": {
+          "gross_error_rate": 0.14307992202729045,
+          "auc": {
+            "assumption": 0.4893114096181324,
+            "state_model": 0.36332309500475046,
+            "self_conf": 0.8503072637047718,
+            "divergence": 0.9852455941479864,
+            "disagree_model": 0.9894337575013344,
+            "combined": 0.9908562919878278
+          },
+          "spearman_divergence_vs_log_error": 0.3745771582227863
+        },
+        "acf": {
+          "gross_error_rate": 0.041882483987747146,
+          "auc": {
+            "assumption": 0.8038248833392493,
+            "state_model": 0.7720589462995692,
+            "self_conf": 0.8846630071944404,
+            "divergence": 0.7365854823688595,
+            "disagree_model": 0.8592920767159612,
+            "combined": 0.8535793948606193
+          },
+          "spearman_divergence_vs_log_error": 0.2217706104823353
+        },
+        "cepstrum": {
+          "gross_error_rate": 0.22456140350877193,
+          "auc": {
+            "assumption": 0.7682058934684985,
+            "state_model": 0.7928819319750692,
+            "self_conf": 0.8370777442030943,
+            "divergence": 0.9326489320799545,
+            "disagree_model": 0.9799313600083909,
+            "combined": 0.979681491542486
+          },
+          "spearman_divergence_vs_log_error": 0.6355289582430499
+        }
+      },
+      "fusion": {
+        "stft": {
+          "gross_error_rate": 0.14307992202729045,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.14307992202729045
+        },
+        "acf": {
+          "gross_error_rate": 0.041882483987747146,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.041882483987747146
+        },
+        "cepstrum": {
+          "gross_error_rate": 0.22456140350877193,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.22456140350877193
+        },
+        "engine_routed": {
+          "gross_error_rate": 0.06003898635477583,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.06003898635477583
+        },
+        "consensus": {
+          "gross_error_rate": 0.055639097744360905,
+          "abstain_rate": 0.03631300473405741,
+          "gross_error_rate_when_answering": 0.020054325839449806
+        },
+        "oracle_best_single": {
+          "gross_error_rate": 0.003954330270119744,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.003954330270119744
+        }
+      },
+      "by_family": {
+        "clean": {
+          "gross_error_rate": 0.07026826325071939,
+          "auc_divergence": 0.9830615796759531,
+          "auc_assumption": 0.5111458390485395
+        },
+        "clipping": {
+          "gross_error_rate": 0.09338160215353197,
+          "auc_divergence": 0.9808124733731327,
+          "auc_assumption": 0.5768457749459015
+        },
+        "noise": {
+          "gross_error_rate": 0.17296327237847706,
+          "auc_divergence": 0.8932018722872138,
+          "auc_assumption": 0.7413167851631606
+        }
+      },
+      "by_signal": {
+        "vocadito": {
+          "gross_error_rate": 0.1365079365079365,
+          "auc_divergence": 0.9340497702918962,
+          "auc_assumption": 0.7050472719025266
+        }
+      },
+      "unpitched": {
+        "n_frames": 1781,
+        "stft": {
+          "false_voiced_rate": 0.11791128579449747
+        },
+        "acf": {
+          "false_voiced_rate": 0.2549129702414374
+        },
+        "cepstrum": {
+          "false_voiced_rate": 0.120157215047726
+        },
+        "any_single_lens": {
+          "false_voiced_rate": 0.3627175743964065
+        },
+        "consensus": {
+          "false_voiced_rate": 0.3627175743964065
+        },
+        "mean_overall_disagreement": 0.4701399231972617
+      },
+      "patterns": {
+        "n_frames": 19736,
+        "n_pitched": 17955,
+        "k": 10,
+        "co_failure": {
+          "STFT+ACF": {
+            "both_wrong": 0.010582010582010581,
+            "if_independent": 0.005992542543276102,
+            "lift": 1.7658632384486057,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.007518796992481203,
+                "lift": 5.360294117647059
+              },
+              "clipping": {
+                "both_wrong": 0.012531328320802004,
+                "lift": 4.387591637252241
+              },
+              "noise": {
+                "both_wrong": 0.010953309198923233,
+                "lift": 1.32909891598916
+              }
+            }
+          },
+          "STFT+CEP": {
+            "both_wrong": 0.027457532720690615,
+            "if_independent": 0.03213022810437399,
+            "lift": 0.8545701148306735,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.005012531328320802,
+                "lift": 0.5588235294117647
+              },
+              "clipping": {
+                "both_wrong": 0.01364522417153996,
+                "lift": 0.8853060300369803
+              },
+              "noise": {
+                "both_wrong": 0.039543302701197436,
+                "lift": 0.9055427694668202
+              }
+            }
+          },
+          "ACF+CEP": {
+            "both_wrong": 0.02857142857142857,
+            "if_independent": 0.009405189386722166,
+            "lift": 3.0378366023936167,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.000556947925368978,
+                "lift": 0.7777777777777778
+              },
+              "clipping": {
+                "both_wrong": 0.003620161514898357,
+                "lift": 2.5714993940729314
+              },
+              "noise": {
+                "both_wrong": 0.04622667780562517,
+                "lift": 2.3527858275562044
+              }
+            }
+          }
+        },
+        "all_three_wrong": 0.003954330270119744,
+        "state_map_comparison": {
+          "nmi_true_failure_vs_disagreement_patterns": 0.5808921645507642,
+          "nmi_true_failure_vs_disagreement_clusters": 0.5392359635392948,
+          "nmi_true_failure_vs_engine_regions": 0.08568256187411372,
+          "nmi_true_failure_vs_state_kmeans_same_k": 0.1590587358413159,
+          "nmi_disagreement_patterns_vs_engine_regions": 0.16689114978603362,
+          "pattern_from_z1z2_knn_accuracy": 0.5774726388325901,
+          "pattern_majority_baseline": 0.3553911633563032
+        },
+        "named": [
+          {
+            "name": "all agree, CEP unsure",
+            "share": 0.3553911633563032,
+            "purity": 0.7489307100085543,
+            "gross_error_rate": {
+              "STFT": 0.00424038602134815,
+              "ACF": 0.04386606228980845,
+              "CEP": 0.1552858605059219
+            }
+          },
+          {
+            "name": "all agree, all confident",
+            "share": 0.3085224969598703,
+            "purity": 0.9993430776810642,
+            "gross_error_rate": {
+              "STFT": 0.0011507479861910242,
+              "ACF": 0.001643925694558606,
+              "CEP": 0.0013151405556468849
+            }
+          },
+          {
+            "name": "CEP an octave low (unsure), others agree",
+            "share": 0.12935751925415484,
+            "purity": 0.5558166862514688,
+            "gross_error_rate": {
+              "STFT": 0.109979633401222,
+              "ACF": 0.12586558044806517,
+              "CEP": 0.9511201629327902
+            }
+          },
+          {
+            "name": "STFT an octave high (confident), others agree",
+            "share": 0.11831171463315768,
+            "purity": 0.5100642398286938,
+            "gross_error_rate": {
+              "STFT": 0.9772129710780018,
+              "ACF": 0.031989482909728306,
+              "CEP": 0.1476774758983348
+            }
+          },
+          {
+            "name": "scattered, none confident",
+            "share": 0.07463518443453587,
+            "purity": 0.7155465037338764,
+            "gross_error_rate": {
+              "STFT": 0.2523364485981308,
+              "ACF": 0.4205607476635514,
+              "CEP": 0.9813084112149533
+            }
+          },
+          {
+            "name": "CEP off-pitch (unsure), others agree",
+            "share": 0.013781921361978111,
+            "purity": 0.6066176470588235,
+            "gross_error_rate": {
+              "STFT": 0.031746031746031744,
+              "ACF": 0.07936507936507936,
+              "CEP": 0.9788359788359788
+            }
+          }
+        ]
+      },
+      "n_tracks": 40,
+      "significance": {
+        "best_single_lens": "acf",
+        "consensus_minus_best_lens": {
+          "diff": 0.013756613756613759,
+          "ci95": [
+            -0.0018939484616599632,
+            0.029951700460383056
+          ]
+        },
+        "consensus_minus_engine_routed": {
+          "diff": -0.004399888610414925,
+          "ci95": [
+            -0.014402264515078334,
+            0.005760442899317665
+          ]
+        },
+        "consensus_when_answering_minus_best_lens_same_frames": {
+          "diff": -0.011096341674854071,
+          "ci95": [
+            -0.02120440831464812,
+            -0.0013795267223632556
+          ]
+        }
+      }
+    },
+    "mdb_stem_synth": {
+      "n_frames": 64335,
+      "gross_cents": 50.0,
+      "per_rep": {
+        "stft": {
+          "gross_error_rate": 0.13280484961529493,
+          "auc": {
+            "assumption": 0.5496464907284725,
+            "state_model": 0.6539870314718582,
+            "self_conf": 0.8611370867007196,
+            "divergence": 0.9691660940372901,
+            "disagree_model": 0.9873872736611902,
+            "combined": 0.9882858545204525
+          },
+          "spearman_divergence_vs_log_error": 0.39823886957299326
+        },
+        "acf": {
+          "gross_error_rate": 0.09935493899121785,
+          "auc": {
+            "assumption": 0.8053453474852298,
+            "state_model": 0.8202346375015263,
+            "self_conf": 0.865100511363105,
+            "divergence": 0.7695913911943629,
+            "disagree_model": 0.9025448534863045,
+            "combined": 0.9031842544668159
+          },
+          "spearman_divergence_vs_log_error": 0.3362143886239736
+        },
+        "cepstrum": {
+          "gross_error_rate": 0.26186368228802365,
+          "auc": {
+            "assumption": 0.7857320000425584,
+            "state_model": 0.8610973409388316,
+            "self_conf": 0.858773852795502,
+            "divergence": 0.937606304718925,
+            "disagree_model": 0.9813681340203579,
+            "combined": 0.9813518658872455
+          },
+          "spearman_divergence_vs_log_error": 0.7550765270967587
+        }
+      },
+      "fusion": {
+        "stft": {
+          "gross_error_rate": 0.13280484961529493,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.13280484961529493
+        },
+        "acf": {
+          "gross_error_rate": 0.09935493899121785,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.09935493899121785
+        },
+        "cepstrum": {
+          "gross_error_rate": 0.26186368228802365,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.26186368228802365
+        },
+        "engine_routed": {
+          "gross_error_rate": 0.11185202455894926,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.11185202455894926
+        },
+        "consensus": {
+          "gross_error_rate": 0.07321053858708323,
+          "abstain_rate": 0.05132509520478745,
+          "gross_error_rate_when_answering": 0.023069486998836694
+        },
+        "oracle_best_single": {
+          "gross_error_rate": 0.008517914043677625,
+          "abstain_rate": 0.0,
+          "gross_error_rate_when_answering": 0.008517914043677625
+        }
+      },
+      "by_family": {
+        "clean": {
+          "gross_error_rate": 0.052019377736328073,
+          "auc_divergence": 0.984794990507731,
+          "auc_assumption": 0.4228843650348732
+        },
+        "clipping": {
+          "gross_error_rate": 0.08603404056889719,
+          "auc_divergence": 0.9792964111771377,
+          "auc_assumption": 0.5453237352353367
+        },
+        "noise": {
+          "gross_error_rate": 0.22843967772855625,
+          "auc_divergence": 0.8542959581729531,
+          "auc_assumption": 0.7420819677257864
+        }
+      },
+      "by_signal": {
+        "mdb_stem_synth": {
+          "gross_error_rate": 0.1646744902981788,
+          "auc_divergence": 0.9140046262658624,
+          "auc_assumption": 0.7371205831205289
+        }
+      },
+      "unpitched": {
+        "n_frames": 292,
+        "stft": {
+          "false_voiced_rate": 0.0
+        },
+        "acf": {
+          "false_voiced_rate": 0.15753424657534246
+        },
+        "cepstrum": {
+          "false_voiced_rate": 0.9691780821917808
+        },
+        "any_single_lens": {
+          "false_voiced_rate": 0.9897260273972602
+        },
+        "consensus": {
+          "false_voiced_rate": 0.9897260273972602
+        },
+        "mean_overall_disagreement": 0.7328726048977623
+      },
+      "patterns": {
+        "n_frames": 64627,
+        "n_pitched": 64335,
+        "k": 9,
+        "co_failure": {
+          "STFT+ACF": {
+            "both_wrong": 0.019771508510142224,
+            "if_independent": 0.013194817731265488,
+            "lift": 1.4984298315309867,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.013445247532447345,
+                "lift": 4.002918581817396
+              },
+              "clipping": {
+                "both_wrong": 0.02028444858941478,
+                "lift": 4.408543020972264
+              },
+              "noise": {
+                "both_wrong": 0.021709282142949666,
+                "lift": 1.1205174556805588
+              }
+            }
+          },
+          "STFT+CEP": {
+            "both_wrong": 0.024931996580399473,
+            "if_independent": 0.03477676694596835,
+            "lift": 0.716915307829954,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.00015543638765835082,
+                "lift": 0.39566420664206636
+              },
+              "clipping": {
+                "both_wrong": 0.009559337840988575,
+                "lift": 0.7992167616046539
+              },
+              "noise": {
+                "both_wrong": 0.03831506955778348,
+                "lift": 0.7084255353977877
+              }
+            }
+          },
+          "ACF+CEP": {
+            "both_wrong": 0.06784798321287014,
+            "if_independent": 0.026017450177742242,
+            "lift": 2.607787571393666,
+            "by_family": {
+              "clean": {
+                "both_wrong": 0.0009326183259501049,
+                "lift": 11.286842105263156
+              },
+              "clipping": {
+                "both_wrong": 0.008315846739721768,
+                "lift": 2.904759794923729
+              },
+              "noise": {
+                "both_wrong": 0.10999715033289292,
+                "lift": 1.85692260775489
+              }
+            }
+          }
+        },
+        "all_three_wrong": 0.008517914043677625,
+        "state_map_comparison": {
+          "nmi_true_failure_vs_disagreement_patterns": 0.5348188268373731,
+          "nmi_true_failure_vs_disagreement_clusters": 0.5269547968562814,
+          "nmi_true_failure_vs_engine_regions": 0.11973356160387497,
+          "nmi_true_failure_vs_state_kmeans_same_k": 0.14808406911096528,
+          "nmi_disagreement_patterns_vs_engine_regions": 0.23493296091988658,
+          "pattern_from_z1z2_knn_accuracy": 0.635601219304625,
+          "pattern_majority_baseline": 0.4224859578813808
+        },
+        "named": [
+          {
+            "name": "all agree, all confident",
+            "share": 0.4224859578813808,
+            "purity": 0.9921989452094931,
+            "gross_error_rate": {
+              "STFT": 0.0006958687371813654,
+              "ACF": 0.00849692352768825,
+              "CEP": 0.0002929973630237328
+            }
+          },
+          {
+            "name": "all agree, CEP unsure",
+            "share": 0.2703204542992867,
+            "purity": 0.7812249570692615,
+            "gross_error_rate": {
+              "STFT": 0.0017172295363480253,
+              "ACF": 0.14419004006868918,
+              "CEP": 0.2576416714367487
+            }
+          },
+          {
+            "name": "STFT an octave high (confident), others agree",
+            "share": 0.10207807882154517,
+            "purity": 0.5669243595573745,
+            "gross_error_rate": {
+              "STFT": 0.9530089434591481,
+              "ACF": 0.05350917083522813,
+              "CEP": 0.10262240412308625
+            }
+          },
+          {
+            "name": "CEP an octave low (unsure), others agree",
+            "share": 0.09851919476379842,
+            "purity": 0.360452332338621,
+            "gross_error_rate": {
+              "STFT": 0.13287262446992304,
+              "ACF": 0.13569970158630437,
+              "CEP": 0.905607036280823
+            }
+          },
+          {
+            "name": "CEP off-pitch (unsure), others agree",
+            "share": 0.06421464712890897,
+            "purity": 0.4983132530120482,
+            "gross_error_rate": {
+              "STFT": 0.07156626506024097,
+              "ACF": 0.29397590361445786,
+              "CEP": 0.9889156626506024
+            }
+          },
+          {
+            "name": "scattered, none confident",
+            "share": 0.04238166710507992,
+            "purity": 0.5706462212486308,
+            "gross_error_rate": {
+              "STFT": 0.4352268083367389,
+              "ACF": 0.49203105843890477,
+              "CEP": 0.7319166326113609
+            }
+          }
+        ]
+      },
+      "n_tracks": 227,
+      "significance": {
+        "best_single_lens": "acf",
+        "consensus_minus_best_lens": {
+          "diff": -0.026144400404134613,
+          "ci95": [
+            -0.03774383713236236,
+            -0.014962492765139918
+          ]
+        },
+        "consensus_minus_engine_routed": {
+          "diff": -0.03864148597186602,
+          "ci95": [
+            -0.049430610238860924,
+            -0.028306475659295297
+          ]
+        },
+        "consensus_when_answering_minus_best_lens_same_frames": {
+          "diff": -0.05590418298297642,
+          "ci95": [
+            -0.06659627238677088,
+            -0.04540141539269732
+          ]
+        }
+      }
+    }
+  },
+  "tracker": {
+    "vocadito": {
+      "clean -": {
+        "n_frames": 22898,
+        "fixed_yin": {
+          "ger_20pct": 0.02030745043235217,
+          "ger_50c": 0.0755524499956328,
+          "no_estimate": 0.0
+        },
+        "adaptive_tracker": {
+          "ger_20pct": 0.03070137129880339,
+          "ger_50c": 0.2418551838588523,
+          "no_estimate": 8.734387282732117e-05
+        },
+        "adaptive_tracker_lag2": {
+          "ger_20pct": 0.018568682278923453,
+          "ger_50c": 0.0872509612023768,
+          "no_estimate": 0.0
+        }
+      },
+      "noise 10 dB": {
+        "n_frames": 22898,
+        "fixed_yin": {
+          "ger_20pct": 0.029871604506943837,
+          "ger_50c": 0.09149270678661892,
+          "no_estimate": 0.0
+        },
+        "adaptive_tracker": {
+          "ger_20pct": 0.03153113809066294,
+          "ger_50c": 0.22565289544938422,
+          "no_estimate": 0.0
+        },
+        "adaptive_tracker_lag2": {
+          "ger_20pct": 0.027569031807060468,
+          "ger_50c": 0.17314750087382033,
+          "no_estimate": 0.0
+        }
+      }
+    },
+    "mdb_stem_synth": {
+      "clean -": {
+        "n_frames": 99879,
+        "fixed_yin": {
+          "ger_20pct": 0.042311196547822866,
+          "ger_50c": 0.12068603009641667,
+          "no_estimate": 0.0
+        },
+        "adaptive_tracker": {
+          "ger_20pct": 0.06596982348641857,
+          "ger_50c": 0.22292974499143964,
+          "no_estimate": 0.007579170796663964
+        },
+        "adaptive_tracker_lag2": {
+          "ger_20pct": 0.049955862290345876,
+          "ger_50c": 0.13799053045501966,
+          "no_estimate": 0.007633817510633176
+        }
+      },
+      "noise 10 dB": {
+        "n_frames": 99879,
+        "fixed_yin": {
+          "ger_20pct": 0.07427987865317033,
+          "ger_50c": 0.15873206579961754,
+          "no_estimate": 0.0
+        },
+        "adaptive_tracker": {
+          "ger_20pct": 0.08776619709848917,
+          "ger_50c": 0.245306821253717,
+          "no_estimate": 0.006788213738623735
+        },
+        "adaptive_tracker_lag2": {
+          "ger_20pct": 0.08672056817269883,
+          "ger_50c": 0.2215211459754434,
+          "no_estimate": 0.006961720568172699
+        }
+      }
+    }
+  },
+  "image": {
+    "n_patches": 3084,
+    "n_analysed": 3084,
+    "gross_deg": 10.0,
+    "lenses": [
+      "tensor",
+      "hog",
+      "fft",
+      "gabor",
+      "radon"
+    ],
+    "empty": {
+      "n": 0,
+      "conditions": []
+    },
+    "atlas": {
+      "tensor": {
+        "clean 0": 0.3151750972762646,
+        "noise 0.1": 0.321011673151751,
+        "noise 0.3": 0.47470817120622566,
+        "blur 2.5": 0.22178988326848248,
+        "jpeg 20": 0.31906614785992216,
+        "occlusion 0.25": 0.5369649805447471
+      },
+      "hog": {
+        "clean 0": 0.20428015564202334,
+        "noise 0.1": 0.2918287937743191,
+        "noise 0.3": 0.5642023346303502,
+        "blur 2.5": 0.17704280155642024,
+        "jpeg 20": 0.23346303501945526,
+        "occlusion 0.25": 0.5214007782101168
+      },
+      "fft": {
+        "clean 0": 0.14785992217898833,
+        "noise 0.1": 0.1517509727626459,
+        "noise 0.3": 0.20038910505836577,
+        "blur 2.5": 0.15953307392996108,
+        "jpeg 20": 0.14007782101167315,
+        "occlusion 0.25": 0.7354085603112841
+      },
+      "gabor": {
+        "clean 0": 0.08754863813229571,
+        "noise 0.1": 0.08754863813229571,
+        "noise 0.3": 0.19455252918287938,
+        "blur 2.5": 0.09533073929961089,
+        "jpeg 20": 0.08949416342412451,
+        "occlusion 0.25": 0.6070038910505836
+      },
+      "radon": {
+        "clean 0": 0.09533073929961089,
+        "noise 0.1": 0.10311284046692606,
+        "noise 0.3": 0.10505836575875487,
+        "blur 2.5": 0.1245136186770428,
+        "jpeg 20": 0.09922178988326848,
+        "occlusion 0.25": 0.556420233463035
+      }
+    },
+    "atlas_by_signal": {
+      "tensor": {
+        "edge": NaN,
+        "grating": NaN,
+        "line": NaN,
+        "texture": NaN
+      },
+      "hog": {
+        "edge": NaN,
+        "grating": NaN,
+        "line": NaN,
+        "texture": NaN
+      },
+      "fft": {
+        "edge": NaN,
+        "grating": NaN,
+        "line": NaN,
+        "texture": NaN
+      },
+      "gabor": {
+        "edge": NaN,
+        "grating": NaN,
+        "line": NaN,
+        "texture": NaN
+      },
+      "radon": {
+        "edge": NaN,
+        "grating": NaN,
+        "line": NaN,
+        "texture": NaN
+      }
+    },
+    "prediction": {
+      "tensor": {
+        "gross_error_rate": 0.3647859922178988,
+        "auc_self_conf": 0.7507580965345131,
+        "auc_divergence": 0.8117057455617945,
+        "auc_disagree_model": 0.9182158697748284
+      },
+      "hog": {
+        "gross_error_rate": 0.3320363164721141,
+        "auc_self_conf": 0.7297069364381068,
+        "auc_divergence": 0.6595774233919903,
+        "auc_disagree_model": 0.9081633040048543
+      },
+      "fft": {
+        "gross_error_rate": 0.25583657587548636,
+        "auc_self_conf": 0.5109689052356614,
+        "auc_divergence": 0.8269086651700533,
+        "auc_disagree_model": 0.8984959312551947
+      },
+      "gabor": {
+        "gross_error_rate": 0.193579766536965,
+        "auc_self_conf": 0.6683157780593088,
+        "auc_divergence": 0.8114530567325301,
+        "auc_disagree_model": 0.8680549241314467
+      },
+      "radon": {
+        "gross_error_rate": 0.18060959792477302,
+        "auc_self_conf": 0.8232272782494837,
+        "auc_divergence": 0.6984346437292324,
+        "auc_disagree_model": 0.8874759420520497
+      }
+    },
+    "answer": {
+      "tensor": {
+        "gross_error_rate": 0.3647859922178988,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.3647859922178988
+      },
+      "hog": {
+        "gross_error_rate": 0.3320363164721141,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.3320363164721141
+      },
+      "fft": {
+        "gross_error_rate": 0.25583657587548636,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.25583657587548636
+      },
+      "gabor": {
+        "gross_error_rate": 0.193579766536965,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.193579766536965
+      },
+      "radon": {
+        "gross_error_rate": 0.18060959792477302,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.18060959792477302
+      },
+      "most_confident": {
+        "gross_error_rate": 0.22535667963683528,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.22535667963683528
+      },
+      "consensus": {
+        "gross_error_rate": 0.24351491569390402,
+        "abstain_rate": 0.05966277561608302,
+        "gross_error_rate_when_answering": 0.19551724137931034
+      },
+      "learned_pick": {
+        "gross_error_rate": 0.16407263294422827,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.16407263294422827
+      },
+      "learned_consensus": {
+        "gross_error_rate": 0.16763942931258105,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.16763942931258105
+      },
+      "oracle_best_single": {
+        "gross_error_rate": 0.06420233463035019,
+        "abstain_rate": 0.0,
+        "gross_error_rate_when_answering": 0.06420233463035019
+      }
+    },
+    "answer_by_family": {
+      "clean": {
+        "tensor": 0.3151750972762646,
+        "hog": 0.20428015564202334,
+        "fft": 0.14785992217898833,
+        "gabor": 0.08754863813229571,
+        "radon": 0.09533073929961089,
+        "consensus": 0.10505836575875487,
+        "learned_pick": 0.07392996108949416
+      },
+      "noise": {
+        "tensor": 0.3978599221789883,
+        "hog": 0.4280155642023346,
+        "fft": 0.17607003891050585,
+        "gabor": 0.14105058365758755,
+        "radon": 0.10408560311284047,
+        "consensus": 0.22081712062256809,
+        "learned_pick": 0.10603112840466926
+      },
+      "blur": {
+        "tensor": 0.22178988326848248,
+        "hog": 0.17704280155642024,
+        "fft": 0.15953307392996108,
+        "gabor": 0.09533073929961089,
+        "radon": 0.1245136186770428,
+        "consensus": 0.1245136186770428,
+        "learned_pick": 0.10311284046692606
+      },
+      "jpeg": {
+        "tensor": 0.31906614785992216,
+        "hog": 0.23346303501945526,
+        "fft": 0.14007782101167315,
+        "gabor": 0.08949416342412451,
+        "radon": 0.09922178988326848,
+        "consensus": 0.09922178988326848,
+        "learned_pick": 0.07003891050583658
+      },
+      "occlusion": {
+        "tensor": 0.5369649805447471,
+        "hog": 0.5214007782101168,
+        "fft": 0.7354085603112841,
+        "gabor": 0.6070038910505836,
+        "radon": 0.556420233463035,
+        "consensus": 0.6906614785992218,
+        "learned_pick": 0.5252918287937743
+      }
+    },
+    "co_failure_lift": {
+      "tensor+hog": 1.9034062500000002,
+      "tensor+fft": 1.6746801858893114,
+      "tensor+gabor": 1.997453936348409,
+      "tensor+radon": 1.8702094554159188,
+      "hog+fft": 1.7826015922053233,
+      "hog+gabor": 2.1742894158291457,
+      "hog+radon": 1.8654272329443449,
+      "fft+gabor": 3.0248581309589775,
+      "fft+radon": 3.010505764859275,
+      "gabor+radon": 2.9956244417780105
+    },
+    "co_failure_lift_within_condition": {
+      "tensor+hog": 1.687681835394519,
+      "tensor+fft": 1.4092765560472815,
+      "tensor+gabor": 1.6160367744313628,
+      "tensor+radon": 1.569402595315576,
+      "hog+fft": 1.43773209707947,
+      "hog+gabor": 1.652375624673678,
+      "hog+radon": 1.511159211569107,
+      "fft+gabor": 1.6664888838984955,
+      "fft+radon": 1.6903747086961853,
+      "gabor+radon": 1.5856318765281172
+    },
+    "failure_sets": [
+      {
+        "lenses": "tensor",
+        "n": 264,
+        "top_conditions": [
+          "jpeg 20 (64)",
+          "clean 0 (63)",
+          "noise 0.1 (56)"
+        ]
+      },
+      {
+        "lenses": "tensor+hog",
+        "n": 234,
+        "top_conditions": [
+          "noise 0.3 (96)",
+          "noise 0.1 (46)",
+          "jpeg 20 (34)"
+        ]
+      },
+      {
+        "lenses": "tensor+hog+fft+gabor+radon",
+        "n": 198,
+        "top_conditions": [
+          "occlusion 0.25 (131)",
+          "noise 0.3 (16)",
+          "blur 2.5 (15)"
+        ]
+      },
+      {
+        "lenses": "hog",
+        "n": 186,
+        "top_conditions": [
+          "noise 0.3 (72)",
+          "noise 0.1 (39)",
+          "jpeg 20 (28)"
+        ]
+      },
+      {
+        "lenses": "fft",
+        "n": 97,
+        "top_conditions": [
+          "occlusion 0.25 (22)",
+          "clean 0 (19)",
+          "noise 0.1 (17)"
+        ]
+      },
+      {
+        "lenses": "tensor+hog+fft+gabor",
+        "n": 92,
+        "top_conditions": [
+          "occlusion 0.25 (33)",
+          "noise 0.3 (27)",
+          "clean 0 (9)"
+        ]
+      },
+      {
+        "lenses": "tensor+hog+gabor",
+        "n": 52,
+        "top_conditions": [
+          "noise 0.3 (18)",
+          "occlusion 0.25 (12)",
+          "clean 0 (7)"
+        ]
+      },
+      {
+        "lenses": "fft+radon",
+        "n": 50,
+        "top_conditions": [
+          "occlusion 0.25 (28)",
+          "clean 0 (6)",
+          "jpeg 20 (6)"
+        ]
+      },
+      {
+        "lenses": "tensor+hog+fft",
+        "n": 42,
+        "top_conditions": [
+          "noise 0.3 (12)",
+          "jpeg 20 (8)",
+          "clean 0 (6)"
+        ]
+      },
+      {
+        "lenses": "tensor+fft+gabor+radon",
+        "n": 39,
+        "top_conditions": [
+          "occlusion 0.25 (33)",
+          "noise 0.1 (2)",
+          "noise 0.3 (2)"
+        ]
+      }
+    ],
+    "patterns": {
+      "silhouette": {
+        "3": 0.2935385005809033,
+        "4": 0.30180375479586197,
+        "5": 0.19281110414576055,
+        "6": 0.19656073195197588,
+        "7": 0.20417066001623752,
+        "8": 0.20409240193662473,
+        "9": 0.17199353396223535,
+        "10": 0.15641947053736135
+      },
+      "k": 4,
+      "clusters": [
+        {
+          "size": 1730,
+          "failure": "none",
+          "purity": 0.630057803468208,
+          "top_condition": "blur 2.5",
+          "mean_confidence": {
+            "tensor": 0.55,
+            "hog": 0.31,
+            "fft": 0.96,
+            "gabor": 0.77,
+            "radon": 0.88
+          },
+          "consensus_gross_rate": 0.1254335260115607
+        },
+        {
+          "size": 825,
+          "failure": "none",
+          "purity": 0.3393939393939394,
+          "top_condition": "noise 0.3",
+          "mean_confidence": {
+            "tensor": 0.12,
+            "hog": 0.04,
+            "fft": 0.31,
+            "gabor": 0.19,
+            "radon": 0.69
+          },
+          "consensus_gross_rate": 0.26181818181818184
+        },
+        {
+          "size": 289,
+          "failure": "tensor+hog",
+          "purity": 0.16608996539792387,
+          "top_condition": "occlusion 0.25",
+          "mean_confidence": {
+            "tensor": 0.16,
+            "hog": 0.12,
+            "fft": 0.74,
+            "gabor": 0.34,
+            "radon": 0.41
+          },
+          "consensus_gross_rate": 0.6401384083044983
+        },
+        {
+          "size": 240,
+          "failure": "tensor+hog",
+          "purity": 0.2791666666666667,
+          "top_condition": "occlusion 0.25",
+          "mean_confidence": {
+            "tensor": 0.15,
+            "hog": 0.12,
+            "fft": 0.71,
+            "gabor": 0.35,
+            "radon": 0.53
+          },
+          "consensus_gross_rate": 0.5541666666666667
+        }
+      ],
+      "nmi_clusters_vs_failure": 0.13888451131326646,
+      "nmi_condition_vs_failure": 0.10296887487116689,
+      "knn_failure_from_disagreement": 0.6076523994811932,
+      "majority_failure_rate": 0.4455252918287938
+    },
+    "n_base_patches": 514,
+    "n_images": 164,
+    "significance": {
+      "best_single_lens": "radon",
+      "learned_pick_minus_best_lens": {
+        "diff": -0.016536964980544744,
+        "ci95": [
+          -0.0354864563604798,
+          0.0010230285487403431
+        ]
+      },
+      "consensus_minus_best_lens": {
+        "diff": 0.062905317769131,
+        "ci95": [
+          0.043346814874600896,
+          0.08122749523909666
+        ]
+      }
+    }
+  }
+}

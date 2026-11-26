@@ -102,13 +102,15 @@ The 41 audio experiments are the proof of concept for this vision:
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
-| Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Synthetic patches only | Exp 044, issue #6 |
+| Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens | Exp 044, 045, issue #6 |
+| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses and the consensus | Exp 045, issue #7 |
 
-**Honest gaps:** almost everything is measured on synthetic signals (real data:
-issue #7). Disagreement reliably *warns* that a lens is blind, in both media, but
-turning that warning into a better *answer* only worked in audio: on images,
-lenses fail in families and the consensus loses to the best single lens. Fusion
-that knows which lenses share blind spots is the open problem.
+**Honest gaps:** disagreement reliably *warns* that a lens is blind, in both media
+and on real data (Exp 045). Turning that warning into a better *answer* is the
+open problem: it works on synthetic audio and on MDB-stem-synth, ties on real
+singing, and fails on images, where lenses fail in families. The consensus also
+trusts a single confident lens, which real unpitched frames exploit (a quorum
+rule is needed). Fusion that knows which lenses share blind spots is next.
 
 ---
 

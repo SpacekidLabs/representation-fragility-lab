@@ -339,7 +339,7 @@ def analyze(all_rows):
     rows = [r for r in all_rows if not r["empty"]]
     empty = [r for r in all_rows if r["empty"]]
     groups = np.array([r["group"] for r in rows])
-    conds = [(f, s) for f, s, _ in CONDITIONS]
+    conds = list(dict.fromkeys((r["family"], r["severity"]) for r in all_rows))
     s = {"n_patches": len(all_rows), "n_analysed": len(rows), "gross_deg": GROSS_DEG, "lenses": list(REPS),
          "empty": {"n": len(empty), "conditions": sorted({f"{r['family']} {r['severity']:g}" for r in empty})}}
 
@@ -426,8 +426,8 @@ def analyze(all_rows):
     clusters = []
     for c in range(k_best):
         idx = labels == c
-        top_fail, n_fail = max(((f, int(np.sum(fail[idx] == f))) for f in set(fail[idx])), key=lambda t: t[1])
-        top_fam = max(set(cond_label[idx]), key=lambda f: np.sum(cond_label[idx] == f))
+        top_fail, n_fail = max(((f, int(np.sum(fail[idx] == f))) for f in sorted(set(fail[idx]))), key=lambda t: t[1])
+        top_fam = max(sorted(set(cond_label[idx])), key=lambda f: np.sum(cond_label[idx] == f))
         conf = X[idx, :len(REPS)].mean(0)
         clusters.append({
             "size": int(idx.sum()),
@@ -443,7 +443,7 @@ def analyze(all_rows):
             sets.setdefault(f, []).append(c)
     s["failure_sets"] = [
         {"lenses": f, "n": len(cs),
-         "top_conditions": [f"{c} ({cs.count(c)})" for c in sorted(set(cs), key=lambda c: -cs.count(c))[:3]]}
+         "top_conditions": [f"{c} ({cs.count(c)})" for c in sorted(sorted(set(cs)), key=lambda c: -cs.count(c))[:3]]}
         for f, cs in sorted(sets.items(), key=lambda t: -len(t[1]))[:10]]
     s["patterns"] = {
         "silhouette": {str(k): v for k, v in sil.items()}, "k": int(k_best),

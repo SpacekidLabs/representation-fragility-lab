@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 24, Exp 001 to Exp 044)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 25, Exp 001 to Exp 045)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data.
 
 ## Representations
 
@@ -685,6 +685,66 @@ This replicates the main audio result on a new medium: comparing lenses tells yo
 
 ---
 
+### Phase 25 — The Key Claims on Real Data (Exp 045)
+
+#### Exp 045 — Do the Claims Survive Real Recordings and Photos?
+Everything up to Exp 044 rests on synthetic signals. This experiment re-runs the key claims on public datasets with ground truth (issue #7, [VISION.md](VISION.md) roadmap step 5). It imports the analysis functions of Exp 042, 043 and 044 rather than re-implementing them, so any difference comes from the data. Cross-validation and the confidence intervals resample whole tracks or images, never single frames.
+
+| Dataset | Medium | Ground truth | Used here |
+|---|---|---|---|
+| [vocadito](https://zenodo.org/records/5578807) | 40 solo singing excerpts, 7 languages | f0 annotated by musicians | 17,955 voiced frames + 1,781 unvoiced (all 40 tracks) |
+| [MDB-stem-synth](https://zenodo.org/records/1481172) | 230 MedleyDB stems (voice and instruments), resynthesised | exact f0 (the resynthesis follows it) | 64,335 voiced frames + 292 unvoiced (227 tracks, ≤ 60 voiced frames each) |
+| [BSDS500](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/resources.html) test split | natural photos | ~5 human boundary maps per image | 514 patches on straight human-marked boundaries (164 images) |
+
+- **Audio frames**: 2048 samples at 22.05 kHz, as in Exp 042. Truth = geometric mean of the annotation inside the frame. Frames that are partly voiced, span more than 100 cents, or lie outside the lenses' 80–1000 Hz range are skipped. Conditions: the recording as is, white noise at 20 / 10 / 0 dB SNR, hard clipping. Each voiced frame appears once per condition.
+- **Image patches**: 64×64, centred on a pixel marked by at least 3 annotators, kept only if every human boundary pixel within 28 px lies within 4 px of one straight line through the centre and the two sides differ in grey level by at least 0.08. Truth = that line's direction. Conditions: as is, noise σ 0.1 / 0.3, blur σ 2.5, JPEG-like q 20, 25% occlusion.
+- Data setup: [data/README.md](../data/README.md). The datasets are not committed.
+
+**Results, claim by claim**
+
+| Claim (synthetic source) | Dataset | Metric | Synthetic | Real | Verdict |
+|---|---|---|---|---|---|
+| A1. Disagreement predicts when a pitch lens is wrong (Exp 042) | vocadito | AUC, disagreement model (STFT / ACF / Cepstrum) | 0.987 / 0.949 / 0.985 | 0.989 / 0.859 / 0.980 | **Holds**, weaker for ACF |
+| | MDB-stem-synth | same | same | 0.987 / 0.903 / 0.981 | **Holds**, weaker for ACF |
+| A1b. …better than each lens's own confidence | both | AUC, own confidence | 0.81–0.88 | 0.84–0.89 | **Holds** (disagreement wins for every lens) |
+| A1c. The engine's assumption score is unreliable for STFT (Exp 042) | both | AUC, assumption score for STFT | 0.581 | 0.489 / 0.550 | **Holds** (at chance) |
+| A2. The consensus is a better answer than any single lens (Exp 042) | vocadito | gross error (> 50 cents), abstaining = wrong | 6.5% vs 4.3% best lens | 5.6% vs 4.2% (ACF); difference +1.4 pts, 95% CI [−0.2, +3.0] | **Not shown**: a tie with the best lens |
+| | vocadito | gross error on the frames where the consensus answers (96.4%) | 1.0% vs 4.3% | 2.0% vs 3.1% (ACF, same frames); −1.1 pts, CI [−2.1, −0.1] | **Holds**, smaller gain |
+| | MDB-stem-synth | gross error, abstaining = wrong | 6.5% vs 4.3% | 7.3% vs 9.9% (ACF); −2.6 pts, CI [−3.8, −1.5] | **Holds** |
+| A2b. …and better than the engine-routed lens (Exp 042) | vocadito | same | 6.5% vs 9.1% | 5.6% vs 6.0%; −0.4 pts, CI [−1.4, +0.6] | **Not shown** (tie) |
+| | MDB-stem-synth | same | same | 7.3% vs 11.2%; −3.9 pts, CI [−4.9, −2.8] | **Holds** |
+| A3. ACF + Cepstrum fail together, STFT + Cepstrum rarely (Exp 043) | vocadito | co-failure lift (ACF+CEP / STFT+CEP) | 2.1× / 0.08× | 3.0× / 0.85× | **Partly**: the shared periodicity blind spot holds, the "complementary pair" is gone |
+| | MDB-stem-synth | same | same | 2.6× / 0.72× | **Partly**, as above |
+| A3b. Disagreement patterns explain failures better than the state map (Exp 043) | vocadito | NMI with the true failure set: patterns vs state-map k-means | 0.546 vs 0.223 | 0.581 vs 0.159 | **Holds** |
+| | MDB-stem-synth | same | same | 0.535 vs 0.148 | **Holds** |
+| A4. Framework-assisted pitch tracking beats fixed YIN (Exp 033, 039) | vocadito, as is | GER > 20% (adaptive tracker vs fixed YIN) | 0.78% vs 0.00% (Exp 039) | 3.1% vs 2.0%; delay-compensated 1.9% vs 2.0% | **Loss**; at best a tie once its delay is removed |
+| | vocadito, 10 dB | same | — | 3.2% vs 3.0%; compensated 2.8% vs 3.0% | **Tie** |
+| | vocadito | GER > 50 cents | — | 24.2% vs 7.6%; compensated 8.7% vs 7.6% | **Loss** |
+| | MDB-stem-synth, as is / 10 dB | GER > 20% | — | 6.6% vs 4.2% / 8.8% vs 7.4%; compensated 5.0% / 8.7% | **Loss** |
+| A5. No lens, and no consensus, is confident on unpitched input (Exp 042) | vocadito unvoiced frames | share with a confident pitch: any lens = consensus | 0% (white noise) | 36% (ACF 25%) | **Fails** |
+| | MDB-stem-synth unvoiced frames | same | 0% | 99% (Cepstrum 97%) | **Fails** |
+| I1. Disagreement predicts when an image lens is wrong (Exp 044) | BSDS500 | AUC, disagreement model (5 lenses) | 0.96–0.98 | 0.87–0.92 | **Holds**, weaker |
+| I1b. …better than own confidence | BSDS500 | AUC, own confidence | 0.59–0.89 | 0.51–0.82 | **Holds** (for every lens) |
+| I2. The image consensus is not the best answer (Exp 044) | BSDS500 | gross error (> 10°) | 9.8% vs 4.8% (Radon) | 24.4% vs 18.1% (Radon); +6.3 pts, CI [+4.3, +8.1] | **Holds** (the negative result replicates) |
+| I2b. A learned choice of lens gets close to the best lens (Exp 044) | BSDS500 | gross error | 5.6% vs 4.8% | 16.4% vs 18.1%; −1.7 pts, CI [−3.5, +0.1] | **Holds**; on photos it is slightly ahead, not significantly |
+| I3. Image lenses fail in families (Exp 044) | BSDS500 | co-failure lift, raw / within condition | 2.9–10.7× / 1.3–3.0× | 1.7–3.0× / 1.4–1.7× | **Weaker**: the global trio (FFT, Gabor, Radon) still co-fails most (3.0× raw), but within a condition all pairs look alike |
+
+**Key findings:**
+1. **The core claim survives real data in both media**: disagreement tells you when a lens is blind (AUC 0.86–0.99 on real audio, 0.87–0.92 on photos), and it beats each lens's own confidence everywhere. It is weaker for ACF (whose errors come with only mild disagreement, as on synthetic data) and on photos.
+2. **Better answers from comparing lenses hold on MDB-stem-synth but not clearly on vocadito**: there the consensus ties the best lens (ACF) once its abstentions count as errors; it only wins on the frames where it answers.
+3. **The "complementary pair" does not transfer**: STFT and Cepstrum fail together at 0.72–0.85× chance on real audio, not 0.08×. The synthetic number came from conditions that break one but not the other; real signals mix them. ACF + Cepstrum sharing a blind spot does transfer (2.6–3.0×).
+4. **The framework's pitch tracker does not beat plain YIN on real audio.** Its causal 5-frame median filter delays the output by 2 hops (46 ms), which costs a lot on vibrato and note changes (24% vs 7.6% at 50 cents on vocadito). Compensating the delay brings it to a tie at the 20% threshold, still behind at 50 cents and on MDB-stem-synth. Exp 039's synthetic result (0.78% vs 0.00%) already showed no gain; this confirms it.
+5. **Real "no pitch" frames are where the system is most wrong.** Breaths, consonants and decaying tails are not white noise: a single lens is confident on 36% (vocadito) and 99% (MDB-stem-synth) of them, and the consensus follows that single lens. This is the same issue Exp 044 found on images (a consensus from one trusted reading); a quorum rule is the obvious fix.
+6. **Photos are much harder than synthetic patches** (best lens 18% vs 5% gross errors), and the image fusion result replicates: the plain consensus loses to the best lens, the learned choice is about even with it.
+7. **Limits**: MDB-stem-synth is resynthesised (real performances, synthetic timbre); vocadito annotations are human and can be off at note boundaries; unvoiced frames are defined by the annotation, so some may carry pitch the annotators skipped. The BSDS500 truth is the direction of a human-marked boundary, which is not always the patch's dominant orientation (texture can compete); the selection keeps only straight, visible boundaries. Noise and clipping are added synthetically on top of the real signals.
+
+- **Run**: `.venv/bin/python src/experiments/exp045_real_data.py` (needs the data in `data/raw/`; about 15 minutes the first time, seconds afterwards from the cache in `data/processed/`; `--refresh` recomputes)
+- **Outputs**: [results/exp045_real_data.png](../results/exp045_real_data.png), [results/exp045_summary.json](../results/exp045_summary.json)
+
+![Exp 045](../results/exp045_real_data.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -766,7 +826,7 @@ representation-fragility-lab/
 │   ├── core/             # Medium-agnostic interfaces and loop (see docs/core_interfaces.md)
 │   ├── image_medium/     # Images on the core: five orientation lenses (Exp 044)
 │   ├── framework/        # [Asset A] The Framework source code (audio)
-│   ├── experiments/      # One script per experiment (exp001–exp044, hpss_reconcile)
+│   ├── experiments/      # One script per experiment (exp001–exp045, hpss_reconcile)
 │   └── vst_prototype/    # JUCE plugin prototype (CMake; see Setup)
 ├── results/
 │   ├── audio/            # Generated WAV files from tuner experiments
@@ -807,16 +867,17 @@ Exp 043:      Disagreement has structure: ACF + cepstrum fail together, STFT + c
 Core:         medium-agnostic interfaces (src/core), audio ported onto them with identical results
 Exp 044:      Images on the same core: disagreement predicts blind spots (AUC 0.96–0.98), but no
               fusion beats the best single lens because lenses fail in families
+Exp 045:      Real data (vocadito, MDB-stem-synth, BSDS500): disagreement still predicts blind
+              spots; the consensus gain holds on MDB only; the framework tracker does not beat YIN
 ```
 
 **Next** (GitHub issues)
 
-- Real-world datasets with ground truth instead of synthetic signals ([#7](https://github.com/SpacekidLabs/representation-fragility-lab/issues/7))
 - Proofs in Lean 4 for the comparison machinery ([#11](https://github.com/SpacekidLabs/representation-fragility-lab/issues/11))
 
 **Known limits**
 
-- Almost all results are on synthetic signals; the one real vocal is short.
+- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses, and the consensus follows them.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044).
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
@@ -893,6 +954,9 @@ Exp 044:      Images on the same core: disagreement predicts blind spots (AUC 0.
 
 # Run the image (second medium) experiment
 .venv/bin/python3 src/experiments/exp044_image_disagreement.py
+
+# Run the real-data experiment (data setup: data/README.md)
+.venv/bin/python3 src/experiments/exp045_real_data.py
 
 # Open listen tests (local only, see Listen Tests)
 open listen_test/index.html

@@ -68,6 +68,22 @@ On images the same split appears between local (gradient) and global (spectral, 
 
 ![Exp 044](results/exp044_image_disagreement.png)
 
+### 4. On real data (Exp 045)
+
+The key claims re-run on vocadito (real singing), MDB-stem-synth (230 resynthesised performances) and BSDS500 (photos with human boundaries):
+
+| Claim | Real data |
+|---|---|
+| Disagreement predicts when a lens is wrong | **Holds**: AUC 0.86–0.99 (audio), 0.87–0.92 (photos) |
+| The consensus is a better answer (audio) | Holds on MDB-stem-synth (7.3% vs 9.9%); a tie on vocadito |
+| ACF + Cepstrum share a blind spot | Holds (2.6–3.0×); STFT + Cepstrum are no longer complementary (0.7–0.85×) |
+| The framework's pitch tracker beats fixed YIN | **Does not hold**: a loss, at best a tie once its delay is removed |
+| No confident answer when there is no pitch | **Fails**: breaths and consonants fool single lenses (36–99% of unvoiced frames) |
+
+Full table with every dataset, metric and confidence interval: [Exp 045 in docs/EXPERIMENTS.md](docs/EXPERIMENTS.md#exp-045--do-the-claims-survive-real-recordings-and-photos).
+
+![Exp 045](results/exp045_real_data.png)
+
 ## How we got here
 
 ```mermaid
@@ -76,7 +92,8 @@ flowchart LR
     B --> C["Exp 032–041<br/>Framework and<br/>DSP gains"]
     C --> D["Exp 042–043<br/>Disagreement as<br/>information"]
     D --> E["Exp 044<br/>Second medium:<br/>images"]
-    E --> F["Next: real data #7,<br/>Lean proofs #11"]
+    E --> G["Exp 045<br/>Real data"]
+    G --> F["Next: Lean proofs #11"]
 ```
 
 | | | | |
@@ -114,6 +131,7 @@ src/core/            medium-agnostic interfaces and loop
 src/framework/       audio: lenses, disagreement, state-space engine, plugins
 src/image_medium/    images: five orientation lenses
 src/experiments/     one script per experiment
+data/                dataset setup (data/README.md); downloads are not committed
 results/             plots and summaries
 docs/                vision, experiments, API, design notes
 tests/               pytest
@@ -121,6 +139,6 @@ tests/               pytest
 
 ## Known limits
 
-- Almost all results are on synthetic signals ([#7](https://github.com/SpacekidLabs/representation-fragility-lab/issues/7) moves to real data).
+- Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds, the framework's pitch-tracker gain does not, and unpitched real frames fool the consensus.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the others.
 - The framework's DSP gains are small and depend on the baseline (see Exp 035 and Exp 041 in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)).
