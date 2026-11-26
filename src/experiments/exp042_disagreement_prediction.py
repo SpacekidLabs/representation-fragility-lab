@@ -4,7 +4,7 @@ Experiment 042 — Does Disagreement Predict Blind Spots? (issue #2)
 Tests the core principle of docs/VISION.md: *disagreement between
 representations is information*.
 
-For thousands of synthetic frames with a known f0, we run STFT, ACF and
+For thousands of synthetic frames with a known f0 track, we run STFT, ACF and
 Cepstrum side by side (src/framework/disagreement.py) and ask, for each
 representation: **can we tell in advance that it is about to make a gross
 pitch error (> 50 cents)?**
@@ -22,8 +22,17 @@ Predictors compared (all evaluated per representation, ROC AUC, higher = better)
   Both:
     6. combined     state + disagreement features (CV)
 
-Cross-validation is grouped by base signal (f0, harmonic count) so the model
+Signals: stationary harmonic stacks (1 to 20 harmonics), vibrato, glides and a
+flat-spectrum pulse train. Perturbations: noise, low-pass, missing fundamental,
+clipping, low-pass + noise, pitch shift and time stretch (the true f0 track is
+transformed along with the signal). Truth for a frame = geometric mean of the
+f0 track over that frame.
+
+Cross-validation is grouped by base signal (f0, signal variant) so the model
 is always tested on signals it has never seen.
+
+An extra check on unpitched input (pure white noise): how often does each lens
+confidently report a pitch that is not there, and how often does the consensus?
 
 We also check whether comparing lenses gives a better *answer*, not just a
 better warning: gross-error rate of each single lens vs. the lens the engine
@@ -53,17 +62,20 @@ warnings.filterwarnings("ignore")
 
 from src.framework.engine import RepresentationIntelligenceEngine
 from src.perturbations.filter import lowpass_filter
+from src.perturbations.pitch_shift import apply_pitch_shift
+from src.perturbations.time_stretch import apply_time_stretch
 from scipy.signal import butter, filtfilt
 
 SR = 22050          # the engine's state space was calibrated at 22.05 kHz
 FRAME = 2048
-DURATION = 0.5
+DURATION = 1.0
 GROSS_CENTS = 50.0
 REPS = ("stft", "acf", "cepstrum")
 SEEDS = (0, 1, 2)
 
 F0S = (110.0, 165.0, 220.0, 330.0, 440.0, 660.0)
 HARMONICS = (1, 2, 3, 5, 10, 20)
+UNPITCHED_FRAMES = 90
 
 OUT_PNG = os.path.join(project_root, "results", "exp042_disagreement_prediction.png")
 OUT_JSON = os.path.join(project_root, "results", "exp042_summary.json")
@@ -73,14 +85,34 @@ OUT_JSON = os.path.join(project_root, "results", "exp042_summary.json")
 # SIGNALS & PERTURBATIONS
 # ──────────────────────────────────────────────────────────────────────────────
 
-def harmonic_signal(f0, num_harmonics, rng):
-    t = np.arange(int(SR * DURATION)) / SR
-    x = np.zeros_like(t)
-    for k in range(1, num_harmonics + 1):
-        if k * f0 >= 0.45 * SR:
+def synth(track, amps):
+    """Harmonic signal following an f0 track (Hz per sample), amps[k-1] for harmonic k."""
+    phase = 2 * np.pi * np.cumsum(track) / SR
+    x = np.zeros_like(track)
+    for k, a in enumerate(amps, start=1):
+        if k * track.max() >= 0.45 * SR:
             break
-        x += (1.0 / k) * np.sin(2 * np.pi * k * f0 * t + rng.uniform(0, 2 * np.pi))
+        x += a * np.sin(k * phase + 0.7 * k)
     return x / (np.max(np.abs(x)) + 1e-12)
+
+
+def signal_variants(f0):
+    """(variant name, signal type, function(rng) -> (x, f0_track))."""
+    n = int(SR * DURATION)
+    t = np.arange(n) / SR
+    flat = np.full(n, f0)
+    out = []
+    for nh in HARMONICS:
+        out.append((f"harmonic{nh}", "harmonic", lambda r, nh=nh: (synth(flat, [1.0 / k for k in range(1, nh + 1)]), flat)))
+    for nh in (5, 10):
+        def vib(r, nh=nh):
+            tr = f0 * 2.0 ** ((50.0 / 1200.0) * np.sin(2 * np.pi * 5.5 * t + r.uniform(0, 2 * np.pi)))
+            return synth(tr, [1.0 / k for k in range(1, nh + 1)]), tr
+        out.append((f"vibrato{nh}", "vibrato", vib))
+    glide = f0 * 2.0 ** ((t - DURATION / 2) / DURATION)  # one octave over the signal, centred on f0
+    out.append(("glide5", "glide", lambda r: (synth(glide, [1.0 / k for k in range(1, 6)]), glide)))
+    out.append(("pulse_train", "pulse_train", lambda r: (synth(flat, [1.0] * 200), flat)))
+    return out
 
 
 def add_noise_snr(x, snr_db, rng):
@@ -94,17 +126,27 @@ def highpass(x, cutoff):
 
 
 def conditions(f0):
-    """(family, severity label, function(x, rng) -> x)."""
-    out = [("clean", "-", lambda x, r: x)]
+    """(family, severity, signal fn(x, rng) -> x, track fn(track) -> track)."""
+    same = lambda tr: tr
+    out = [("clean", "-", lambda x, r: x, same)]
     for snr in (20, 10, 5, 0, -5):
-        out.append(("noise", f"{snr} dB", lambda x, r, s=snr: add_noise_snr(x, s, r)))
+        out.append(("noise", f"{snr} dB", lambda x, r, s=snr: add_noise_snr(x, s, r), same))
     for mult in (1.5, 2.5, 4.5):
-        out.append(("lowpass", f"{mult}xf0", lambda x, r, m=mult: lowpass_filter(x, SR, m * f0)))
-    out.append(("missing_fund", "hp 1.5xf0", lambda x, r: highpass(x, 1.5 * f0)))
+        out.append(("lowpass", f"{mult}xf0", lambda x, r, m=mult: lowpass_filter(x, SR, m * f0), same))
+    out.append(("missing_fund", "hp 1.5xf0", lambda x, r: highpass(x, 1.5 * f0), same))
     for gain in (3.0, 10.0):
-        out.append(("clipping", f"x{gain:g}", lambda x, r, g=gain: np.clip(g * x, -1, 1)))
+        out.append(("clipping", f"x{gain:g}", lambda x, r, g=gain: np.clip(g * x, -1, 1), same))
     out.append(("lowpass+noise", "2.5xf0, 5 dB",
-                lambda x, r: add_noise_snr(lowpass_filter(x, SR, 2.5 * f0), 5, r)))
+                lambda x, r: add_noise_snr(lowpass_filter(x, SR, 2.5 * f0), 5, r), same))
+    for steps in (-5, 4, 7):
+        out.append(("pitch_shift", f"{steps:+d} st",
+                    lambda x, r, n=steps: apply_pitch_shift(x, SR, n),
+                    lambda tr, n=steps: tr * 2.0 ** (n / 12.0)))
+    for rate in (0.8, 1.25):
+        # Output time t corresponds to input time t * rate.
+        out.append(("time_stretch", f"x{rate:g}",
+                    lambda x, r, k=rate: apply_time_stretch(x, k),
+                    lambda tr, k=rate: np.interp(np.arange(len(tr)) * k, np.arange(len(tr)), tr)))
     return out
 
 
@@ -174,32 +216,49 @@ def grouped_cv_scores(X, y, groups, k=5, seed=0):
 # DATA COLLECTION
 # ──────────────────────────────────────────────────────────────────────────────
 
+def frame_row(engine, frame, truth, meta):
+    state = engine.analyze(frame, SR)
+    rep = state.disagreement
+    return {
+        **meta, "truth": truth,
+        "z1": state.coordinate[0], "z2": state.coordinate[1],
+        "region": state.region,
+        "assumptions": {r: state.assumptions[r] for r in REPS},
+        "readings": {r: (rep.readings[r].f0, rep.readings[r].confidence) for r in REPS},
+        "voiced": {r: rep.readings[r].voiced for r in REPS},
+        "divergence": dict(rep.divergence),
+        "overall": rep.overall,
+        "consensus_f0": rep.consensus_f0,
+        "pairs": [(p.a, p.b, p.pitch_term, p.confidence_gap, p.octave_related) for p in rep.pairs],
+    }
+
+
 def collect():
     engine = RepresentationIntelligenceEngine()
     rows = []
     for f0 in F0S:
-        for nh in HARMONICS:
-            for family, severity, fn in conditions(f0):
+        for variant, sig_type, make in signal_variants(f0):
+            for family, severity, fn, track_fn in conditions(f0):
                 for seed in SEEDS:
-                    rng = np.random.default_rng(zlib.crc32(repr((f0, nh, family, severity, seed)).encode()))
-                    x = fn(harmonic_signal(f0, nh, rng), rng)
+                    rng = np.random.default_rng(zlib.crc32(repr((f0, variant, family, severity, seed)).encode()))
+                    x, track = make(rng)
+                    x, track = fn(x, rng), track_fn(track)
                     start = (len(x) - FRAME) // 2 + int(rng.integers(-500, 500))
-                    frame = x[start:start + FRAME]
-                    state = engine.analyze(frame, SR)
-                    rep = state.disagreement
-                    rows.append({
-                        "f0": f0, "harmonics": nh, "family": family, "severity": severity,
-                        "seed": seed, "group": f"{f0:g}-{nh}",
-                        "z1": state.coordinate[0], "z2": state.coordinate[1],
-                        "region": state.region,
-                        "assumptions": {r: state.assumptions[r] for r in REPS},
-                        "readings": {r: (rep.readings[r].f0, rep.readings[r].confidence) for r in REPS},
-                        "divergence": dict(rep.divergence),
-                        "overall": rep.overall,
-                        "consensus_f0": rep.consensus_f0,
-                        "pairs": [(p.a, p.b, p.pitch_term, p.confidence_gap, p.octave_related)
-                                  for p in rep.pairs],
-                    })
+                    truth = float(np.exp(np.mean(np.log(track[start:start + FRAME]))))
+                    rows.append(frame_row(engine, x[start:start + FRAME], truth, {
+                        "f0": f0, "variant": variant, "signal": sig_type,
+                        "family": family, "severity": severity, "seed": seed,
+                        "group": f"{f0:g}-{variant}",
+                    }))
+    return rows
+
+
+def collect_unpitched():
+    engine = RepresentationIntelligenceEngine()
+    rows = []
+    for seed in range(UNPITCHED_FRAMES):
+        frame = np.random.default_rng(10_000 + seed).normal(0.0, 0.3, FRAME)
+        rows.append(frame_row(engine, frame, 0.0, {"seed": seed}))
     return rows
 
 
@@ -236,7 +295,7 @@ def analyze(rows):
     scores_for_plot = {}
 
     for rep in REPS:
-        err = np.array([cents_error(r["readings"][rep][0], r["f0"]) for r in rows])
+        err = np.array([cents_error(r["readings"][rep][0], r["truth"]) for r in rows])
         y = (err > GROSS_CENTS).astype(float)
         Xs = np.array([state_features(r) for r in rows])
         Xd = np.array([features(r, rep) for r in rows])
@@ -257,25 +316,31 @@ def analyze(rows):
         }
         scores_for_plot[rep] = (Xd[:, 0], np.minimum(err, 2400.0), y)
 
-    # Per perturbation family: AUC of divergence vs. state baseline, pooled over reps.
-    for fam in sorted({r["family"] for r in rows}):
-        idx = [i for i, r in enumerate(rows) if r["family"] == fam]
+    # Per perturbation family and per signal type: AUC of divergence vs. the
+    # existing assumption score, pooled over reps.
+    def breakdown(_key, i_list):
         lab, div, ass = [], [], []
         for rep in REPS:
-            for i in idx:
-                e = cents_error(rows[i]["readings"][rep][0], rows[i]["f0"])
+            for i in i_list:
+                e = cents_error(rows[i]["readings"][rep][0], rows[i]["truth"])
                 lab.append(e > GROSS_CENTS)
                 div.append(rows[i]["divergence"][rep])
                 ass.append(1.0 - rows[i]["assumptions"][rep])
-        summary["by_family"][fam] = {
+        return {
             "gross_error_rate": float(np.mean(lab)),
             "auc_divergence": roc_auc(div, lab),
             "auc_assumption": roc_auc(ass, lab),
         }
 
+    summary["by_signal"] = {}
+    for sig in sorted({r["signal"] for r in rows}):
+        summary["by_signal"][sig] = breakdown("signal", [i for i, r in enumerate(rows) if r["signal"] == sig])
+    for fam in sorted({r["family"] for r in rows}):
+        summary["by_family"][fam] = breakdown("family", [i for i, r in enumerate(rows) if r["family"] == fam])
+
     # Fusion: does comparing lenses give a better answer?
     def rate(estimates):
-        errs = np.array([cents_error(e, r["f0"]) for e, r in zip(estimates, rows)])
+        errs = np.array([cents_error(e, r["truth"]) for e, r in zip(estimates, rows)])
         answered = np.array([e > 0 for e in estimates])
         return {
             "gross_error_rate": float(np.mean(errs > GROSS_CENTS)),
@@ -290,9 +355,20 @@ def analyze(rows):
         r["readings"][max(REPS, key=lambda k: r["assumptions"][k])][0] for r in rows])
     summary["fusion"]["consensus"] = rate([r["consensus_f0"] for r in rows])
     summary["fusion"]["oracle_best_single"] = rate([
-        min((r["readings"][k][0] for k in REPS), key=lambda e: cents_error(e, r["f0"]))
+        min((r["readings"][k][0] for k in REPS), key=lambda e: cents_error(e, r["truth"]))
         for r in rows])
     return summary, scores_for_plot
+
+
+def analyze_unpitched(rows):
+    """On pure noise there is no pitch: any confident answer is a false alarm."""
+    out = {"n_frames": len(rows)}
+    for rep in REPS:
+        out[rep] = {"false_voiced_rate": float(np.mean([r["voiced"][rep] for r in rows]))}
+    out["any_single_lens"] = {"false_voiced_rate": float(np.mean([any(r["voiced"].values()) for r in rows]))}
+    out["consensus"] = {"false_voiced_rate": float(np.mean([r["consensus_f0"] > 0 for r in rows]))}
+    out["mean_overall_disagreement"] = float(np.mean([r["overall"] for r in rows]))
+    return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -348,6 +424,7 @@ def plot(summary, scores):
 def main():
     rows = collect()
     summary, scores = analyze(rows)
+    summary["unpitched_noise"] = analyze_unpitched(collect_unpitched())
     with open(OUT_JSON, "w") as f:
         json.dump(summary, f, indent=2)
     plot(summary, scores)
@@ -358,6 +435,10 @@ def main():
         d = summary["per_rep"][rep]
         print(f"{rep:10s} {d['gross_error_rate']:8.1%} " +
               " ".join(f"{d['auc'][p]:14.3f}" for p in PREDICTORS))
+    print("\nBy signal type (pooled over lenses): AUC divergence vs assumption")
+    for sig, d in summary["by_signal"].items():
+        print(f"  {sig:15s} err {d['gross_error_rate']:6.1%}  div {d['auc_divergence']:.3f}"
+              f"  assumption {d['auc_assumption']:.3f}")
     print("\nBy perturbation family (pooled over lenses): AUC divergence vs assumption")
     for fam, d in summary["by_family"].items():
         print(f"  {fam:15s} err {d['gross_error_rate']:6.1%}  div {d['auc_divergence']:.3f}"
@@ -365,6 +446,10 @@ def main():
     print("\nAnswer quality (gross error rate when answering / abstain rate)")
     for k, d in summary["fusion"].items():
         print(f"  {k:20s} {d['gross_error_rate_when_answering']:6.1%}  abstain {d['abstain_rate']:5.1%}")
+    u = summary["unpitched_noise"]
+    print(f"\nUnpitched noise ({u['n_frames']} frames): false 'voiced' rate")
+    for k in (*REPS, "any_single_lens", "consensus"):
+        print(f"  {k:20s} {u[k]['false_voiced_rate']:6.1%}")
     print(f"\nSaved {OUT_PNG}\nSaved {OUT_JSON}")
 
 

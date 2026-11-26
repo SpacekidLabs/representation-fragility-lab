@@ -644,31 +644,47 @@ Performs zero-shot external validation on five completely external algorithms fr
 #### Exp 042 — Does Disagreement Predict Blind Spots?
 The first test of the project's core principle ([docs/VISION.md](docs/VISION.md)): *disagreement between representations is information*. STFT, ACF and Cepstrum run side by side on each frame (`src/framework/disagreement.py`, issue #1). For each lens we ask: **can we tell in advance that it is about to make a gross pitch error (> 50 cents)?**
 
-- **Data**: 1,404 synthetic frames with known f0 (6 pitches × 6 harmonic counts from a pure sine to 20 harmonics × 13 conditions × 3 seeds) at 22.05 kHz. Conditions: clean, noise (20 to −5 dB SNR), low-pass (1.5/2.5/4.5 × f0), missing fundamental, clipping (×3, ×10), low-pass + noise.
-- **Warning signals compared**: the current framework's descriptor-only state space (`1 − assumption` score, and a model on z₁/z₂), the lens's own confidence, and the new cross-lens disagreement (`divergence`, and a model on disagreement features). Models are logistic regressions, cross-validated so every test signal is unseen.
+- **Data**: 3,240 synthetic frames with a known f0 track at 22.05 kHz: 6 pitches (110–660 Hz) × 10 signal variants × 18 conditions × 3 seeds.
+  - *Signals*: stationary harmonic stacks (pure sine up to 20 harmonics), vibrato (±50 cents at 5.5 Hz), a one-octave glide, and a flat-spectrum pulse train.
+  - *Conditions*: clean, noise (20 to −5 dB SNR), low-pass (1.5/2.5/4.5 × f0), missing fundamental, clipping (×3, ×10), low-pass + noise, pitch shift (−5, +4, +7 semitones) and time stretch (×0.8, ×1.25). The true f0 track is transformed along with the signal; a frame's truth is the geometric mean of its f0 track.
+  - *Unpitched check*: 90 frames of pure white noise, where any confident pitch is a false alarm.
+- **Warning signals compared**: the current framework's descriptor-only state space (`1 − assumption` score, and a model on z₁/z₂), the lens's own confidence, and the new cross-lens disagreement (`divergence`, and a model on disagreement features). Models are logistic regressions, cross-validated so every test signal (pitch + variant) is unseen.
 
-**ROC AUC for predicting a gross error (0.5 = chance):**
+**ROC AUC for predicting a gross error (> 50 cents; 0.5 = chance):**
 
 | Lens | Gross error rate | Assumption (existing) | State model (existing) | Own confidence | Divergence (new) | Disagreement model (new) | Combined |
 |---|---|---|---|---|---|---|---|
-| STFT | 5.3% | 0.408 | 0.890 | 0.835 | 0.974 | 0.986 | **0.997** |
-| ACF | 7.4% | 0.816 | 0.801 | 0.860 | 0.724 | **0.911** | 0.905 |
-| Cepstrum | 38.1% | 0.784 | 0.796 | 0.805 | 0.943 | 0.982 | **0.988** |
+| STFT | 4.3% | 0.581 | 0.883 | 0.879 | 0.987 | 0.987 | **0.996** |
+| ACF | 6.9% | 0.776 | 0.778 | 0.814 | 0.833 | **0.949** | 0.946 |
+| Cepstrum | 26.7% | 0.756 | 0.797 | 0.854 | 0.954 | 0.985 | **0.986** |
 
-**By condition** (all lenses pooled, AUC): divergence beats the existing assumption score on clean (1.000 vs 0.911), clipping (1.000 vs 0.886), low-pass (1.000 vs 0.879), noise (0.848 vs 0.767) and especially missing fundamental (0.901 vs 0.296, where the existing score is worse than chance). It is **worse** on low-pass + noise (0.796 vs 0.843).
+**By condition** (all lenses pooled, AUC divergence vs. existing assumption score):
+
+| Condition | Gross error rate | Divergence | Assumption |
+|---|---|---|---|
+| clean | 2.2% | **1.000** | 0.775 |
+| clipping | 6.0% | **0.996** | 0.832 |
+| low-pass | 3.3% | **1.000** | 0.898 |
+| low-pass + noise | 33.3% | 0.772 | **0.843** |
+| missing fundamental | 30.0% | **0.941** | 0.320 |
+| noise | 22.9% | **0.842** | 0.752 |
+| pitch shift | 6.4% | **0.978** | 0.653 |
+| time stretch | 3.1% | **0.995** | 0.741 |
+
+**By signal type**: divergence beats the assumption score for every type: harmonic 0.922 vs 0.822, vibrato 0.953 vs 0.787, glide 0.929 vs 0.819, pulse train 0.976 vs 0.507 (the existing score is at chance there).
 
 **Better answers, not just better warnings** (gross error rate when answering):
 
 | STFT | ACF | Cepstrum | Engine-routed lens | **Disagreement consensus** | Oracle best lens |
 |---|---|---|---|---|---|
-| 5.3% | 7.4% | 38.1% | 10.5% | **1.2%** (abstains on 7.7%) | 0.2% |
+| 4.3% | 6.9% | 26.7% | 9.1% | **1.0%** (abstains on 5.6%) | 0.1% |
 
 **Key findings:**
-1. Disagreement is a strong warning signal. A model on disagreement features predicts gross errors with AUC 0.91–0.99 for all three lenses, beating both the existing state-space predictors and each lens's own confidence.
-2. Divergence alone, with no training, is excellent for STFT (0.974) and Cepstrum (0.943) but weak for ACF (0.724), where ACF's own confidence is better (0.860). ACF errors often come with mild disagreement, so the full disagreement model is needed there.
-3. The existing framework's assumption score fails badly in some places: it is below chance for STFT (0.408) and for missing-fundamental signals (0.296). Disagreement does not have this failure.
-4. Comparing lenses gives a better answer. The confidence-weighted consensus is wrong 1.2% of the time when it answers, versus 5.3% for the best single lens and 10.5% for the lens the engine would route to. The cost is declining to answer on 7.7% of frames: exactly the 108 frames at −5 dB SNR, where no lens is confident. Counting those abstentions as errors, the consensus is wrong 8.8% of the time, still better than the engine-routed lens (10.5%).
-5. Limits: all signals are synthetic and harmonic, the error threshold and confidence calibrations are hand-set, and disagreement is weaker than the existing state space when filtering and noise combine. Validation on real recordings is tracked in issue #7.
+1. Disagreement is a strong warning signal. A model on disagreement features predicts gross errors with AUC 0.95–0.99 for all three lenses, beating both the existing state-space predictors and each lens's own confidence. This holds across all four signal types, including the moving-pitch ones (vibrato, glide).
+2. Divergence alone, with no training, is excellent for STFT (0.987) and Cepstrum (0.954) but weaker for ACF (0.833). ACF errors often come with only mild disagreement, so the full disagreement model is needed there.
+3. The existing framework's assumption score fails badly in places: near chance for STFT (0.581) and pulse trains (0.507), and below chance for missing-fundamental signals (0.320). Disagreement does not have these failures.
+4. Comparing lenses gives a better answer. The confidence-weighted consensus is wrong 1.0% of the time when it answers, versus 4.3% for the best single lens and 9.1% for the lens the engine would route to. The cost is declining to answer on 5.6% of frames: 179 of the 180 frames at −5 dB SNR plus 2 at 0 dB, where no lens is confident. Counting abstentions as errors, the consensus is wrong 6.5% of the time, still better than the engine-routed lens (9.1%).
+5. Limits: disagreement is weaker than the existing state space when filtering and noise combine (0.772 vs 0.843). The unpitched check was not informative: no lens, and so no consensus, ever reported a confident pitch on white noise (0 of 90 frames), so a harder test (e.g. coloured or modulated noise) is needed. All signals are synthetic, and the error threshold and confidence calibrations are hand-set. Validation on real recordings is tracked in issue #7.
 
 - **Run**: `.venv/bin/python src/experiments/exp042_disagreement_prediction.py`
 - **Outputs**: [results/exp042_disagreement_prediction.png](results/exp042_disagreement_prediction.png), [results/exp042_summary.json](results/exp042_summary.json)
