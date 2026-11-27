@@ -88,18 +88,26 @@ Full table with every dataset, metric and confidence interval: [Exp 045 in docs/
 ## How we got here
 
 ```mermaid
-flowchart LR
-    A["Exp 001–013<br/>Blind-spot atlas"] --> B["Exp 014–031<br/>Failure manifold,<br/>state space"]
-    B --> C["Exp 032–041<br/>Framework and<br/>DSP gains"]
-    C --> D["Exp 042–043<br/>Disagreement as<br/>information"]
-    D --> E["Exp 044<br/>Second medium:<br/>images"]
-    E --> G["Exp 045<br/>Real data"]
-    G --> H["Exp 046<br/>Consensus<br/>quorum"]
-    H --> I["Exp 047–051<br/>Fusion, chooser,<br/>abstention, probing,<br/>time"]
-    I --> J["Exp 052<br/>Learned lenses"]
-    J --> K["Exp 053<br/>Third medium:<br/>sensor signals"]
-    K --> L["Exp 054–055<br/>Tracker retired,<br/>lens value"]
-    L --> F["Next: probing in the core #30,<br/>lead lens #31, photo lens #32,<br/>Lean proofs #11"]
+flowchart TB
+    subgraph R1["Audio: lenses and their blind spots"]
+        direction LR
+        A["Exp 001–013<br/>Blind-spot atlas"] --> B["Exp 014–031<br/>Failure manifold,<br/>state space"]
+        B --> C["Exp 032–041<br/>Framework and<br/>DSP gains"]
+        C --> D["Exp 042–043<br/>Disagreement as<br/>information"]
+    end
+    subgraph R2["A second medium, real data, a quorum"]
+        direction LR
+        E["Exp 044<br/>Second medium:<br/>images"] --> G["Exp 045<br/>Real data"]
+        G --> H["Exp 046<br/>Consensus<br/>quorum"]
+        H --> I["Exp 047–051<br/>Fusion, chooser,<br/>abstention, probing,<br/>time"]
+    end
+    subgraph R3["Learned lenses, a third medium, what each lens is worth"]
+        direction LR
+        J["Exp 052<br/>Learned lenses"] --> K["Exp 053<br/>Third medium:<br/>sensor signals"]
+        K --> L["Exp 054–055<br/>Tracker retired,<br/>lens value"]
+        L --> F["Next: probing #30,<br/>lead lens #31,<br/>photo lens #32,<br/>Lean proofs #11"]
+    end
+    R1 --> R2 --> R3
 ```
 
 | Exp | Question | Answer |
