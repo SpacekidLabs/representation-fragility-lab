@@ -8,11 +8,12 @@ Exposes the three coordinate-gated adaptive reference plugins:
 """
 
 from .denoiser import AdaptiveDenoiser
-from .pitch_tracker import AdaptivePitchTracker
+from .pitch_tracker import AdaptivePitchTracker, QuorumPitchTracker
 from .onset_detector import AdaptiveOnsetDetector
 
 __all__ = [
     "AdaptiveDenoiser",
     "AdaptivePitchTracker",
+    "QuorumPitchTracker",
     "AdaptiveOnsetDetector"
 ]

@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 33, Exp 001 to Exp 053)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 34, Exp 001 to Exp 054)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting; Exp 051 treats disagreement as a trajectory over time; Exp 052 adds a learned lens (CREPE, ImageNet CNN features) to the classic ones; Exp 053 adds a third medium (sensor rate, ECG) on the unchanged core.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting; Exp 051 treats disagreement as a trajectory over time; Exp 052 adds a learned lens (CREPE, ImageNet CNN features) to the classic ones; Exp 053 adds a third medium (sensor rate, ECG) on the unchanged core; Exp 054 diagnoses why the framework's pitch tracker loses on real audio.
 
 ## Representations
 
@@ -995,6 +995,187 @@ Failure onsets caught k hops ahead at 10% false alarms, current → history (hel
 
 ---
 
+### Phase 32 — A Learned Embedding as a Lens (Exp 052)
+
+#### Exp 052 — Does a Neural Lens Fail in New Ways, or Join a Family?
+Issue #26 adds one learned lens per medium through the core `Representation` interface and asks whether it fails like the classic lenses or on its own, and what it adds to the warning and the fused answer.
+
+- **Audio, `crepe`** ([src/framework/learned.py](../src/framework/learned.py)): pretrained CREPE "full" (torchcrepe 0.0.24), no training here. The frame is resampled to 16 kHz; the centre 1024 samples go through the network; bins outside 80–1000 Hz (the classic lenses' range) are dropped; f0 is CREPE's local weighted mean around the peak. Confidence is the peak probability, calibrated like the CQT / wavelet lenses (noise max 0.105 → 0, clean 5th percentile 0.872 → 1).
+- **Images, `cnn`** ([src/image_medium/learned.py](../src/image_medium/learned.py)): a frozen ImageNet ResNet-18 (torchvision 0.29.2, `IMAGENET1K_V1`). The patch is standardised, upsampled 2× and run up to `layer2`. The channel means after `conv1`, `layer1` and `layer2` (256 numbers) go into a ridge read-out to (cos 2θ, sin 2θ), fitted on 2400 **clean** synthetic patterns with orientations and seeds the evaluation never uses. **`cnn_aug`** is the same read-out fitted with one noisy and one blurred copy of each pattern added (the usual augmentation; noise and blur are then not new to it).
+- Pinned in [requirements-learned.txt](../requirements-learned.txt). The weight hashes are in the summary JSON. torch is imported lazily, so the core and the classic lenses do not need it.
+
+Data: the cached readings of Exp 042/044/045 with the inputs rebuilt for the learned lenses (0 mismatches on the checked frames and patches). Audio: synthetic (3240 frames + 90 noise frames), vocadito (17 955 + 1781 unvoiced), MDB-stem-synth (64 335 + 292). Images: synthetic (2288 non-empty patches + 90 isotropic), BSDS500 (3084). Gross error: > 50 cents / > 10°. **CREPE was trained on MDB-stem-synth (among others), so on MDB it has seen the test recordings; vocadito is newer than CREPE.**
+
+Gross error per lens:
+
+| Dataset | Classic lenses | Learned |
+|---|---|---|
+| Audio synthetic | STFT 4.3%, ACF 6.9%, Cepstrum 26.7% | **CREPE 1.1%** |
+| vocadito | STFT 14.3%, ACF 4.2%, Cepstrum 22.5% | **CREPE 1.1%** |
+| MDB-stem-synth (seen in training) | STFT 13.3%, ACF 9.9%, Cepstrum 26.2% | CREPE 2.1% |
+| Image synthetic | tensor 13.0%, HOG 18.8%, FFT 8.7%, Gabor 9.2%, Radon 4.8% | cnn 30.1%, cnn_aug 17.4% |
+| BSDS500 | tensor 36.5%, HOG 33.2%, FFT 25.6%, Gabor 19.4%, Radon 18.1% | cnn 72.0%, cnn_aug 62.4% |
+
+Family: the failure correlation (phi) of the learned lens with each classic family, next to the classic lenses' own same-family / across-family phi:
+
+| Dataset | Learned → family A | Learned → family B | Classic same / across | Learned lens alone in its failures | Right when every classic lens is wrong |
+|---|---|---|---|---|---|
+| Audio synthetic | CREPE → spectral (STFT) 0.19 | → periodicity (ACF, Cep) 0.10 | 0.18 / −0.04 | 16% | 0 of 3 |
+| vocadito | 0.20 | 0.14 (ACF alone 0.21) | 0.23 / 0.02 | 4% | 49% of 71 |
+| MDB-stem-synth | 0.22 | 0.21 | 0.32 / 0.00 | 3% | 31% of 548 |
+| Image synthetic | cnn → local gradient (tensor, HOG) 0.37 | → global (FFT, Gabor, Radon) 0.20 | 0.64 / 0.32 | 47% | 41% of 32 |
+| | cnn_aug 0.43 | 0.31 | | 29% | 31% of 32 |
+| BSDS500 | cnn 0.15 | 0.07 | 0.52 / 0.33 | 40% | 14% of 198 |
+| | cnn_aug 0.15 | 0.13 | | 39% | 14% of 198 |
+
+Warning (ROC AUC of the Exp 042 disagreement model, 5-fold CV by group; mean over the classic lenses, without → with the learned lens), and the learned lens's own warning:
+
+| Dataset | Classic lenses | Learned lens: disagreement vs own confidence |
+|---|---|---|
+| Audio synthetic | +0.003 | CREPE 0.952 vs 0.804 |
+| vocadito | **+0.017** (ACF 0.859 → 0.901) | 0.936 vs 0.913 |
+| MDB-stem-synth | +0.013 (ACF 0.903 → 0.932) | 0.951 vs 0.917 |
+| Image synthetic | +0.005 (cnn), +0.010 (cnn_aug) | cnn 0.964 vs 0.711; cnn_aug 0.957 vs 0.791 |
+| BSDS500 | −0.007 (cnn), −0.005 (cnn_aug) | cnn 0.905 vs 0.602; cnn_aug 0.890 vs 0.624 |
+
+Fusion (gross error, abstention counts as wrong; Δ with group-bootstrap 95% CI):
+
+| Dataset | Lenses | Old rule (all trusted) | Quorum 2 | AgreementTable (CV) | Best single lens |
+|---|---|---|---|---|---|
+| Audio synthetic | classic | 6.5% | 11.7% | 6.8% | STFT 4.3% |
+| | + CREPE | **2.1%** (−4.4) | 6.5% (−5.2) | 2.1% (−4.7) | CREPE 1.1% |
+| vocadito | classic | 5.6% | 16.3% | 5.4% | ACF 4.2% |
+| | + CREPE | **2.1%** (−3.5) | 4.8% (−11.5) | 1.9% (−3.6) | CREPE 1.1% |
+| MDB-stem-synth | classic | 7.3% | 18.2% | 10.2% | ACF 9.9% |
+| | + CREPE | 4.3% (−3.0) | 7.0% (−11.2) | 4.1% (−6.1) | CREPE 2.1% |
+| Image synthetic | classic | 9.8% | 15.1% | 6.8% | Radon 4.8% |
+| | + cnn | 13.1% (**+3.2**) | 13.9% (−1.1) | 6.2% (−0.6) | Radon 4.8% |
+| | + cnn_aug | 9.4% (n.s.) | 14.2% (−0.9) | 6.6% (n.s.) | Radon 4.8% |
+| BSDS500 | classic | 24.4% | 42.3% | 21.8% | Radon 18.1% |
+| | + cnn | 30.4% (**+6.0**) | 39.7% (−2.6) | 21.3% (−0.5) | Radon 18.1% |
+| | + cnn_aug | 24.0% (n.s.) | 41.0% (−1.4) | 21.8% (n.s.) | Radon 18.1% |
+
+All CIs of the differences shown exclude 0 except those marked n.s. False answers of the quorum on unpitched / unoriented input: unchanged on synthetic audio and MDB (0%); vocadito 6.6% → **10.8%** with CREPE; image synthetic 3.3% → 8.9% with cnn, 3.3% with cnn_aug.
+
+**Key findings:**
+1. **CREPE is in no classic audio family.** Its failure correlation with STFT and with ACF is about 0.2 on every dataset, the same with both families and about as weak as the weakest classic same-family bond (0.18–0.32). The automatic rule (closest family, phi at least half the classic same-family phi) says "spectral", but on vocadito ACF alone correlates as much (0.21). Its few failures sit where STFT and ACF fail *together*: P(CREPE wrong) is 29–75% when exactly STFT + ACF are wrong (mostly the missing fundamental, 8% CREPE error there), and 0–3% under every other classic failure set. It almost never fails alone (3–4% of its failures on real data). Noise, clipping and low-pass, which break the cepstrum, do not touch it.
+2. **CREPE carries the audio answer.** On real singing it makes 1.1% gross errors against 4.2% for the best classic lens. Adding it cuts every fusion rule by 3–11 pts, but no rule beats CREPE alone (AgreementTable +0.8 to +2.0 pts, CIs exclude 0): the classic lenses outvote it more often than they rescue it. The quorum also answers more on unvoiced vocadito frames (false answers 6.6% → 10.8%), because CREPE agrees with a classic lens on breaths and consonants. As a fourth voice it sharpens the warning for the classic lenses (ACF +0.03–0.04 AUC on real data), and disagreement warns when CREPE itself is wrong better than its own confidence does (0.94–0.95 vs 0.80–0.92).
+3. **The CNN lens is a weak member of the local-gradient family on synthetic patches and fails on its own on photos.** On synthetic patches its failures correlate with tensor/HOG (phi 0.37–0.43) more than with the global trio (0.20–0.31), and it shares their worst conditions (noise, a second pattern), but more weakly than tensor and HOG share them with each other (0.64). On BSDS500 it is wrong on 62–72% of boundaries and its failures barely correlate with anything (≤ 0.15): it reads something other than the boundary orientation. Clean-only training also made it **more confident on white noise than on clean patterns** (raw score 1.27 vs 0.88), so the usual calibration was undefined and noise gets full confidence. Augmentation fixes that (0.28 vs 0.80) and cuts its synthetic noise errors from 59% to 17%, but not the photo errors.
+4. **A weak lens hurts the voters that trust it and helps the ones that learn about it.** With `cnn` the old rule gets worse (+3.2 / +6.0 pts), because it fuses every trusted reading. The quorum and the AgreementTable get slightly better (−0.5 to −2.6 pts), because the CNN breaks some ties and the table learns how far to trust it. None reaches the best single lens. On photos the warning for the classic lenses gets slightly worse (−0.005 to −0.007 AUC): its noise dilutes the disagreement features.
+5. **Answer to issue #26:** in both media the learned lens is **not a new member of an existing family**. CREPE fails where two families fail together (the missing fundamental) and is otherwise independent and far better than the classic lenses. The CNN read-out leans toward the local-gradient family on synthetic data but has mostly its own failures on photos. What it adds depends on its accuracy, not on its independence: CREPE improves warning and fusion everywhere, the CNN read-out does not.
+
+**Decision:** keep both learned lenses opt-in (`framework.learned.CrepePitch`, `image_medium.learned.CnnOrientation`); torch stays optional. For audio pitch, CREPE should be treated as the main reading, with the classic lenses as a warning around it (they warn, CREPE answers), not as one equal vote among four. The fusion rules assume comparable voters, and CREPE is not one. The image read-out is not good enough to use. A learned orientation lens needs training on real boundaries, or an end-to-end model, before its family can be judged on photos.
+
+- **Run**: `.venv/bin/pip install -r requirements-learned.txt`, then `.venv/bin/python src/experiments/exp052_learned_lens.py` (uses the caches of Exp 045 and 046 and the raw datasets; about 30 minutes the first time, mostly CREPE on the CPU over 87k frames; the readings are cached in `data/processed/exp052_*.pkl`. `RFL_CREPE_DEVICE=mps` is 2.5× faster but hung once in a long run). `--calibrate` prints the confidence calibration.
+- **Outputs**: [results/exp052_learned_lens.png](../results/exp052_learned_lens.png), [results/exp052_summary.json](../results/exp052_summary.json) (versions and weight hashes, calibration, per-condition atlas, every phi / lift raw and within condition, failure-set placement, warning AUCs, fusion with CIs)
+
+![Exp 052](../results/exp052_learned_lens.png)
+
+---
+
+### Phase 33 — A Third Medium: Periodic Sensor Signals (Exp 053)
+
+#### Exp 053 — Does the Core Carry a Third Medium, and Do the Claims Hold There?
+Issue #27 is a stronger test that `src/core` is medium-agnostic. The new medium is the **rate of a periodic sensor signal**: heart rate from an ECG, pulse rate from a PPG, step rate from an accelerometer, in cycles per minute over an 8 s window (30–240 / min). Only [`src/timeseries_medium`](../src/timeseries_medium) is new: a `Medium` (`SensorWindow`, `context["fs"]` required), four lenses and a `RateComparator` (log-ratio distance; "agree" within 10%, "double", "half", "off"; confidence-weighted median as the consensus). **The core needed no change**: `git diff` of `src/core` since Exp 051 is empty, and the summary JSON records it. Gross error: more than 10% from the truth.
+
+| Lens | Reads | Stated assumptions |
+|---|---|---|
+| `fft` | strongest spectral line in 0.5–4 Hz | the fundamental is the strongest line; the rate is stable |
+| `acf` | highest autocorrelation peak at 0.25–2 s | the waveform repeats; a few cycles fit in the window |
+| `wavelet` | time-averaged Morlet scalogram (5 cycles), first 3 harmonics summed | energy at the rate and its low harmonics; stable over the long wavelets |
+| `peaks` | Pan-Tompkins style: band-pass 5–15 Hz, squared derivative, 150 ms integration, 250 ms refractory, 60 / median interval | one sharp event per cycle; events stand above noise and other waves |
+
+Confidence calibration: lo = the strongest raw score over 60 white-noise windows, as in the other media. hi = the **median** over clean synthetic windows the lens reads right. The 5th-percentile rule of the other media puts hi below lo here: the clean set holds signals a lens reads right but only weakly (the many-harmonic ECG for the wavelet bank).
+
+Data:
+- **Synthetic** (1260 windows, 42 groups): 6 signal types × 7 rates (45–180 / min) × 10 conditions × 3 seeds. The signal types are an ECG, an ECG with a tall T wave, an ECG with respiratory sinus arrhythmia, ventricular bigeminy, a PPG-like pulse, and accelerometer-like steps (alternating feet plus a sway at half the step rate). The conditions are clean, white noise at 10 / 0 dB, baseline wander, 60 Hz mains, muscle noise, motion artefacts, clipping, a 4 Hz low-pass and dropouts. Truth = 60 / mean beat interval in the window.
+- **MIT-BIH Arrhythmia** (PhysioNet, 48 records, lead 1, 20 160 windows): 60 seeded windows per record. Truth comes from the cardiologists' beat annotations; windows with flutter / fibrillation markers are skipped. Each window is run clean and with **real** electrode-motion (em), muscle (ma) and baseline-wander (bw) noise from the MIT-BIH Noise Stress Test Database at 6 and 0 dB. 40% of the windows are irregular (RR CV > 0.1 or an ectopic beat).
+- **Nulls** (no rhythm): 90 white / brown noise windows, and 90 NSTDB noise-only windows.
+- The WFDB files are read with numpy, so no new package is needed.
+
+| | Synthetic | MIT-BIH |
+|---|---|---|
+| Gross error, FFT / ACF / wavelet / peaks | 33.6% / 37.1% / 44.4% / 36.5% | 65.4% / 37.5% / 63.7% / **13.0%** |
+| Disagreement predicts a lens is wrong (AUC, CV by group), per lens | 0.64 / 0.75 / 0.78 / 0.69 | **0.92 / 0.91 / 0.93 / 0.90** |
+| Same, the lens's own confidence | 0.47 / 0.58 / 0.30 / 0.64 | 0.61 / 0.71 / 0.46 / 0.89 |
+| Old rule (fuse all trusted) | 42.0% (answers 98%) | 37.4% (80%) |
+| Quorum 2 | 51.4% (71%; wrong when answering 31.7%) | 65.2% (37%; 6.2%) |
+| AgreementTable, CV / trained on synthetic | 34.4% | 32.3% / 32.3% |
+| Best single lens | FFT 33.6% | **peaks 13.0%** |
+| Hindsight (some lens right) | 14.5% | 9.2% |
+| Quorum false answers on rhythm-free input | 2% | 70% (bw 87%, ma 70%, em 53%) |
+
+Group-bootstrap 95% CIs (fused minus best lens): synthetic AgreementTable +0.9 pts [−9.2, +11.7], n.s.; MIT-BIH AgreementTable **+19.3 pts** [+13.0, +25.8]; the quorum on the frames it answers is +4.7 pts [+3.1, +6.8] behind the peak counter on those same frames.
+
+**Key findings:**
+1. **The core carries a third medium unchanged.** A `Medium`, four `Representation`s and a 15-line `estimate_distance` / `fuse` were enough; the quorum, the outlier, the `AgreementTable` and the analyzer are the same code as for audio and images (`tests/test_timeseries_core.py` checks the three media share it).
+2. **Each lens has its own, structured blind spots.** On real ECG the FFT reads the 2nd or 3rd harmonic (2× in 838, 3× in 427 of the 2880 clean windows): QRS energy rises with frequency, so the fundamental is rarely the strongest line, which is the audio STFT's missing-fundamental story again. The wavelet bank reads half, double or triple the rate. The ACF reads half the rate (two-beat periods) and breaks at 0 dB noise. The peak counter is almost perfect on regular rhythms (1.5% gross) and fails on irregular ones (30%: missed or extra events around ectopic beats). On synthetic data the designed ambiguities dominate: bigeminy defeats the peak counter (99%) and the ACF (95%), the step sway pulls FFT, ACF and wavelet to half the step rate, the smooth PPG pulse defeats the peak counter (52%), and motion artefacts break every lens (75–96%).
+3. **Disagreement predicts a blind spot on real data as well as in the other media.** The AUC is 0.90–0.93 for every lens on MIT-BIH, above each lens's own confidence (0.46–0.71) except the peak counter's, whose interval regularity is already a good warning (0.89). On synthetic data the warning is weaker (0.64–0.78), because there all four lenses are often wrong together (15% of windows).
+4. **Fusion loses to the best lens, by more than on images.** On real ECG, three of the four lenses fail in one family (FFT + wavelet phi 0.49, ACF + wavelet 0.40; the peak counter correlates 0.18–0.33 with the others). The family is wrong with high confidence and outvotes the one lens that is right: the AgreementTable makes 32.3% gross errors against 13.0% for the peak counter, and the quorum answers only 37% of windows. This is Exp 044's family problem in its strongest form, because the right lens is in a minority of one. Training the table on synthetic data gives the same result as cross-validation on MIT-BIH.
+5. **Slow drift reads as a rhythm.** On NSTDB noise without ECG the FFT and the wavelet bank confidently report a rate at the band edge (about 30 / min) on baseline wander and muscle noise. ACF, FFT and wavelet read about 60 / min on electrode-motion noise, which is probably real periodic motion during the recording. The quorum answers 70% of these windows. The peak counter is confident on 1%. On synthetic white / brown noise the quorum answers 2%.
+
+**Decision:** the time-series medium is in the repository as `src/timeseries_medium` (package `representation_timeseries`), on the unchanged core. For ECG heart rate the default fusion should not be used: the spectral family outvotes the right lens. Use the peak counter, with disagreement as the warning (AUC 0.90–0.93); this is the same "one lens answers, the others warn" split as CREPE in Exp 052. A medium-specific lower band edge (or a drift check) is needed before rhythm-free input can be rejected.
+
+- **Run**: `.venv/bin/python src/experiments/exp053_timeseries_medium.py` (needs `data/raw/mitdb` and `data/raw/nstdb`, see [data/README.md](../data/README.md); about 3 minutes the first time, then the readings are cached in `data/processed/exp053_*.pkl`; `--refresh` re-reads, `--calibrate` prints the lens calibration)
+- **Outputs**: [results/exp053_timeseries_medium.png](../results/exp053_timeseries_medium.png), [results/exp053_summary.json](../results/exp053_summary.json) (per-condition and per-signal atlas, regular vs irregular rhythm, AUCs, fusion with CIs, co-failure lift and phi raw and within condition, failure sets, nulls, core diff)
+
+![Exp 053](../results/exp053_timeseries_medium.png)
+
+---
+
+### Phase 34 — Why the Pitch-Tracker Gain Does Not Hold on Real Data (Exp 054)
+
+#### Exp 054 — What Breaks the Adaptive Pitch Tracker on Real Voice, and Can It Be Fixed?
+Exp 045 found that the framework's `AdaptivePitchTracker` loses to fixed YIN on real recordings: 24.2% vs 7.6% gross errors (> 50 cents) on clean vocadito. Issue #28 asks why, and whether it can be fixed. (The issue says "Exp 053"; that number went to the third medium, #27.)
+
+**Method.** The setup is Exp 045's: hop 512 at 22.05 kHz, clean and 10 dB noise, vocadito (40 tracks, 22 898 annotated hops per condition) and MDB-stem-synth (first 30 s of 230 stems, 99 879 hops).
+- Every per-hop ingredient is cached once:
+  - the engine's recommendation (YIN window, trough threshold, voicing gate, hold flag)
+  - the raw adaptive-YIN estimate
+  - fixed YIN
+  - the three plain lenses and their quorum
+- The tracker's post-processing is then **replayed** with each step on or off. The full replay matches `AdaptivePitchTracker.track` on all 861 checked hops.
+- Each annotated hop gets a context from the annotation alone:
+  - **onset**: the first 100 ms of a voiced segment
+  - **offset**: the last 100 ms
+  - **transition**: the pitch moves by more than 1 semitone across ±2 hops
+  - **vibrato**: the detrended pitch varies by more than 20 cents (std) over ±160 ms
+  - **stable**: everything else
+- Fixes were chosen on vocadito; MDB-stem-synth is held out.
+
+Gross error (> 50 cents or no estimate) on annotated voiced hops; Δ = group-bootstrap 95% CI over tracks:
+
+| | vocadito clean | vocadito 10 dB | MDB clean | MDB 10 dB |
+|---|---|---|---|---|
+| Fixed YIN | 7.6% | 9.1% | 12.1% | 15.9% |
+| Best plain lens (in hindsight) | ACF 7.0% | ACF 9.4% | Cepstrum 7.0% | STFT 15.6% |
+| `AdaptivePitchTracker` | 24.2% | 22.6% | 22.3% | 24.5% |
+| Raw adaptive YIN (the tracker's input, no post-processing) | 7.4% | **18.0%** | 12.2% | **22.7%** |
+| Tracker without the median filter | 8.1% | 17.9% | 13.8% | 22.8% |
+| Tracker with the 2-hop delay removed (offline) | 8.8% | 17.4% | 14.0% | 22.3% |
+| Tracker without octave step / continuity / gates / hysteresis (each) | 23.9–24.3% | 22.2–22.7% | 22.1–22.3% | 24.4–24.6% |
+| **`QuorumPitchTracker`** (quorum of the plain lenses, else fixed YIN; no filter) | **5.6%** | **7.3%** | **9.4%** | **14.7%** |
+| vs fixed YIN | −2.0 [−2.9, −1.4] | −1.8 [−3.4, −0.9] | −2.7 [−3.5, −1.9] | −1.2 [−1.8, −0.6] |
+| vs the best single lens | −1.4 [−1.8, −1.1] | −1.8 [−3.4, −0.9] | +2.4 [+1.5, +3.5] | −0.9 [−4.2, +1.9], n.s. |
+
+Error by context, clean (fixed YIN / tracker): vocadito onset 9.3 / 26.3%, offset 12.1 / 26.6%, transition 16.5 / **65.5%**, vibrato 3.4 / **17.9%**, stable 2.8 / 3.4%. On MDB the transition share is 34.5 / 60.0% and vibrato 6.1 / 17.3%. Of the hops where the tracker is wrong and fixed YIN is right, 62% (vocadito) and 83% (MDB) are transitions or vibrato. Stable notes account for 2–5% of them. The pattern is the same at low, mid and high f0, so pitch range is not the cause.
+
+**Key findings:**
+1. **The median filter causes almost all of the loss.** The tracker's causal 5-hop median assumes the pitch is constant over about 116 ms and reports the pitch of 2 hops ago. Real voice breaks that: vibrato at 5–6 Hz and note changes every few hundred milliseconds. Removing the filter alone takes clean vocadito from 24.2% to 8.1%, and clean MDB from 22.3% to 13.8%. A shorter (3-hop) or centred (offline) median is still worse than none. Exp 039's synthetic tests used steady tones with slow vibrato, where the filter costs nothing.
+2. **The engine's adaptive window and threshold do not help, and hurt under noise.** On clean audio raw adaptive YIN ties fixed YIN (7.4% vs 7.6%, 12.2% vs 12.1%). With 10 dB noise it is much worse (18.0% vs 9.1%, 22.7% vs 15.9%): the engine picks long windows and permissive thresholds where fixed YIN's 2048 samples and 0.15 threshold were right. Feeding fixed YIN into the tracker instead does not rescue it while the median filter stays.
+3. **The other steps are inert.** Octave correction, the continuity limit, the voicing / hold gates and the release hysteresis each move the error by less than 0.5 pts in every condition. The engine's gates and the octave logic make no measurable difference on real audio.
+4. **The fix that helps is Exp 046's quorum, not the engine.** On each hop, the consensus of at least two agreeing plain lenses, falling back to fixed YIN when there is none, with no filter. It beats fixed YIN on both datasets and both conditions (all CIs exclude 0). It beats the best single lens on vocadito, clean and noisy. On MDB-stem-synth (held out) it ties the best lens under noise but loses to the Cepstrum on clean audio (9.4% vs 7.0%). That lens was picked in hindsight and is the worst lens on noisy MDB (40.8%).
+5. **Not separable here:** breath, reverb and room are not annotated, so their effect cannot be isolated. Onsets and offsets cost the tracker 10–15 pts on vocadito, but the median filter explains that too (11–13% without it).
+
+**Decision:** `AdaptivePitchTracker` stays unchanged, because Exp 039 and 045 depend on it. The claim that the engine-driven tracker beats YIN is **retired**: it never held on real recordings, and the reasons are the median filter's stability assumption and noise-blind window choices. A new plugin, `framework.plugins.QuorumPitchTracker`, carries the fix. It matches its replay on all 861 checked hops, and a regression test checks that it follows a note change on the next hop where the adaptive tracker takes about 4 hops. It beats fixed YIN on real audio. It beats the best single lens on vocadito but not on clean MDB-stem-synth, so "beats every single lens" is not claimed. Like YIN it gives a pitch on every hop and does not decide voicing (see Exp 049 / 050 for that).
+
+- **Run**: `.venv/bin/python src/experiments/exp054_tracker_on_real_data.py` (needs vocadito and MDB-stem-synth in `data/raw/`; about 15 minutes the first time, then the per-hop ingredients are cached in `data/processed/exp054_*.pkl` and the analysis takes about 3 minutes)
+- **Outputs**: [results/exp054_tracker_on_real_data.png](../results/exp054_tracker_on_real_data.png), [results/exp054_summary.json](../results/exp054_summary.json) (every variant, ablation and fix per dataset and condition, at 50 cents and 20%, with CIs against fixed YIN and against the best single lens, by context and f0 range)
+
+![Exp 054](../results/exp054_tracker_on_real_data.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -1039,7 +1220,7 @@ Seven retune speeds on the same confidence-gated tuner (0 ms → 500 ms).
 19. **Practical DSP Improvement**: Experiment 033 proves the framework is instrumentally useful: zero regressions across clean, vibrato, and transient conditions; complete elimination of the 2.33% GER in the noise-collapse segment; sub-millisecond overhead (~0.3 ms/frame). A developer can drop one call — `state = engine.analyze(frame, sr)` — into any YIN pipeline and immediately gain robustness.
 20. **Universal DSP State Sensor**: Experiment 034 validates the framework zero-shot across five structurally different tasks (Pitch Tracking, Onset Detection, Voicing Detection, Transient Detection, Spectral Denoising). 4/5 tasks improved without any retraining. The engine was trained once on audio physics and generalizes because the physical state space is universal — not task-specific.
 21. **Learned DSP Controller**: Experiment 038 demonstrates that we can automatically learn optimal parameter mapping functions $g(z_1, z_2) \to (\alpha, \beta)$ from grid-searched frame-level training data using a Random Forest Regressor. When evaluated out-of-sample on the test split of a real noisy vocal recording, the learned controller minimized Log Spectral Distance (LSD) down to 17.85 dB (a -0.08 dB delta improvement over the hand-crafted rule), confirming that the Universal Audio State Space contains enough structure to automatically discover superior DSP parameter mappings.
-22. **Framework V1 Library**: Experiment 039 completes the transition of the Universal Audio State Space architecture into a reusable coordinate-gated DSP library. By wrapping the core engine with importable reference plugins (denoiser, pitch tracker, onset detector), we demonstrated that JUCE/DSP developers can deploy this technology using a few simple lines of code to achieve immediate, out-of-sample improvements without any retraining.
+22. **Framework V1 Library** (the pitch-tracker part does not hold on real recordings; see Exp 045 and Exp 054): Experiment 039 completes the transition of the Universal Audio State Space architecture into a reusable coordinate-gated DSP library. By wrapping the core engine with importable reference plugins (denoiser, pitch tracker, onset detector), we demonstrated that JUCE/DSP developers can deploy this technology using a few simple lines of code to achieve immediate, out-of-sample improvements without any retraining.
 23. **Zero-Shot External Validation**: Experiment 041 demonstrates that the state-space engine can act as a zero-shot manager and post-filter for external library algorithms (such as librosa and scipy) with zero internal code changes. The framework achieved positive performance benefits ($\Delta P > 0$) across all 5 evaluated algorithms, yielding an average performance benefit of $+0.0320$. The HPSS part of that gain does not survive a fixed-kernel control (see Exp 035).
 
 ### On the Product
@@ -1142,6 +1323,9 @@ Exp 052:      A learned lens: CREPE is in no classic family (phi ~0.2 with STFT 
 Exp 053:      Third medium (sensor rate; MIT-BIH ECG with real NSTDB noise) on the unchanged core:
               disagreement predicts a blind spot (AUC 0.90-0.93), but FFT, wavelet and ACF fail as
               a family and outvote the peak counter (fusion 32% vs 13% gross errors)
+Exp 054:      Why the pitch tracker lost on real audio: its 5-hop median filter (transitions,
+              vibrato) and noise-blind window choices. The quorum of plain lenses with a YIN
+              fallback beats fixed YIN on vocadito and MDB-stem-synth (−1.2 to −2.7 pts)
 ```
 
 **Next** (GitHub issues)

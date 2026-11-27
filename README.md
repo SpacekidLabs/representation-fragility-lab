@@ -77,7 +77,7 @@ The key claims re-run on vocadito (real singing), MDB-stem-synth (230 resynthesi
 | Disagreement predicts when a lens is wrong | **Holds**: AUC 0.86–0.99 (audio), 0.87–0.92 (photos) |
 | The consensus is a better answer (audio) | Holds on MDB-stem-synth (7.3% vs 9.9%); a tie on vocadito |
 | ACF + Cepstrum share a blind spot | Holds (2.6–3.0×); STFT + Cepstrum are no longer complementary (0.7–0.85×) |
-| The framework's pitch tracker beats fixed YIN | **Does not hold**: a loss, at best a tie once its delay is removed |
+| The framework's pitch tracker beats fixed YIN | **Does not hold**: a loss. Exp 054 traces it to the tracker's median filter, which lags vibrato and note changes, and to window choices that hurt under noise. The claim is retired. A quorum of the plain lenses with a YIN fallback (`QuorumPitchTracker`) does beat fixed YIN on both real datasets |
 | No confident answer when there is no pitch | **Failed**: breaths and consonants fool single lenses (36–99% of unvoiced frames). Fixed by a quorum of two agreeing lenses (Exp 046): 0–7%, at the cost of more abstentions in heavy noise |
 
 Full table with every dataset, metric and confidence interval: [Exp 045 in docs/EXPERIMENTS.md](docs/EXPERIMENTS.md#exp-045--do-the-claims-survive-real-recordings-and-photos).
@@ -140,6 +140,6 @@ tests/               pytest
 
 ## Known limits
 
-- Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds, the framework's pitch-tracker gain does not, and unpitched real frames fool the consensus.
+- Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds, the framework's pitch-tracker gain does not (Exp 054 says why; the quorum tracker that replaces it beats fixed YIN), and unpitched real frames fool the consensus.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the others.
 - The framework's DSP gains are small and depend on the baseline (see Exp 035 and Exp 041 in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)).

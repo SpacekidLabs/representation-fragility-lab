@@ -178,3 +178,49 @@ class AdaptivePitchTracker:
             pitches[idx] = pitch if is_voiced else 0.0
             
         return pitches
+
+
+class QuorumPitchTracker:
+    """
+    Pitch tracker from Exp 054 (issue #28): the Exp 046 quorum of the plain lenses
+    (STFT, ACF, Cepstrum on a 2048-sample frame centred on each hop; consensus
+    only when at least two trusted lenses agree), falling back to fixed YIN
+    (2048 samples, trough threshold 0.15) when there is no quorum.
+
+    No median filter, continuity limit, octave correction or engine gates: on
+    vocadito and MDB-stem-synth the 5-hop causal median of AdaptivePitchTracker
+    (a 2-hop delay) caused most of its loss, and the other steps changed the
+    error by less than 0.5 pts. It beats fixed YIN on both datasets, clean and
+    with 10 dB noise. Like YIN it reports a pitch on every hop; it does not
+    decide voicing.
+    """
+
+    def __init__(self, min_agreeing: int = 2):
+        self.min_agreeing = min_agreeing
+
+    def track(self, sig: np.ndarray, sr: int, hop_length=512, fmin=80, fmax=1000) -> np.ndarray:
+        from ..audio import PitchComparator
+        from ..disagreement import OUTLIER_MARGIN, VOICING_THRESHOLD, read_acf, read_cepstrum, read_stft
+        from ..audio import ConfidenceThresholdDetector, Reading
+
+        readers = {"stft": read_stft, "acf": read_acf, "cepstrum": read_cepstrum}
+        comp = PitchComparator(outlier_margin=OUTLIER_MARGIN, min_agreeing=self.min_agreeing,
+                               detector=ConfidenceThresholdDetector(VOICING_THRESHOLD))
+        n = len(sig)
+        hops = np.arange(0, n - hop_length, hop_length)
+        yin = librosa.yin(sig, fmin=fmin, fmax=fmax, sr=sr, frame_length=2048, hop_length=hop_length,
+                          trough_threshold=0.15, center=True)[:len(hops)]
+        pad = 2048
+        y = np.pad(sig, pad, mode="reflect")
+        out = np.zeros(len(hops))
+        for i, c in enumerate(hops):
+            frame = y[c + pad - 1024:c + pad + 1024]
+            rd = {}
+            for name, read in readers.items():
+                r = read(frame, sr, fmin, fmax)
+                conf = r.confidence if np.isfinite(r.confidence) else 0.0
+                rd[name] = Reading(name, r.f0 if r.f0 > 0 else None, conf)
+            q = comp.compare(rd).consensus
+            p = q if q is not None else float(yin[i])
+            out[i] = p if fmin < p < fmax else 0.0
+        return out

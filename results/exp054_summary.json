@@ -1,0 +1,2098 @@
+{
+  "replay_mismatch_vocadito_first_20s": [
+    0,
+    861
+  ],
+  "quorum_tracker_mismatch_vocadito_first_20s": [
+    0,
+    861
+  ],
+  "vocadito": {
+    "n_hops": 45796,
+    "n_tracks": 40,
+    "by_condition": {
+      "clean -": {
+        "n": 22898,
+        "gross_50c": {
+          "fixed_yin": 0.0755524499956328,
+          "adaptive_yin_raw": 0.07419861996680933,
+          "lens_stft": 0.13232596733339155,
+          "lens_acf": 0.06987509826185694,
+          "lens_cepstrum": 0.1193117302821207,
+          "quorum": 0.08140448947506332,
+          "tracker": 0.2418551838588523,
+          "tracker_lag2_removed": 0.08764957638221679,
+          "no_octave": 0.24320901388767577,
+          "no_cont": 0.23866713250065508,
+          "no_octave_no_cont": 0.236876583107695,
+          "no_gates": 0.2418551838588523,
+          "no_median": 0.0810987859201677,
+          "median3": 0.14765481701458644,
+          "median5_centred": 0.093283256179579,
+          "no_hyst": 0.2419861996680933,
+          "fixed_yin_input": 0.24303432614202114,
+          "fix_quorum_input": 0.23735697440824527,
+          "fix_no_median_no_cont": 0.07642588872390602,
+          "fix_no_median_no_cont_no_octave": 0.07419861996680933,
+          "fix_quorum_no_median_no_cont": 0.05738492444755001,
+          "fix_fyin_no_median_no_cont": 0.0779980784347978,
+          "fix_fyin_median3_centred": 0.07891518909948467,
+          "fix_quorum_fyin_no_median_no_cont": 0.05865141060354616,
+          "quorum_tracker": 0.05563804699100358
+        },
+        "gross_20pct": {
+          "fixed_yin": 0.02030745043235217,
+          "adaptive_yin_raw": 0.02030745043235217,
+          "lens_stft": 0.12136431129356276,
+          "lens_acf": 0.015809240981745132,
+          "lens_cepstrum": 0.07830378198969343,
+          "quorum": 0.06804087693248319,
+          "tracker": 0.03070137129880339,
+          "tracker_lag2_removed": 0.018997292339942354,
+          "no_octave": 0.030919730980871692,
+          "no_cont": 0.024325268582408945,
+          "no_octave_no_cont": 0.022054327888898592,
+          "no_gates": 0.03070137129880339,
+          "no_median": 0.026596209275919293,
+          "median3": 0.028692462223775004,
+          "median5_centred": 0.026552537339505633,
+          "no_hyst": 0.030876059044458032,
+          "fixed_yin_input": 0.03017730806183946,
+          "fix_quorum_input": 0.024106908900340642,
+          "fix_no_median_no_cont": 0.02253471918944886,
+          "fix_no_median_no_cont_no_octave": 0.02030745043235217,
+          "fix_quorum_no_median_no_cont": 0.016027600663813434,
+          "fix_fyin_no_median_no_cont": 0.022840422744344484,
+          "fix_fyin_median3_centred": 0.02244737531662154,
+          "fix_quorum_fyin_no_median_no_cont": 0.01646432002795004,
+          "quorum_tracker": 0.013625644161062102
+        },
+        "context_share": {
+          "onset": 0.19516988383264913,
+          "offset": 0.16787492357411127,
+          "transition": 0.12726002270940692,
+          "vibrato": 0.3122980172940868,
+          "stable": 0.19739715258974583
+        },
+        "by_context": {
+          "onset": {
+            "fixed_yin": 0.09286193779368987,
+            "adaptive_yin_raw": 0.08995300962183934,
+            "lens_stft": 0.12866413067800403,
+            "lens_acf": 0.08972924591631237,
+            "lens_cepstrum": 0.13090176773327367,
+            "quorum": 0.10561646900872679,
+            "tracker": 0.2629223539941821,
+            "tracker_lag2_removed": 0.11367196240769747,
+            "no_octave": 0.26650257328261356,
+            "no_cont": 0.23942716491385097,
+            "no_octave_no_cont": 0.22868650704855673,
+            "no_gates": 0.2629223539941821,
+            "no_median": 0.13090176773327367,
+            "median3": 0.17565450883866637,
+            "median5_centred": 0.15104050123070037,
+            "no_hyst": 0.2633698814052361,
+            "fixed_yin_input": 0.2691877377489371,
+            "fix_quorum_input": 0.2600134258223316,
+            "fix_no_median_no_cont": 0.11076303423584695,
+            "fix_no_median_no_cont_no_octave": 0.08995300962183934,
+            "fix_quorum_no_median_no_cont": 0.08995300962183934,
+            "fix_fyin_no_median_no_cont": 0.11523830834638622,
+            "fix_fyin_median3_centred": 0.11501454464085925,
+            "fix_quorum_fyin_no_median_no_cont": 0.0944282837323786,
+            "quorum_tracker": 0.07227567688520922
+          },
+          "offset": {
+            "fixed_yin": 0.12096774193548387,
+            "adaptive_yin_raw": 0.11940686784599376,
+            "lens_stft": 0.11082206035379813,
+            "lens_acf": 0.11628511966701353,
+            "lens_cepstrum": 0.18522372528616024,
+            "quorum": 0.1240894901144641,
+            "tracker": 0.26560874089490116,
+            "tracker_lag2_removed": 0.13111342351716962,
+            "no_octave": 0.26768990634755463,
+            "no_cont": 0.26560874089490116,
+            "no_octave_no_cont": 0.2666493236212279,
+            "no_gates": 0.26560874089490116,
+            "no_median": 0.11524453694068679,
+            "median3": 0.18912591050988553,
+            "median5_centred": 0.1259105098855359,
+            "no_hyst": 0.26560874089490116,
+            "fixed_yin_input": 0.2643080124869927,
+            "fix_quorum_input": 0.2559833506763788,
+            "fix_no_median_no_cont": 0.1149843912591051,
+            "fix_no_median_no_cont_no_octave": 0.11914672216441206,
+            "fix_quorum_no_median_no_cont": 0.08949011446409989,
+            "fix_fyin_no_median_no_cont": 0.11654526534859522,
+            "fix_fyin_median3_centred": 0.11524453694068679,
+            "fix_quorum_fyin_no_median_no_cont": 0.09079084287200832,
+            "quorum_tracker": 0.09235171696149844
+          },
+          "transition": {
+            "fixed_yin": 0.16506520247083048,
+            "adaptive_yin_raw": 0.1633493479752917,
+            "lens_stft": 0.13143445435827042,
+            "lens_acf": 0.1678105696636925,
+            "lens_cepstrum": 0.1973232669869595,
+            "quorum": 0.18771448181194234,
+            "tracker": 0.6554564172958133,
+            "tracker_lag2_removed": 0.1873713109128346,
+            "no_octave": 0.6568291008922443,
+            "no_cont": 0.6654083733699382,
+            "no_octave_no_cont": 0.6633493479752917,
+            "no_gates": 0.6554564172958133,
+            "no_median": 0.16986959505833904,
+            "median3": 0.42930679478380235,
+            "median5_centred": 0.18085106382978725,
+            "no_hyst": 0.6554564172958133,
+            "fixed_yin_input": 0.6564859299931366,
+            "fix_quorum_input": 0.6640356897735072,
+            "fix_no_median_no_cont": 0.1633493479752917,
+            "fix_no_median_no_cont_no_octave": 0.16369251887439945,
+            "fix_quorum_no_median_no_cont": 0.12731640356897736,
+            "fix_fyin_no_median_no_cont": 0.16437886067261495,
+            "fix_fyin_median3_centred": 0.16403568977350722,
+            "fix_quorum_fyin_no_median_no_cont": 0.12800274536719286,
+            "quorum_tracker": 0.13212079615648592
+          },
+          "vibrato": {
+            "fixed_yin": 0.033841420780310445,
+            "adaptive_yin_raw": 0.03286253670815271,
+            "lens_stft": 0.145294364424556,
+            "lens_acf": 0.026569710529995804,
+            "lens_cepstrum": 0.06446650818067404,
+            "quorum": 0.03761711648720459,
+            "tracker": 0.17857642287791917,
+            "tracker_lag2_removed": 0.04600755139141379,
+            "no_octave": 0.178716263459656,
+            "no_cont": 0.17899594462312962,
+            "no_octave_no_cont": 0.17983498811355056,
+            "no_gates": 0.17857642287791917,
+            "no_median": 0.032023493217731784,
+            "median3": 0.07089917494056776,
+            "median5_centred": 0.048105160117466086,
+            "no_hyst": 0.178716263459656,
+            "fixed_yin_input": 0.178716263459656,
+            "fix_quorum_input": 0.17298279960844637,
+            "fix_no_median_no_cont": 0.03174381205425814,
+            "fix_no_median_no_cont_no_octave": 0.03286253670815271,
+            "fix_quorum_no_median_no_cont": 0.019158159697944342,
+            "fix_fyin_no_median_no_cont": 0.03272269612641589,
+            "fix_fyin_median3_centred": 0.03649839183331002,
+            "fix_quorum_fyin_no_median_no_cont": 0.019437840861417983,
+            "quorum_tracker": 0.020276884351838904
+          },
+          "stable": {
+            "fixed_yin": 0.028097345132743364,
+            "adaptive_yin_raw": 0.028097345132743364,
+            "lens_stft": 0.1342920353982301,
+            "lens_acf": 0.016150442477876108,
+            "lens_cepstrum": 0.08827433628318584,
+            "quorum": 0.02190265486725664,
+            "tracker": 0.034292035398230086,
+            "tracker_lag2_removed": 0.02654867256637168,
+            "no_octave": 0.034734513274336284,
+            "no_cont": 0.034292035398230086,
+            "no_octave_no_cont": 0.034955752212389384,
+            "no_gates": 0.034292035398230086,
+            "no_median": 0.023230088495575223,
+            "median3": 0.024557522123893807,
+            "median5_centred": 0.023451327433628318,
+            "no_hyst": 0.034292035398230086,
+            "fixed_yin_input": 0.034292035398230086,
+            "fix_quorum_input": 0.02588495575221239,
+            "fix_no_median_no_cont": 0.024336283185840708,
+            "fix_no_median_no_cont_no_octave": 0.028097345132743364,
+            "fix_quorum_no_median_no_cont": 0.01327433628318584,
+            "fix_fyin_no_median_no_cont": 0.024336283185840708,
+            "fix_fyin_median3_centred": 0.024557522123893807,
+            "fix_quorum_fyin_no_median_no_cont": 0.01327433628318584,
+            "quorum_tracker": 0.014601769911504425
+          }
+        },
+        "by_range": {
+          "low": {
+            "fixed_yin": 0.07977963680881453,
+            "adaptive_yin_raw": 0.07386247704550092,
+            "lens_stft": 0.15547847378086105,
+            "lens_acf": 0.08345235666190573,
+            "lens_cepstrum": 0.1828198326872067,
+            "quorum": 0.1236482350540706,
+            "tracker": 0.28402366863905326,
+            "tracker_lag2_removed": 0.09406243623750254,
+            "no_octave": 0.28402366863905326,
+            "no_cont": 0.27994286880228525,
+            "no_octave_no_cont": 0.27749438890022443,
+            "no_gates": 0.28402366863905326,
+            "no_median": 0.08630891654764333,
+            "median3": 0.17588247296470108,
+            "median5_centred": 0.10426443582942256,
+            "no_hyst": 0.2844317486227301,
+            "fixed_yin_input": 0.28422770863089164,
+            "fix_quorum_input": 0.28626810854927565,
+            "fix_no_median_no_cont": 0.07529075698836972,
+            "fix_no_median_no_cont_no_octave": 0.07406651703733932,
+            "fix_quorum_no_median_no_cont": 0.0622321975107121,
+            "fix_fyin_no_median_no_cont": 0.08141195674352172,
+            "fix_fyin_median3_centred": 0.08243215670271373,
+            "fix_quorum_fyin_no_median_no_cont": 0.0654968373801265,
+            "quorum_tracker": 0.0644766374209345
+          },
+          "mid": {
+            "fixed_yin": 0.07246132208157524,
+            "adaptive_yin_raw": 0.07234880450070323,
+            "lens_stft": 0.1209563994374121,
+            "lens_acf": 0.06464135021097046,
+            "lens_cepstrum": 0.10289732770745429,
+            "quorum": 0.06835443037974684,
+            "tracker": 0.22931082981715892,
+            "tracker_lag2_removed": 0.08433192686357244,
+            "no_octave": 0.23088607594936708,
+            "no_cont": 0.22627285513361461,
+            "no_octave_no_cont": 0.22458509142053446,
+            "no_gates": 0.22931082981715892,
+            "no_median": 0.07842475386779184,
+            "median3": 0.13879043600562588,
+            "median5_centred": 0.08894514767932489,
+            "no_hyst": 0.22936708860759494,
+            "fixed_yin_input": 0.23077355836849509,
+            "fix_quorum_input": 0.22306610407876232,
+            "fix_no_median_no_cont": 0.07538677918424753,
+            "fix_no_median_no_cont_no_octave": 0.07229254571026723,
+            "fix_quorum_no_median_no_cont": 0.05462728551336146,
+            "fix_fyin_no_median_no_cont": 0.07572433192686358,
+            "fix_fyin_median3_centred": 0.07662447257383967,
+            "fix_quorum_fyin_no_median_no_cont": 0.05535864978902954,
+            "quorum_tracker": 0.05158931082981716
+          },
+          "high": {
+            "fixed_yin": 0.22972972972972974,
+            "adaptive_yin_raw": 0.22972972972972974,
+            "lens_stft": 0.5315315315315315,
+            "lens_acf": 0.1891891891891892,
+            "lens_cepstrum": 0.03153153153153153,
+            "quorum": 0.19369369369369369,
+            "tracker": 0.3153153153153153,
+            "tracker_lag2_removed": 0.21171171171171171,
+            "no_octave": 0.32882882882882886,
+            "no_cont": 0.31981981981981983,
+            "no_octave_no_cont": 0.32432432432432434,
+            "no_gates": 0.3153153153153153,
+            "no_median": 0.18018018018018017,
+            "median3": 0.23423423423423423,
+            "median5_centred": 0.1981981981981982,
+            "no_hyst": 0.3153153153153153,
+            "fixed_yin_input": 0.3153153153153153,
+            "fix_quorum_input": 0.30180180180180183,
+            "fix_no_median_no_cont": 0.18468468468468469,
+            "fix_no_median_no_cont_no_octave": 0.22972972972972974,
+            "fix_quorum_no_median_no_cont": 0.17117117117117117,
+            "fix_fyin_no_median_no_cont": 0.18468468468468469,
+            "fix_fyin_median3_centred": 0.18468468468468469,
+            "fix_quorum_fyin_no_median_no_cont": 0.17117117117117117,
+            "quorum_tracker": 0.18468468468468469
+          }
+        },
+        "range_share": {
+          "low": 0.21403616036335052,
+          "mid": 0.7762686697528168,
+          "high": 0.00969516988383265
+        },
+        "best_plain_lens": "lens_acf",
+        "best_single": "lens_acf",
+        "vs_best_single": {
+          "tracker": {
+            "diff": 0.17198008559699535,
+            "ci95": [
+              0.15139509501113005,
+              0.19151405711620448
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.017774478120359857,
+            "ci95": [
+              0.01119823228520548,
+              0.026017632829070554
+            ]
+          },
+          "quorum": {
+            "diff": 0.011529391213206383,
+            "ci95": [
+              0.00013769372853748968,
+              0.025272600386126897
+            ]
+          },
+          "no_octave": {
+            "diff": 0.17333391562581885,
+            "ci95": [
+              0.1527237885187392,
+              0.19317406902841155
+            ]
+          },
+          "no_cont": {
+            "diff": 0.16879203423879813,
+            "ci95": [
+              0.14894958031345434,
+              0.1872488173689963
+            ]
+          },
+          "no_octave_no_cont": {
+            "diff": 0.16700148484583804,
+            "ci95": [
+              0.14665835101391198,
+              0.18558760733154206
+            ]
+          },
+          "no_gates": {
+            "diff": 0.17198008559699535,
+            "ci95": [
+              0.15139509501113005,
+              0.19151405711620448
+            ]
+          },
+          "no_median": {
+            "diff": 0.011223687658310763,
+            "ci95": [
+              0.005880894506064176,
+              0.018208459600275968
+            ]
+          },
+          "median3": {
+            "diff": 0.0777797187527295,
+            "ci95": [
+              0.06667866812062719,
+              0.08895468328724208
+            ]
+          },
+          "median5_centred": {
+            "diff": 0.023408157917722064,
+            "ci95": [
+              0.0162494674235935,
+              0.03134701117953933
+            ]
+          },
+          "no_hyst": {
+            "diff": 0.17211110140623637,
+            "ci95": [
+              0.15162613724977367,
+              0.19176504626153426
+            ]
+          },
+          "fixed_yin_input": {
+            "diff": 0.1731592278801642,
+            "ci95": [
+              0.15243769348548872,
+              0.19306661958284083
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.16748187614638832,
+            "ci95": [
+              0.14706693212229166,
+              0.18713228515077537
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.00655079046204908,
+            "ci95": [
+              0.0009675249702894661,
+              0.013795726511742714
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.004323521704952399,
+            "ci95": [
+              -0.0018267293003861723,
+              0.01202927385260887
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": -0.012490173814306928,
+            "ci95": [
+              -0.01638444126779092,
+              -0.008978167987931782
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.008122980172940858,
+            "ci95": [
+              0.0030048760648087062,
+              0.014783167652305168
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.009040090837627732,
+            "ci95": [
+              0.0034652806151852958,
+              0.015832165444350826
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.011223687658310777,
+            "ci95": [
+              -0.015225689313228295,
+              -0.007932456312585903
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.014237051270853354,
+            "ci95": [
+              -0.017912869892225933,
+              -0.010950271587590134
+            ]
+          }
+        },
+        "vs_fixed_yin": {
+          "tracker": {
+            "diff": 0.16630273386321948,
+            "ci95": [
+              0.14505795711092173,
+              0.18680585612961192
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.012097126386583987,
+            "ci95": [
+              0.008346355210434173,
+              0.016351448226314697
+            ]
+          },
+          "quorum": {
+            "diff": 0.0058520394794305125,
+            "ci95": [
+              -0.00587600862464234,
+              0.01890695043632623
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.16180452441261245,
+            "ci95": [
+              0.1402946395922395,
+              0.18418127204147017
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.0008734387282732098,
+            "ci95": [
+              -0.0013584899431830545,
+              0.003175534775333089
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": -0.0013538300288234717,
+            "ci95": [
+              -0.0026629259940958152,
+              -0.00020642111397308082
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": -0.018167525548082798,
+            "ci95": [
+              -0.026506622353610045,
+              -0.011962349894388687
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.0024456284391649874,
+            "ci95": [
+              0.00032808837219328453,
+              0.004585647378186524
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.003362739103851861,
+            "ci95": [
+              0.0012534515878174473,
+              0.0056326887262231435
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.016901039392086648,
+            "ci95": [
+              -0.02565317615755547,
+              -0.010506641721591565
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.019914403004629225,
+            "ci95": [
+              -0.02895882474398787,
+              -0.013780636465467623
+            ]
+          }
+        },
+        "extra_error_share_by_context": {
+          "onset": 0.2039072039072039,
+          "offset": 0.15286935286935288,
+          "transition": 0.3626373626373626,
+          "vibrato": 0.2647130647130647,
+          "stable": 0.015873015873015872
+        }
+      },
+      "noise 10 dB": {
+        "n": 22898,
+        "gross_50c": {
+          "fixed_yin": 0.09149270678661892,
+          "adaptive_yin_raw": 0.1800157218971089,
+          "lens_stft": 0.13298104637959648,
+          "lens_acf": 0.0942877107170932,
+          "lens_cepstrum": 0.298759717005852,
+          "quorum": 0.20770372958336972,
+          "tracker": 0.22565289544938422,
+          "tracker_lag2_removed": 0.1735086033714735,
+          "no_octave": 0.22705039741462135,
+          "no_cont": 0.22229015634553237,
+          "no_octave_no_cont": 0.22237750021835967,
+          "no_gates": 0.22565289544938422,
+          "no_median": 0.17892392348676742,
+          "median3": 0.19324831863044808,
+          "median5_centred": 0.1754738405100882,
+          "no_hyst": 0.2254782077037296,
+          "fixed_yin_input": 0.24897370949427897,
+          "fix_quorum_input": 0.2304568084548869,
+          "fix_no_median_no_cont": 0.1788365796139401,
+          "fix_no_median_no_cont_no_octave": 0.17997204996069527,
+          "fix_quorum_no_median_no_cont": 0.09297755262468338,
+          "fix_fyin_no_median_no_cont": 0.09144903485020525,
+          "fix_fyin_median3_centred": 0.09171106646868722,
+          "fix_quorum_fyin_no_median_no_cont": 0.07463533933094593,
+          "quorum_tracker": 0.0732378373657088
+        },
+        "gross_20pct": {
+          "fixed_yin": 0.029871604506943837,
+          "adaptive_yin_raw": 0.03371473491134597,
+          "lens_stft": 0.12193204646694035,
+          "lens_acf": 0.01663900777360468,
+          "lens_cepstrum": 0.1741636824176784,
+          "quorum": 0.200847235566425,
+          "tracker": 0.03153113809066294,
+          "tracker_lag2_removed": 0.027993711241156433,
+          "no_octave": 0.031793169709144906,
+          "no_cont": 0.02930386933356625,
+          "no_octave_no_cont": 0.029565900952048214,
+          "no_gates": 0.03153113809066294,
+          "no_median": 0.03017730806183946,
+          "median3": 0.03057035548956241,
+          "median5_centred": 0.03004629225259848,
+          "no_hyst": 0.03140012228142196,
+          "fixed_yin_input": 0.03537426849506507,
+          "fix_quorum_input": 0.027163944449296883,
+          "fix_no_median_no_cont": 0.03148746615424928,
+          "fix_no_median_no_cont_no_octave": 0.03371473491134597,
+          "fix_quorum_no_median_no_cont": 0.026770897021573935,
+          "fix_fyin_no_median_no_cont": 0.02930386933356625,
+          "fix_fyin_median3_centred": 0.028692462223775004,
+          "fix_quorum_fyin_no_median_no_cont": 0.02332081404489475,
+          "quorum_tracker": 0.022622063062276182
+        },
+        "context_share": {
+          "onset": 0.19516988383264913,
+          "offset": 0.16787492357411127,
+          "transition": 0.12726002270940692,
+          "vibrato": 0.3122980172940868,
+          "stable": 0.19739715258974583
+        },
+        "by_context": {
+          "onset": {
+            "fixed_yin": 0.09957484895949877,
+            "adaptive_yin_raw": 0.19534571492503916,
+            "lens_stft": 0.12799283956142313,
+            "lens_acf": 0.09935108525397181,
+            "lens_cepstrum": 0.23383307227567687,
+            "quorum": 0.1919892593421347,
+            "tracker": 0.18438129335421793,
+            "tracker_lag2_removed": 0.1913179682255538,
+            "no_octave": 0.18706645782054152,
+            "no_cont": 0.17632579995524725,
+            "no_octave_no_cont": 0.17319310807786978,
+            "no_gates": 0.18438129335421793,
+            "no_median": 0.2036249720295368,
+            "median3": 0.1828149474155292,
+            "median5_centred": 0.2036249720295368,
+            "no_hyst": 0.18371000223763706,
+            "fixed_yin_input": 0.27925710449765045,
+            "fix_quorum_input": 0.19847840680241666,
+            "fix_no_median_no_cont": 0.2018348623853211,
+            "fix_no_median_no_cont_no_octave": 0.19534571492503916,
+            "fix_quorum_no_median_no_cont": 0.11053927053031998,
+            "fix_fyin_no_median_no_cont": 0.12374132915641083,
+            "fix_fyin_median3_centred": 0.12418885656746476,
+            "fix_quorum_fyin_no_median_no_cont": 0.1049451778921459,
+            "quorum_tracker": 0.07965987916759902
+          },
+          "offset": {
+            "fixed_yin": 0.17195629552549427,
+            "adaptive_yin_raw": 0.2554630593132154,
+            "lens_stft": 0.1147242455775234,
+            "lens_acf": 0.18496357960457857,
+            "lens_cepstrum": 0.3889177939646202,
+            "quorum": 0.2736732570239334,
+            "tracker": 0.2916233090530697,
+            "tracker_lag2_removed": 0.24219562955254942,
+            "no_octave": 0.29292403746097817,
+            "no_cont": 0.2898022892819979,
+            "no_octave_no_cont": 0.2916233090530697,
+            "no_gates": 0.2916233090530697,
+            "no_median": 0.24479708636836628,
+            "median3": 0.2666493236212279,
+            "median5_centred": 0.2356919875130073,
+            "no_hyst": 0.2916233090530697,
+            "fixed_yin_input": 0.2739334027055151,
+            "fix_quorum_input": 0.26873048907388136,
+            "fix_no_median_no_cont": 0.24713839750260147,
+            "fix_no_median_no_cont_no_octave": 0.2554630593132154,
+            "fix_quorum_no_median_no_cont": 0.1404786680541103,
+            "fix_fyin_no_median_no_cont": 0.1550468262226847,
+            "fix_fyin_median3_centred": 0.15088449531737774,
+            "fix_quorum_fyin_no_median_no_cont": 0.12278876170655567,
+            "quorum_tracker": 0.1331945889698231
+          },
+          "transition": {
+            "fixed_yin": 0.17398764584763213,
+            "adaptive_yin_raw": 0.40116678105696635,
+            "lens_stft": 0.1338366506520247,
+            "lens_acf": 0.19492107069320522,
+            "lens_cepstrum": 0.272477693891558,
+            "quorum": 0.29718599862731643,
+            "tracker": 0.5459849004804392,
+            "tracker_lag2_removed": 0.39121482498284144,
+            "no_octave": 0.5473575840768703,
+            "no_cont": 0.5401509951956074,
+            "no_octave_no_cont": 0.5394646533973919,
+            "no_gates": 0.5459849004804392,
+            "no_median": 0.4021962937542896,
+            "median3": 0.4605353466026081,
+            "median5_centred": 0.3970487302676733,
+            "no_hyst": 0.5459849004804392,
+            "fixed_yin_input": 0.6578586135895677,
+            "fix_quorum_input": 0.6293754289636239,
+            "fix_no_median_no_cont": 0.40150995195607414,
+            "fix_no_median_no_cont_no_octave": 0.40116678105696635,
+            "fix_quorum_no_median_no_cont": 0.20212765957446807,
+            "fix_fyin_no_median_no_cont": 0.17364447494852436,
+            "fix_fyin_median3_centred": 0.17295813315030886,
+            "fix_quorum_fyin_no_median_no_cont": 0.15030885380919698,
+            "quorum_tracker": 0.1554564172958133
+          },
+          "vibrato": {
+            "fixed_yin": 0.046287232554887425,
+            "adaptive_yin_raw": 0.1300517410152426,
+            "lens_stft": 0.145294364424556,
+            "lens_acf": 0.04684659488183471,
+            "lens_cepstrum": 0.26569710529995805,
+            "quorum": 0.18444972731086562,
+            "tracker": 0.20081107537407356,
+            "tracker_lag2_removed": 0.12459795832750664,
+            "no_octave": 0.20234932177317858,
+            "no_cont": 0.19843378548454763,
+            "no_octave_no_cont": 0.199692350720179,
+            "no_gates": 0.20081107537407356,
+            "no_median": 0.12865333519787442,
+            "median3": 0.14976926304013424,
+            "median5_centred": 0.12487763949098028,
+            "no_hyst": 0.20067123479233673,
+            "fixed_yin_input": 0.18570829254649698,
+            "fix_quorum_input": 0.1851489302195497,
+            "fix_no_median_no_cont": 0.12753461054397985,
+            "fix_no_median_no_cont_no_octave": 0.1299119004335058,
+            "fix_quorum_no_median_no_cont": 0.051181652915676126,
+            "fix_fyin_no_median_no_cont": 0.04363026150188785,
+            "fix_fyin_median3_centred": 0.04670675430009789,
+            "fix_quorum_fyin_no_median_no_cont": 0.03342189903509998,
+            "quorum_tracker": 0.035239826597678645
+          },
+          "stable": {
+            "fixed_yin": 0.0334070796460177,
+            "adaptive_yin_raw": 0.03716814159292035,
+            "lens_stft": 0.1334070796460177,
+            "lens_acf": 0.022345132743362833,
+            "lens_cepstrum": 0.35553097345132745,
+            "quorum": 0.14623893805309734,
+            "tracker": 0.04314159292035398,
+            "tracker_lag2_removed": 0.034513274336283185,
+            "no_octave": 0.04314159292035398,
+            "no_cont": 0.04314159292035398,
+            "no_octave_no_cont": 0.04358407079646018,
+            "no_gates": 0.04314159292035398,
+            "no_median": 0.034070796460176994,
+            "median3": 0.03761061946902655,
+            "median5_centred": 0.033628318584070796,
+            "no_hyst": 0.04314159292035398,
+            "fixed_yin_input": 0.034292035398230086,
+            "fix_quorum_input": 0.04402654867256637,
+            "fix_no_median_no_cont": 0.035619469026548674,
+            "fix_no_median_no_cont_no_octave": 0.03716814159292035,
+            "fix_quorum_no_median_no_cont": 0.030973451327433628,
+            "fix_fyin_no_median_no_cont": 0.028097345132743364,
+            "fix_fyin_median3_centred": 0.028097345132743364,
+            "fix_quorum_fyin_no_median_no_cont": 0.02013274336283186,
+            "quorum_tracker": 0.023008849557522124
+          }
+        },
+        "by_range": {
+          "low": {
+            "fixed_yin": 0.08671699653132015,
+            "adaptive_yin_raw": 0.19934707202611712,
+            "lens_stft": 0.15507039379718424,
+            "lens_acf": 0.11936339522546419,
+            "lens_cepstrum": 0.1860844725566211,
+            "quorum": 0.246684350132626,
+            "tracker": 0.2462762701489492,
+            "tracker_lag2_removed": 0.19281779228728832,
+            "no_octave": 0.246684350132626,
+            "no_cont": 0.2413793103448276,
+            "no_octave_no_cont": 0.2401550703937972,
+            "no_gates": 0.2462762701489492,
+            "no_median": 0.20220363191185473,
+            "median3": 0.21546623138135074,
+            "median5_centred": 0.19730667210773312,
+            "no_hyst": 0.2458681901652724,
+            "fixed_yin_input": 0.28871658845133646,
+            "fix_quorum_input": 0.2570903897163844,
+            "fix_no_median_no_cont": 0.20097939196082432,
+            "fix_no_median_no_cont_no_octave": 0.19914303203427872,
+            "fix_quorum_no_median_no_cont": 0.11160987553560497,
+            "fix_fyin_no_median_no_cont": 0.08936951642521934,
+            "fix_fyin_median3_centred": 0.08998163640073455,
+            "fix_quorum_fyin_no_median_no_cont": 0.07529075698836972,
+            "quorum_tracker": 0.07325035706998571
+          },
+          "mid": {
+            "fixed_yin": 0.09153305203938115,
+            "adaptive_yin_raw": 0.17282700421940927,
+            "lens_stft": 0.12191279887482419,
+            "lens_acf": 0.08607594936708861,
+            "lens_cepstrum": 0.3279887482419128,
+            "quorum": 0.19234880450070324,
+            "tracker": 0.21839662447257385,
+            "tracker_lag2_removed": 0.16646976090014065,
+            "no_octave": 0.21980309423347397,
+            "no_cont": 0.21541490857946555,
+            "no_octave_no_cont": 0.21569620253164556,
+            "no_gates": 0.21839662447257385,
+            "no_median": 0.1710267229254571,
+            "median3": 0.18571026722925457,
+            "median5_centred": 0.1679324894514768,
+            "no_hyst": 0.21828410689170183,
+            "fixed_yin_input": 0.23741209563994375,
+            "fix_quorum_input": 0.22171589310829817,
+            "fix_no_median_no_cont": 0.17130801687763714,
+            "fix_no_median_no_cont_no_octave": 0.17282700421940927,
+            "fix_quorum_no_median_no_cont": 0.0859634317862166,
+            "fix_fyin_no_median_no_cont": 0.09085794655414908,
+            "fix_fyin_median3_centred": 0.0910267229254571,
+            "fix_quorum_fyin_no_median_no_cont": 0.0729113924050633,
+            "quorum_tracker": 0.07150492264416315
+          },
+          "high": {
+            "fixed_yin": 0.19369369369369369,
+            "adaptive_yin_raw": 0.32882882882882886,
+            "lens_stft": 0.5315315315315315,
+            "lens_acf": 0.1981981981981982,
+            "lens_cepstrum": 0.44594594594594594,
+            "quorum": 0.5765765765765766,
+            "tracker": 0.35135135135135137,
+            "tracker_lag2_removed": 0.3108108108108108,
+            "no_octave": 0.3738738738738739,
+            "no_cont": 0.35135135135135137,
+            "no_octave_no_cont": 0.36486486486486486,
+            "no_gates": 0.35135135135135137,
+            "no_median": 0.2972972972972973,
+            "median3": 0.3063063063063063,
+            "median5_centred": 0.2972972972972973,
+            "no_hyst": 0.35135135135135137,
+            "fixed_yin_input": 0.2972972972972973,
+            "fix_quorum_input": 0.34234234234234234,
+            "fix_no_median_no_cont": 0.2927927927927928,
+            "fix_no_median_no_cont_no_octave": 0.32882882882882886,
+            "fix_quorum_no_median_no_cont": 0.24324324324324326,
+            "fix_fyin_no_median_no_cont": 0.18468468468468469,
+            "fix_fyin_median3_centred": 0.18468468468468469,
+            "fix_quorum_fyin_no_median_no_cont": 0.1981981981981982,
+            "quorum_tracker": 0.21171171171171171
+          }
+        },
+        "range_share": {
+          "low": 0.21403616036335052,
+          "mid": 0.7762686697528168,
+          "high": 0.00969516988383265
+        },
+        "best_plain_lens": "lens_acf",
+        "best_single": "fixed_yin",
+        "vs_best_single": {
+          "tracker": {
+            "diff": 0.1341601886627653,
+            "ci95": [
+              0.1132899935524504,
+              0.15426338413996535
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.08201589658485459,
+            "ci95": [
+              0.06549891824878376,
+              0.09833743908563745
+            ]
+          },
+          "quorum": {
+            "diff": 0.1162110227967508,
+            "ci95": [
+              0.06335795804283695,
+              0.17390005670558906
+            ]
+          },
+          "no_octave": {
+            "diff": 0.13555769062800244,
+            "ci95": [
+              0.11475616399190387,
+              0.15521604301777148
+            ]
+          },
+          "no_cont": {
+            "diff": 0.13079744955891345,
+            "ci95": [
+              0.11022932508985166,
+              0.15097124112888685
+            ]
+          },
+          "no_octave_no_cont": {
+            "diff": 0.13088479343174075,
+            "ci95": [
+              0.11061488688376286,
+              0.15091114703406047
+            ]
+          },
+          "no_gates": {
+            "diff": 0.1341601886627653,
+            "ci95": [
+              0.1132899935524504,
+              0.15426338413996535
+            ]
+          },
+          "no_median": {
+            "diff": 0.0874312167001485,
+            "ci95": [
+              0.0696369929997442,
+              0.10530408478350231
+            ]
+          },
+          "median3": {
+            "diff": 0.10175561184382917,
+            "ci95": [
+              0.08331441110792537,
+              0.12113623412499211
+            ]
+          },
+          "median5_centred": {
+            "diff": 0.0839811337234693,
+            "ci95": [
+              0.0668553653709217,
+              0.10088124811555904
+            ]
+          },
+          "no_hyst": {
+            "diff": 0.13398550091711067,
+            "ci95": [
+              0.11304453803652582,
+              0.1541768138065993
+            ]
+          },
+          "fixed_yin_input": {
+            "diff": 0.15748100270766005,
+            "ci95": [
+              0.13555968056056963,
+              0.1792933678226747
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.13896410166826798,
+            "ci95": [
+              0.11612664895242615,
+              0.16103571609699047
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.08734387282732117,
+            "ci95": [
+              0.07030008025844463,
+              0.10446220986053983
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.08847934317407635,
+            "ci95": [
+              0.07224882381948626,
+              0.10521767873263403
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": 0.0014848458380644636,
+            "ci95": [
+              -0.017225131981607914,
+              0.019964670974123005
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": -4.367193641366396e-05,
+            "ci95": [
+              -0.0028156125868302262,
+              0.002351428417930793
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.00021835968206830592,
+            "ci95": [
+              -0.002698685059266369,
+              0.0029946689184973713
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.016857367455672984,
+            "ci95": [
+              -0.03194907355514865,
+              -0.008229217027182982
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.01825486942091012,
+            "ci95": [
+              -0.03358720702886331,
+              -0.009155800920686448
+            ]
+          }
+        },
+        "vs_fixed_yin": {
+          "tracker": {
+            "diff": 0.1341601886627653,
+            "ci95": [
+              0.1132899935524504,
+              0.15426338413996535
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.08201589658485459,
+            "ci95": [
+              0.06549891824878376,
+              0.09833743908563745
+            ]
+          },
+          "quorum": {
+            "diff": 0.1162110227967508,
+            "ci95": [
+              0.06335795804283695,
+              0.17390005670558906
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.13896410166826798,
+            "ci95": [
+              0.11612664895242615,
+              0.16103571609699047
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.08734387282732117,
+            "ci95": [
+              0.07030008025844463,
+              0.10446220986053983
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.08847934317407635,
+            "ci95": [
+              0.07224882381948626,
+              0.10521767873263403
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": 0.0014848458380644636,
+            "ci95": [
+              -0.017225131981607914,
+              0.019964670974123005
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": -4.367193641366396e-05,
+            "ci95": [
+              -0.0028156125868302262,
+              0.002351428417930793
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.00021835968206830592,
+            "ci95": [
+              -0.002698685059266369,
+              0.0029946689184973713
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.016857367455672984,
+            "ci95": [
+              -0.03194907355514865,
+              -0.008229217027182982
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.01825486942091012,
+            "ci95": [
+              -0.03358720702886331,
+              -0.009155800920686448
+            ]
+          }
+        },
+        "extra_error_share_by_context": {
+          "onset": 0.11915952446779099,
+          "offset": 0.18440696709980647,
+          "transition": 0.3218136577273984,
+          "vibrato": 0.3378490461708598,
+          "stable": 0.036770804534144316
+        }
+      }
+    }
+  },
+  "mdb_stem_synth": {
+    "n_hops": 199758,
+    "n_tracks": 180,
+    "by_condition": {
+      "clean -": {
+        "n": 99879,
+        "gross_50c": {
+          "fixed_yin": 0.12068603009641667,
+          "adaptive_yin_raw": 0.12168724156229037,
+          "lens_stft": 0.1505922165820643,
+          "lens_acf": 0.12811501917319956,
+          "lens_cepstrum": 0.06974439071276244,
+          "quorum": 0.09465453198370027,
+          "tracker": 0.22292974499143964,
+          "tracker_lag2_removed": 0.13963896314540594,
+          "no_octave": 0.22349042341232891,
+          "no_cont": 0.22150802470989897,
+          "no_octave_no_cont": 0.22054686170266022,
+          "no_gates": 0.22292974499143964,
+          "no_median": 0.1384675457303337,
+          "median3": 0.17432092832327115,
+          "median5_centred": 0.1462469588201724,
+          "no_hyst": 0.22324012054586048,
+          "fixed_yin_input": 0.22249922406111394,
+          "fix_quorum_input": 0.21909510507714333,
+          "fix_no_median_no_cont": 0.13248030116440893,
+          "fix_no_median_no_cont_no_octave": 0.12939656984951792,
+          "fix_quorum_no_median_no_cont": 0.09516514983129587,
+          "fix_fyin_no_median_no_cont": 0.13086835070435227,
+          "fix_fyin_median3_centred": 0.13016750267824068,
+          "fix_quorum_fyin_no_median_no_cont": 0.09569579190820893,
+          "quorum_tracker": 0.09384355069634258
+        },
+        "gross_20pct": {
+          "fixed_yin": 0.042311196547822866,
+          "adaptive_yin_raw": 0.042181039057259284,
+          "lens_stft": 0.11834319526627218,
+          "lens_acf": 0.05077143343445569,
+          "lens_cepstrum": 0.029766016880425315,
+          "quorum": 0.07745371899998998,
+          "tracker": 0.06596982348641857,
+          "tracker_lag2_removed": 0.0517726449003294,
+          "no_octave": 0.0658697023398312,
+          "no_cont": 0.05843070114838955,
+          "no_octave_no_cont": 0.056638532624475615,
+          "no_gates": 0.06596982348641857,
+          "no_median": 0.059341803582334623,
+          "median3": 0.0634667948217343,
+          "median5_centred": 0.05976231239800158,
+          "no_hyst": 0.06731144685068934,
+          "fixed_yin_input": 0.06474834549805264,
+          "fix_quorum_input": 0.06187486859099511,
+          "fix_no_median_no_cont": 0.053184353067211323,
+          "fix_no_median_no_cont_no_octave": 0.050441033650717365,
+          "fix_quorum_no_median_no_cont": 0.04663643008039728,
+          "fix_fyin_no_median_no_cont": 0.05270377156359195,
+          "fix_fyin_median3_centred": 0.05187276604691677,
+          "fix_quorum_fyin_no_median_no_cont": 0.04683667237357202,
+          "quorum_tracker": 0.04689674506152444
+        },
+        "context_share": {
+          "onset": 0.06535908449223561,
+          "offset": 0.05629812072607856,
+          "transition": 0.19930115439682014,
+          "vibrato": 0.3184052703771564,
+          "stable": 0.3606363700077093
+        },
+        "by_context": {
+          "onset": {
+            "fixed_yin": 0.23835784313725492,
+            "adaptive_yin_raw": 0.24065563725490197,
+            "lens_stft": 0.2693014705882353,
+            "lens_acf": 0.25045955882352944,
+            "lens_cepstrum": 0.15318627450980393,
+            "quorum": 0.21721813725490197,
+            "tracker": 0.31954656862745096,
+            "tracker_lag2_removed": 0.2668504901960784,
+            "no_octave": 0.31924019607843135,
+            "no_cont": 0.29411764705882354,
+            "no_octave_no_cont": 0.2867647058823529,
+            "no_gates": 0.31954656862745096,
+            "no_median": 0.28737745098039214,
+            "median3": 0.2977941176470588,
+            "median5_centred": 0.3005514705882353,
+            "no_hyst": 0.31862745098039214,
+            "fixed_yin_input": 0.3322610294117647,
+            "fix_quorum_input": 0.3190870098039216,
+            "fix_no_median_no_cont": 0.26608455882352944,
+            "fix_no_median_no_cont_no_octave": 0.24877450980392157,
+            "fix_quorum_no_median_no_cont": 0.21001838235294118,
+            "fix_fyin_no_median_no_cont": 0.2607230392156863,
+            "fix_fyin_median3_centred": 0.25597426470588236,
+            "fix_quorum_fyin_no_median_no_cont": 0.21645220588235295,
+            "quorum_tracker": 0.19929534313725492
+          },
+          "offset": {
+            "fixed_yin": 0.21163080206295573,
+            "adaptive_yin_raw": 0.22034501155966565,
+            "lens_stft": 0.2352836564111684,
+            "lens_acf": 0.22372399075226748,
+            "lens_cepstrum": 0.11079494931531211,
+            "quorum": 0.1726836208429664,
+            "tracker": 0.32669393562155435,
+            "tracker_lag2_removed": 0.2687177663169127,
+            "no_octave": 0.3274052996621021,
+            "no_cont": 0.32616041259114353,
+            "no_octave_no_cont": 0.3258047305708696,
+            "no_gates": 0.32669393562155435,
+            "no_median": 0.24293081984705672,
+            "median3": 0.29023652854348214,
+            "median5_centred": 0.2502223012626712,
+            "no_hyst": 0.32669393562155435,
+            "fixed_yin_input": 0.32100302329717234,
+            "fix_quorum_input": 0.31228881380046236,
+            "fix_no_median_no_cont": 0.23741774853281167,
+            "fix_no_median_no_cont_no_octave": 0.22959274408678643,
+            "fix_quorum_no_median_no_cont": 0.16930464165036457,
+            "fix_fyin_no_median_no_cont": 0.22710296994486928,
+            "fix_fyin_median3_centred": 0.2196336475191179,
+            "fix_quorum_fyin_no_median_no_cont": 0.16912680064022764,
+            "quorum_tracker": 0.16379157033611952
+          },
+          "transition": {
+            "fixed_yin": 0.34532301818547173,
+            "adaptive_yin_raw": 0.3452225459660404,
+            "lens_stft": 0.2459057570581734,
+            "lens_acf": 0.35175324022907667,
+            "lens_cepstrum": 0.22706721591479956,
+            "quorum": 0.28855621420677185,
+            "tracker": 0.6004219833216116,
+            "tracker_lag2_removed": 0.36200140661107205,
+            "no_octave": 0.6013764694062091,
+            "no_cont": 0.6010750527479152,
+            "no_octave_no_cont": 0.5979101778358283,
+            "no_gates": 0.6004219833216116,
+            "no_median": 0.37692153119662414,
+            "median3": 0.49191198633577815,
+            "median5_centred": 0.38611473927459056,
+            "no_hyst": 0.6005224555410429,
+            "fixed_yin_input": 0.5945945945945946,
+            "fix_quorum_input": 0.6037375665628454,
+            "fix_no_median_no_cont": 0.35712850396865264,
+            "fix_no_median_no_cont_no_octave": 0.3488897819752838,
+            "fix_quorum_no_median_no_cont": 0.2739877423892294,
+            "fix_fyin_no_median_no_cont": 0.3558223651160454,
+            "fix_fyin_median3_centred": 0.35230583743594895,
+            "fix_quorum_fyin_no_median_no_cont": 0.2750427006932583,
+            "quorum_tracker": 0.2693660202953883
+          },
+          "vibrato": {
+            "fixed_yin": 0.060876674422992265,
+            "adaptive_yin_raw": 0.0633922394817936,
+            "lens_stft": 0.1213131249606943,
+            "lens_acf": 0.06732280988617068,
+            "lens_cepstrum": 0.0196214074586504,
+            "quorum": 0.03342557071882272,
+            "tracker": 0.17250487390730143,
+            "tracker_lag2_removed": 0.08549776743601031,
+            "no_octave": 0.173573989057292,
+            "no_cont": 0.17294509779259165,
+            "no_octave_no_cont": 0.17351109993082195,
+            "no_gates": 0.17250487390730143,
+            "no_median": 0.07266838563612352,
+            "median3": 0.10225771964027419,
+            "median5_centred": 0.0877303314256965,
+            "no_hyst": 0.17319665429847178,
+            "fixed_yin_input": 0.17175020438966102,
+            "fix_quorum_input": 0.1671592981573486,
+            "fix_no_median_no_cont": 0.07097037922143261,
+            "fix_no_median_no_cont_no_octave": 0.07078171184202252,
+            "fix_quorum_no_median_no_cont": 0.0366014716055594,
+            "fix_fyin_no_median_no_cont": 0.06832903590969121,
+            "fix_fyin_median3_centred": 0.0709389346581976,
+            "fix_quorum_fyin_no_median_no_cont": 0.0364128042261493,
+            "quorum_tracker": 0.037167473743789696
+          },
+          "stable": {
+            "fixed_yin": 0.013825652415324819,
+            "adaptive_yin_raw": 0.01265963353692393,
+            "lens_stft": 0.08903387007218212,
+            "lens_acf": 0.02109938922820655,
+            "lens_cepstrum": 0.0055247084952804,
+            "quorum": 0.0071626873958911715,
+            "tracker": 0.02512493059411438,
+            "tracker_lag2_removed": 0.021349250416435313,
+            "no_octave": 0.02515269294836202,
+            "no_cont": 0.02512493059411438,
+            "no_octave_no_cont": 0.02509716823986674,
+            "no_gates": 0.02512493059411438,
+            "no_median": 0.021488062187673514,
+            "median3": 0.021960022209883398,
+            "median5_centred": 0.02115491393670183,
+            "no_hyst": 0.025485841199333704,
+            "fixed_yin_input": 0.02640199888950583,
+            "fix_quorum_input": 0.019711271515824542,
+            "fix_no_median_no_cont": 0.022043309272626318,
+            "fix_no_median_no_cont_no_octave": 0.022570794003331483,
+            "fix_quorum_no_median_no_cont": 0.015657967795669074,
+            "fix_fyin_no_median_no_cont": 0.023209328151027206,
+            "fix_fyin_median3_centred": 0.022931704608550804,
+            "fix_quorum_fyin_no_median_no_cont": 0.015574680732926153,
+            "quorum_tracker": 0.0168517490283176
+          }
+        },
+        "by_range": {
+          "low": {
+            "fixed_yin": 0.10680777128415732,
+            "adaptive_yin_raw": 0.10443847733375454,
+            "lens_stft": 0.10706049597220028,
+            "lens_acf": 0.11176749328700047,
+            "lens_cepstrum": 0.08191438951192545,
+            "quorum": 0.08592639393460749,
+            "tracker": 0.18616332332964777,
+            "tracker_lag2_removed": 0.11716948349391881,
+            "no_octave": 0.18632127625967462,
+            "no_cont": 0.18584741746959407,
+            "no_octave_no_cont": 0.18382561996525035,
+            "no_gates": 0.18616332332964777,
+            "no_median": 0.12058126678249882,
+            "median3": 0.14724372137103142,
+            "median5_centred": 0.12633075343547623,
+            "no_hyst": 0.18534196809350814,
+            "fixed_yin_input": 0.18543673985152426,
+            "fix_quorum_input": 0.18145632601484757,
+            "fix_no_median_no_cont": 0.11094613805086084,
+            "fix_no_median_no_cont_no_octave": 0.10680777128415732,
+            "fix_quorum_no_median_no_cont": 0.07932396145948507,
+            "fix_fyin_no_median_no_cont": 0.11246248617911862,
+            "fix_fyin_median3_centred": 0.11107250039488233,
+            "fix_quorum_fyin_no_median_no_cont": 0.08166166482388248,
+            "quorum_tracker": 0.07919759911546359
+          },
+          "mid": {
+            "fixed_yin": 0.13352734163508392,
+            "adaptive_yin_raw": 0.13835499007399388,
+            "lens_stft": 0.21602598808879264,
+            "lens_acf": 0.13384316910305,
+            "lens_cepstrum": 0.06370691210972748,
+            "quorum": 0.10623082476087349,
+            "tracker": 0.24634542501353546,
+            "tracker_lag2_removed": 0.15046922938097818,
+            "no_octave": 0.2467289297960657,
+            "no_cont": 0.2439541598989352,
+            "no_octave_no_cont": 0.24307435480960116,
+            "no_gates": 0.24634542501353546,
+            "no_median": 0.14661162245082116,
+            "median3": 0.19096282259519942,
+            "median5_centred": 0.15626691932864104,
+            "no_hyst": 0.24598447933585996,
+            "fixed_yin_input": 0.2451949106659448,
+            "fix_quorum_input": 0.24415719184262769,
+            "fix_no_median_no_cont": 0.14160350117307346,
+            "fix_no_median_no_cont_no_octave": 0.13830987186428442,
+            "fix_quorum_no_median_no_cont": 0.09991427540155207,
+            "fix_fyin_no_median_no_cont": 0.13621187511279553,
+            "fix_fyin_median3_centred": 0.13578325212055586,
+            "fix_quorum_fyin_no_median_no_cont": 0.09975636166756903,
+            "quorum_tracker": 0.09677855982674607
+          },
+          "high": {
+            "fixed_yin": 0.11524941412788751,
+            "adaptive_yin_raw": 0.11361734181452963,
+            "lens_stft": 0.08687646468028122,
+            "lens_acf": 0.13914462671576833,
+            "lens_cepstrum": 0.06482256444593237,
+            "quorum": 0.08474221627050553,
+            "tracker": 0.22819718781386006,
+            "tracker_lag2_removed": 0.149313692668229,
+            "no_octave": 0.22962002008704385,
+            "no_cont": 0.2271091396049548,
+            "no_octave_no_cont": 0.22740207566119852,
+            "no_gates": 0.22819718781386006,
+            "no_median": 0.14705390023434883,
+            "median3": 0.17931871442919317,
+            "median5_centred": 0.15404251757616338,
+            "no_hyst": 0.23125209240040173,
+            "fixed_yin_input": 0.2294944760629394,
+            "fix_quorum_input": 0.22246401071309005,
+            "fix_no_median_no_cont": 0.1440826916638768,
+            "fix_no_median_no_cont_no_octave": 0.14278540341479745,
+            "fix_quorum_no_median_no_cont": 0.107340140609307,
+            "fix_fyin_no_median_no_cont": 0.1453381319049213,
+            "fix_fyin_median3_centred": 0.14504519584867762,
+            "fix_quorum_fyin_no_median_no_cont": 0.10675426849681956,
+            "quorum_tracker": 0.10780046869768999
+          }
+        },
+        "range_share": {
+          "low": 0.31693348952232203,
+          "mid": 0.44381701859249695,
+          "high": 0.23924949188518108
+        },
+        "best_plain_lens": "lens_cepstrum",
+        "best_single": "lens_cepstrum",
+        "vs_best_single": {
+          "tracker": {
+            "diff": 0.1531853542786772,
+            "ci95": [
+              0.136176474466158,
+              0.1718300145391331
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.0698945724326435,
+            "ci95": [
+              0.05733112141295548,
+              0.08300772711016963
+            ]
+          },
+          "quorum": {
+            "diff": 0.02491014127093784,
+            "ci95": [
+              0.017831079158427094,
+              0.033076060571458246
+            ]
+          },
+          "no_octave": {
+            "diff": 0.1537460326995665,
+            "ci95": [
+              0.13676205084243204,
+              0.1723835185304558
+            ]
+          },
+          "no_cont": {
+            "diff": 0.15176363399713655,
+            "ci95": [
+              0.13493622547776918,
+              0.17019785633996215
+            ]
+          },
+          "no_octave_no_cont": {
+            "diff": 0.1508024709898978,
+            "ci95": [
+              0.1342488252753102,
+              0.16903354296602366
+            ]
+          },
+          "no_gates": {
+            "diff": 0.1531853542786772,
+            "ci95": [
+              0.136176474466158,
+              0.1718300145391331
+            ]
+          },
+          "no_median": {
+            "diff": 0.06872315501757127,
+            "ci95": [
+              0.05689266796950349,
+              0.08216421298398863
+            ]
+          },
+          "median3": {
+            "diff": 0.10457653761050871,
+            "ci95": [
+              0.09038901662255783,
+              0.11979917110402123
+            ]
+          },
+          "median5_centred": {
+            "diff": 0.07650256810740998,
+            "ci95": [
+              0.06390248185677305,
+              0.09063244455560318
+            ]
+          },
+          "no_hyst": {
+            "diff": 0.15349572983309806,
+            "ci95": [
+              0.13632052520552712,
+              0.17191927631825674
+            ]
+          },
+          "fixed_yin_input": {
+            "diff": 0.1527548333483515,
+            "ci95": [
+              0.1356267846069699,
+              0.1716074653851992
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.1493507143643809,
+            "ci95": [
+              0.1325098468397378,
+              0.16769319420173923
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.06273591045164649,
+            "ci95": [
+              0.05089988364252654,
+              0.07542012456247511
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.05965217913675548,
+            "ci95": [
+              0.04803943724363869,
+              0.07246619504745608
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": 0.025420759118533434,
+            "ci95": [
+              0.016167087168684965,
+              0.03565941591148487
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.06112395999158983,
+            "ci95": [
+              0.05013535882443977,
+              0.07328626872996913
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.06042311196547824,
+            "ci95": [
+              0.04978688272944156,
+              0.07248469594016216
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": 0.02595140119544649,
+            "ci95": [
+              0.016840711285051845,
+              0.035992521060167676
+            ]
+          },
+          "quorum_tracker": {
+            "diff": 0.024099159983580143,
+            "ci95": [
+              0.014712880367745793,
+              0.03462645946754232
+            ]
+          }
+        },
+        "vs_fixed_yin": {
+          "tracker": {
+            "diff": 0.10224371489502297,
+            "ci95": [
+              0.09081599940301585,
+              0.11398787760621189
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.018952933048989276,
+            "ci95": [
+              0.012992947074361293,
+              0.02544597450393729
+            ]
+          },
+          "quorum": {
+            "diff": -0.026031498112716392,
+            "ci95": [
+              -0.031817191129478284,
+              -0.020704118687735883
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.09840907498072667,
+            "ci95": [
+              0.08683430804540065,
+              0.1104777341014016
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.01179427106799226,
+            "ci95": [
+              0.006392517899584969,
+              0.018087862851716534
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.008710539753101251,
+            "ci95": [
+              0.003224395682241447,
+              0.014932232876716068
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": -0.025520880265120796,
+            "ci95": [
+              -0.033009583928010074,
+              -0.017822603360167756
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.0101823206079356,
+            "ci95": [
+              0.005237196968082336,
+              0.01610983351410664
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.00948147258182401,
+            "ci95": [
+              0.00435540388863253,
+              0.01539511708262953
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.02499023818820774,
+            "ci95": [
+              -0.032449177729893794,
+              -0.017252410973850964
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.026842479400074087,
+            "ci95": [
+              -0.03456375582998021,
+              -0.018746026304563707
+            ]
+          }
+        },
+        "extra_error_share_by_context": {
+          "onset": 0.06088469184890656,
+          "offset": 0.06370112657388999,
+          "transition": 0.5057985420808483,
+          "vibrato": 0.32173624917163685,
+          "stable": 0.04787939032471836
+        }
+      },
+      "noise 10 dB": {
+        "n": 99879,
+        "gross_50c": {
+          "fixed_yin": 0.15873206579961754,
+          "adaptive_yin_raw": 0.22717488160674415,
+          "lens_stft": 0.1561789765616396,
+          "lens_acf": 0.18191011123459386,
+          "lens_cepstrum": 0.4078034421650197,
+          "quorum": 0.28042931947656663,
+          "tracker": 0.245306821253717,
+          "tracker_lag2_removed": 0.22300984190870954,
+          "no_octave": 0.24647823866878923,
+          "no_cont": 0.24418546441193845,
+          "no_octave_no_cont": 0.24570730584006648,
+          "no_gates": 0.245306821253717,
+          "no_median": 0.22833628690715765,
+          "median3": 0.23030867349492887,
+          "median5_centred": 0.2239710049159483,
+          "no_hyst": 0.24562720892279657,
+          "fixed_yin_input": 0.2406311637080868,
+          "fix_quorum_input": 0.2373171537560448,
+          "fix_no_median_no_cont": 0.23110964266762782,
+          "fix_no_median_no_cont_no_octave": 0.23471400394477318,
+          "fix_quorum_no_median_no_cont": 0.1602038466544519,
+          "fix_fyin_no_median_no_cont": 0.1601838224251344,
+          "fix_fyin_median3_centred": 0.15776089067772003,
+          "fix_quorum_fyin_no_median_no_cont": 0.1427627429189319,
+          "quorum_tracker": 0.14669750397981557
+        },
+        "gross_20pct": {
+          "fixed_yin": 0.07427987865317033,
+          "adaptive_yin_raw": 0.08953834139308563,
+          "lens_stft": 0.12321909510507714,
+          "lens_acf": 0.06319646772594839,
+          "lens_cepstrum": 0.26743359464952593,
+          "quorum": 0.27008680503409127,
+          "tracker": 0.08776619709848917,
+          "tracker_lag2_removed": 0.08846704512460077,
+          "no_octave": 0.08771613652519548,
+          "no_cont": 0.08652469488080577,
+          "no_octave_no_cont": 0.08896765085753762,
+          "no_gates": 0.08776619709848917,
+          "no_median": 0.08625436778501988,
+          "median3": 0.0866148039127344,
+          "median5_centred": 0.0861542466384325,
+          "no_hyst": 0.08943822024649827,
+          "fixed_yin_input": 0.08076772895203196,
+          "fix_quorum_input": 0.07592186545720321,
+          "fix_no_median_no_cont": 0.09323281170215961,
+          "fix_no_median_no_cont_no_octave": 0.09855925670060774,
+          "fix_quorum_no_median_no_cont": 0.07693308903773566,
+          "fix_fyin_no_median_no_cont": 0.07604201083310806,
+          "fix_fyin_median3_centred": 0.07491064187667078,
+          "fix_quorum_fyin_no_median_no_cont": 0.0706254568027313,
+          "quorum_tracker": 0.07579170796663963
+        },
+        "context_share": {
+          "onset": 0.06535908449223561,
+          "offset": 0.05629812072607856,
+          "transition": 0.19930115439682014,
+          "vibrato": 0.3184052703771564,
+          "stable": 0.3606363700077093
+        },
+        "by_context": {
+          "onset": {
+            "fixed_yin": 0.2746629901960784,
+            "adaptive_yin_raw": 0.3550857843137255,
+            "lens_stft": 0.28140318627450983,
+            "lens_acf": 0.28799019607843135,
+            "lens_cepstrum": 0.3549325980392157,
+            "quorum": 0.38756127450980393,
+            "tracker": 0.3247549019607843,
+            "tracker_lag2_removed": 0.35370710784313725,
+            "no_octave": 0.3255208333333333,
+            "no_cont": 0.3180147058823529,
+            "no_octave_no_cont": 0.3160232843137255,
+            "no_gates": 0.3247549019607843,
+            "no_median": 0.35753676470588236,
+            "median3": 0.3382352941176471,
+            "median5_centred": 0.35309436274509803,
+            "no_hyst": 0.32536764705882354,
+            "fixed_yin_input": 0.37683823529411764,
+            "fix_quorum_input": 0.3316482843137255,
+            "fix_no_median_no_cont": 0.3587622549019608,
+            "fix_no_median_no_cont_no_octave": 0.3606004901960784,
+            "fix_quorum_no_median_no_cont": 0.2789522058823529,
+            "fix_fyin_no_median_no_cont": 0.3003982843137255,
+            "fix_fyin_median3_centred": 0.29641544117647056,
+            "fix_quorum_fyin_no_median_no_cont": 0.27818627450980393,
+            "quorum_tracker": 0.25980392156862747
+          },
+          "offset": {
+            "fixed_yin": 0.40014227280810954,
+            "adaptive_yin_raw": 0.4349991107949493,
+            "lens_stft": 0.2724524275297884,
+            "lens_acf": 0.39605192957496,
+            "lens_cepstrum": 0.5411701938467011,
+            "quorum": 0.621198648408323,
+            "tracker": 0.41757069180152945,
+            "tracker_lag2_removed": 0.4246843322070069,
+            "no_octave": 0.41668148675084477,
+            "no_cont": 0.421661035034679,
+            "no_octave_no_cont": 0.4259292192779655,
+            "no_gates": 0.41757069180152945,
+            "no_median": 0.4035212520007114,
+            "median3": 0.4079672772541348,
+            "median5_centred": 0.39125022230126266,
+            "no_hyst": 0.41668148675084477,
+            "fixed_yin_input": 0.4013871598790681,
+            "fix_quorum_input": 0.39480704250400145,
+            "fix_no_median_no_cont": 0.41899341988262495,
+            "fix_no_median_no_cont_no_octave": 0.44122354614974213,
+            "fix_quorum_no_median_no_cont": 0.35621554330428595,
+            "fix_fyin_no_median_no_cont": 0.3770229414903077,
+            "fix_fyin_median3_centred": 0.36759736795305,
+            "fix_quorum_fyin_no_median_no_cont": 0.3499911079494932,
+            "quorum_tracker": 0.37791214654099237
+          },
+          "transition": {
+            "fixed_yin": 0.35893700391841654,
+            "adaptive_yin_raw": 0.538531096151914,
+            "lens_stft": 0.24987440972571084,
+            "lens_acf": 0.3797347533407013,
+            "lens_cepstrum": 0.4018386416155933,
+            "quorum": 0.45709836230282325,
+            "tracker": 0.566010248166382,
+            "tracker_lag2_removed": 0.5220536521651763,
+            "no_octave": 0.5686225258715965,
+            "no_cont": 0.5617904149502663,
+            "no_octave_no_cont": 0.5632472621320205,
+            "no_gates": 0.566010248166382,
+            "no_median": 0.5320004018888778,
+            "median3": 0.5369235406410128,
+            "median5_centred": 0.527780568672762,
+            "no_hyst": 0.5672661509092736,
+            "fixed_yin_input": 0.5996684416758766,
+            "fix_quorum_input": 0.5908268863659198,
+            "fix_no_median_no_cont": 0.5388827489199236,
+            "fix_no_median_no_cont_no_octave": 0.5419471516125791,
+            "fix_quorum_no_median_no_cont": 0.3798352255601326,
+            "fix_fyin_no_median_no_cont": 0.3688335175324023,
+            "fix_fyin_median3_centred": 0.36511604541344317,
+            "fix_quorum_fyin_no_median_no_cont": 0.33602933788807393,
+            "quorum_tracker": 0.33246257409826185
+          },
+          "vibrato": {
+            "fixed_yin": 0.08260486761838878,
+            "adaptive_yin_raw": 0.15819759763536884,
+            "lens_stft": 0.12364002264008553,
+            "lens_acf": 0.11257153638135967,
+            "lens_cepstrum": 0.34422363373372744,
+            "quorum": 0.20278598830262248,
+            "tracker": 0.20797434123640024,
+            "tracker_lag2_removed": 0.15618514558832777,
+            "no_octave": 0.20982957046726622,
+            "no_cont": 0.20665366958052953,
+            "no_octave_no_cont": 0.20743978366140495,
+            "no_gates": 0.20797434123640024,
+            "no_median": 0.16973775234261995,
+            "median3": 0.17791333878372428,
+            "median5_centred": 0.16552418086912773,
+            "no_hyst": 0.20806867492610528,
+            "fixed_yin_input": 0.1777246714043142,
+            "fix_quorum_input": 0.18599459153512357,
+            "fix_no_median_no_cont": 0.16744229922646375,
+            "fix_no_median_no_cont_no_octave": 0.16574429281177283,
+            "fix_quorum_no_median_no_cont": 0.09008867366832275,
+            "fix_fyin_no_median_no_cont": 0.08140997421545815,
+            "fix_fyin_median3_centred": 0.08191308722721842,
+            "fix_quorum_fyin_no_median_no_cont": 0.07122193572731275,
+            "quorum_tracker": 0.07688195710961575
+          },
+          "stable": {
+            "fixed_yin": 0.05660744031093837,
+            "adaptive_yin_raw": 0.06038312048861744,
+            "lens_stft": 0.09228206551915602,
+            "lens_acf": 0.0811493614658523,
+            "lens_cepstrum": 0.45599666851749027,
+            "quorum": 0.1787340366463076,
+            "tracker": 0.05974458634092171,
+            "tracker_lag2_removed": 0.06157690172126596,
+            "no_octave": 0.05991116046640755,
+            "no_cont": 0.060716268739589116,
+            "no_octave_no_cont": 0.06313159355913381,
+            "no_gates": 0.05974458634092171,
+            "no_median": 0.061493614658523044,
+            "median3": 0.05982787340366463,
+            "median5_centred": 0.058162132148806216,
+            "no_hyst": 0.05988339811215991,
+            "fixed_yin_input": 0.04797334813992227,
+            "fix_quorum_input": 0.04558578567462521,
+            "fix_no_median_no_cont": 0.06476957245974459,
+            "fix_no_median_no_cont_no_octave": 0.07076624097723487,
+            "fix_quorum_no_median_no_cont": 0.04861188228761799,
+            "fix_fyin_no_median_no_cont": 0.055163797890061074,
+            "fix_fyin_median3_centred": 0.052248750694058856,
+            "fix_quorum_fyin_no_median_no_cont": 0.04222654081066075,
+            "quorum_tracker": 0.049083842309827874
+          }
+        },
+        "by_range": {
+          "low": {
+            "fixed_yin": 0.12329805717896067,
+            "adaptive_yin_raw": 0.19068077712841572,
+            "lens_stft": 0.11069341336281788,
+            "lens_acf": 0.21949139156531353,
+            "lens_cepstrum": 0.4107723898278313,
+            "quorum": 0.3083873005844258,
+            "tracker": 0.20240088453640814,
+            "tracker_lag2_removed": 0.18426788816932554,
+            "no_octave": 0.20246406570841888,
+            "no_cont": 0.20208497867635444,
+            "no_octave_no_cont": 0.20217975043437056,
+            "no_gates": 0.20240088453640814,
+            "no_median": 0.19406096983099036,
+            "median3": 0.19090191123045333,
+            "median5_centred": 0.18758489969988942,
+            "no_hyst": 0.20274838098246722,
+            "fixed_yin_input": 0.1941241510030011,
+            "fix_quorum_input": 0.19703048491549519,
+            "fix_no_median_no_cont": 0.19308166166482388,
+            "fix_no_median_no_cont_no_octave": 0.1929552993208024,
+            "fix_quorum_no_median_no_cont": 0.14427420628652662,
+            "fix_fyin_no_median_no_cont": 0.12693097456957828,
+            "fix_fyin_median3_centred": 0.12181329963670826,
+            "fix_quorum_fyin_no_median_no_cont": 0.11202021797504344,
+            "quorum_tracker": 0.11123045332490918
+          },
+          "mid": {
+            "fixed_yin": 0.165674066053059,
+            "adaptive_yin_raw": 0.2474508211514167,
+            "lens_stft": 0.22092131384226674,
+            "lens_acf": 0.16535823858509294,
+            "lens_cepstrum": 0.32487366901281356,
+            "quorum": 0.28968146543945134,
+            "tracker": 0.26301660350117306,
+            "tracker_lag2_removed": 0.23687060097455334,
+            "no_octave": 0.26425735426818264,
+            "no_cont": 0.26051254286229925,
+            "no_octave_no_cont": 0.26069301570113695,
+            "no_gates": 0.26301660350117306,
+            "no_median": 0.24108915358238586,
+            "median3": 0.24589424291644107,
+            "median5_centred": 0.23691571918426277,
+            "no_hyst": 0.2629038079768995,
+            "fixed_yin_input": 0.25690308608554413,
+            "fix_quorum_input": 0.2606253383865728,
+            "fix_no_median_no_cont": 0.24237502255910484,
+            "fix_no_median_no_cont_no_octave": 0.2472252301028695,
+            "fix_quorum_no_median_no_cont": 0.16477170185887025,
+            "fix_fyin_no_median_no_cont": 0.15917704385489984,
+            "fix_fyin_median3_centred": 0.15811676592672802,
+            "fix_quorum_fyin_no_median_no_cont": 0.14805540516152318,
+            "quorum_tracker": 0.15301840822956145
+          },
+          "high": {
+            "fixed_yin": 0.1927937730164044,
+            "adaptive_yin_raw": 0.23790592567793772,
+            "lens_stft": 0.09633411449614998,
+            "lens_acf": 0.16283059926347507,
+            "lens_cepstrum": 0.5577084030800133,
+            "quorum": 0.22623033143622365,
+            "tracker": 0.2692919317040509,
+            "tracker_lag2_removed": 0.248619015734851,
+            "no_octave": 0.27180281218613994,
+            "no_cont": 0.2696685637763642,
+            "no_octave_no_cont": 0.27556913290927354,
+            "no_gates": 0.2692919317040509,
+            "no_median": 0.2500836960160696,
+            "median3": 0.2535989286909943,
+            "median5_centred": 0.24815868764646803,
+            "no_hyst": 0.27037997991295615,
+            "fixed_yin_input": 0.27205390023434883,
+            "fix_quorum_input": 0.24744727150987614,
+            "fix_no_median_no_cont": 0.2605875460328088,
+            "fix_no_median_no_cont_no_octave": 0.26682289922999664,
+            "fix_quorum_no_median_no_cont": 0.17283227318379646,
+            "fix_fyin_no_median_no_cont": 0.2061014395714764,
+            "fix_fyin_median3_centred": 0.20472045530632743,
+            "fix_quorum_fyin_no_median_no_cont": 0.1736692333444928,
+            "quorum_tracker": 0.18195513893538667
+          }
+        },
+        "range_share": {
+          "low": 0.31693348952232203,
+          "mid": 0.44381701859249695,
+          "high": 0.23924949188518108
+        },
+        "best_plain_lens": "lens_stft",
+        "best_single": "lens_stft",
+        "vs_best_single": {
+          "tracker": {
+            "diff": 0.08912784469207741,
+            "ci95": [
+              0.05550139126422946,
+              0.11832695305828192
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.06683086534706995,
+            "ci95": [
+              0.03494436984598483,
+              0.09637584630136556
+            ]
+          },
+          "quorum": {
+            "diff": 0.12425034291492704,
+            "ci95": [
+              0.10330818785022959,
+              0.1466978206759401
+            ]
+          },
+          "no_octave": {
+            "diff": 0.09029926210714964,
+            "ci95": [
+              0.05626130282994211,
+              0.11949261515164133
+            ]
+          },
+          "no_cont": {
+            "diff": 0.08800648785029885,
+            "ci95": [
+              0.05441522141524141,
+              0.11722976941582754
+            ]
+          },
+          "no_octave_no_cont": {
+            "diff": 0.08952832927842688,
+            "ci95": [
+              0.05550815184981657,
+              0.11919316010199059
+            ]
+          },
+          "no_gates": {
+            "diff": 0.08912784469207741,
+            "ci95": [
+              0.05550139126422946,
+              0.11832695305828192
+            ]
+          },
+          "no_median": {
+            "diff": 0.07215731034551806,
+            "ci95": [
+              0.03945070969247317,
+              0.10182648224234755
+            ]
+          },
+          "median3": {
+            "diff": 0.07412969693328927,
+            "ci95": [
+              0.04190439314512701,
+              0.10337424857763321
+            ]
+          },
+          "median5_centred": {
+            "diff": 0.0677920283543087,
+            "ci95": [
+              0.034971207381157526,
+              0.097283482636487
+            ]
+          },
+          "no_hyst": {
+            "diff": 0.08944823236115698,
+            "ci95": [
+              0.05564250715214325,
+              0.11872157465927156
+            ]
+          },
+          "fixed_yin_input": {
+            "diff": 0.0844521871464472,
+            "ci95": [
+              0.04741462691554954,
+              0.11601150472228898
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.08113817719440522,
+            "ci95": [
+              0.0479043842059187,
+              0.11072557755080234
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.07493066610598823,
+            "ci95": [
+              0.04198185042802028,
+              0.10550225756001565
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.07853502738313359,
+            "ci95": [
+              0.045512079611163735,
+              0.10876975377426082
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": 0.004024870092812299,
+            "ci95": [
+              -0.025020351779777374,
+              0.029352929418442482
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.00400484586349481,
+            "ci95": [
+              -0.03053001055866308,
+              0.03362517438829876
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": 0.0015819141160804406,
+            "ci95": [
+              -0.03314294959243266,
+              0.030740247209027727
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.013416233642707692,
+            "ci95": [
+              -0.046318058380470414,
+              0.014275237854755936
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.009481472581824024,
+            "ci95": [
+              -0.04230864355811954,
+              0.018956392227612858
+            ]
+          }
+        },
+        "vs_fixed_yin": {
+          "tracker": {
+            "diff": 0.08657475545409946,
+            "ci95": [
+              0.07441510753552828,
+              0.09801073914031168
+            ]
+          },
+          "tracker_lag2_removed": {
+            "diff": 0.064277776109092,
+            "ci95": [
+              0.05452071622625278,
+              0.0743863593907939
+            ]
+          },
+          "quorum": {
+            "diff": 0.12169725367694909,
+            "ci95": [
+              0.09516218917917112,
+              0.15286543798136024
+            ]
+          },
+          "fix_quorum_input": {
+            "diff": 0.07858508795642727,
+            "ci95": [
+              0.06583558533640584,
+              0.09004415823677162
+            ]
+          },
+          "fix_no_median_no_cont": {
+            "diff": 0.07237757686801027,
+            "ci95": [
+              0.06174521486723265,
+              0.08304836402649296
+            ]
+          },
+          "fix_no_median_no_cont_no_octave": {
+            "diff": 0.07598193814515564,
+            "ci95": [
+              0.06540031865161279,
+              0.08662367677047873
+            ]
+          },
+          "fix_quorum_no_median_no_cont": {
+            "diff": 0.001471780854834348,
+            "ci95": [
+              -0.00588513209224323,
+              0.009475455445236699
+            ]
+          },
+          "fix_fyin_no_median_no_cont": {
+            "diff": 0.001451756625516859,
+            "ci95": [
+              -0.003257359914878805,
+              0.006890417916391714
+            ]
+          },
+          "fix_fyin_median3_centred": {
+            "diff": -0.0009711751218975107,
+            "ci95": [
+              -0.00575711854828037,
+              0.004452728702826
+            ]
+          },
+          "fix_quorum_fyin_no_median_no_cont": {
+            "diff": -0.015969322880685644,
+            "ci95": [
+              -0.02134795689152005,
+              -0.010492799162729249
+            ]
+          },
+          "quorum_tracker": {
+            "diff": -0.012034561819801975,
+            "ci95": [
+              -0.01773334641590047,
+              -0.005996128483898656
+            ]
+          }
+        },
+        "extra_error_share_by_context": {
+          "onset": 0.03911444887741532,
+          "offset": 0.06375655167018697,
+          "transition": 0.4133614957365251,
+          "vibrato": 0.38332159899867013,
+          "stable": 0.10044590471720254
+        }
+      }
+    }
+  }
+}

@@ -100,11 +100,11 @@ The 41 audio experiments are the proof of concept for this vision:
 | Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens. On real data, the history of disagreement predicts STFT and Cepstrum failures 4–8 frames (186–372 ms) ahead better than the current frame (+0.02–0.05 AUC), but most onsets are not foreseeable one frame ahead | Exp 015–016, 051 |
 | Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens | Exp 014, 017–018, 042 |
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
-| Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
+| Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms. The adaptive pitch tracker's gain is synthetic only (Exp 054); on real audio a quorum tracker replaces it | Exp 019–024, 033–041, 054 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
 | Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens. Family-aware fusion (an agreement table) narrows the gap by 2.6–3.1 pts but cannot close it. A learned lens (frozen ImageNet CNN + linear read-out) leans to the local-gradient family and fails on photos | Exp 044, 045, 047, 052, issues #6, #21, #26 |
 | Third medium: sensor time series | 🟡 `src/timeseries_medium`: rate of periodic sensor signals (FFT, ACF, wavelet, peak counter) on the **unchanged** core. On MIT-BIH ECG with real NSTDB noise, disagreement predicts blind spots (AUC 0.90–0.93), but FFT, wavelet and ACF fail as a family and outvote the peak counter: fusion makes 32% gross errors vs 13% for the best lens | Exp 053, issue #27 |
-| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048). Probing the signal (low-pass at 1.5× each candidate) cuts gross error on disagreement frames to 3.9% / 5.6% vs 14.5% / 17.6% for the consensus on both real audio datasets, untrained (Exp 050) | Exp 045, 046, 048, 050, issues #7, #20, #22, #24 |
+| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the engine-driven pitch tracker's gain does not hold (Exp 054: its median filter lags real vibrato and note changes; the claim is retired, and a quorum tracker with a YIN fallback beats fixed YIN instead); unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048). Probing the signal (low-pass at 1.5× each candidate) cuts gross error on disagreement frames to 3.9% / 5.6% vs 14.5% / 17.6% for the consensus on both real audio datasets, untrained (Exp 050) | Exp 045, 046, 048, 050, 054, issues #7, #20, #22, #24, #28 |
 
 **Honest gaps:** disagreement reliably *warns* that a lens is blind, in both media
 and on real data (Exp 045). Turning that warning into a better *answer* is the
@@ -149,6 +149,11 @@ problem is at its worst: three lenses share a harmonic blind spot and outvote th
 that is right. Across three media the pattern is the same. Disagreement reliably warns,
 but voting only helps when the lenses fail independently. Where one lens is clearly
 better, it should answer and the others should warn.
+Exp 054 retires an old claim. The engine-driven pitch tracker never beat YIN on real
+recordings. Its median filter assumes the pitch holds still for about 100 ms, which real
+vibrato and note changes break. Its adaptive windows also hurt under noise. What does help
+is the quorum of plain lenses with a YIN fallback, which beats fixed YIN on both real audio
+datasets.
 
 ---
 

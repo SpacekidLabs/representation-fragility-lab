@@ -21,7 +21,7 @@ from .disagreement import (
     compare_readings,
 )
 from .plugins.denoiser import AdaptiveDenoiser
-from .plugins.pitch_tracker import AdaptivePitchTracker
+from .plugins.pitch_tracker import AdaptivePitchTracker, QuorumPitchTracker
 from .plugins.onset_detector import AdaptiveOnsetDetector
 
 __all__ = [
@@ -38,5 +38,6 @@ __all__ = [
     "compare_readings",
     "AdaptiveDenoiser",
     "AdaptivePitchTracker",
+    "QuorumPitchTracker",
     "AdaptiveOnsetDetector",
 ]
