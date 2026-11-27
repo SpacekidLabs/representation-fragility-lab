@@ -314,3 +314,44 @@ def test_no_lead_leaves_the_default_unchanged():
     assert r.warning is None and r.consensus_from == ("median", "trimmed")
     with pytest.raises(ValueError):
         LocationComparator(lead="mean", lead_fallback="vote")
+
+
+# ---------------------------------------------------------------------------
+# Probing: settle a disagreement by asking the signal (issue #30)
+# ---------------------------------------------------------------------------
+
+from core import Probe, Prober  # noqa: E402
+
+
+class ProbedNumbers(Numbers):
+    """Toy analogue of the audio low-pass probe: keep the values up to 1.5 x the
+    candidate. If the candidate is the typical value, the lenses still read it."""
+
+    def probes(self, signal, candidate, context):
+        kept = [v for v in signal if v <= 1.5 * candidate] or [candidate]
+        return [Probe("cut", kept, candidate)]
+
+
+def probed_analyzer(**kw):
+    return Analyzer(ProbedNumbers(), [Mean(), Median(), TrimmedMean()], LocationComparator(), prober=Prober(**kw))
+
+
+def test_probing_picks_the_candidate_that_survives_its_probe():
+    a = probed_analyzer().analyze([10, 10, 10, 10, 10, 10, 10, 10, 10, 100])
+    p = a.probe
+    assert len(p.candidates) == 2                 # the mean (19) against median and trimmed mean (10)
+    assert p.choice == pytest.approx(10.0)
+    assert p.follows[[c for c, _ in p.candidates].index(p.choice)] == 3
+    assert a.answer == p.choice and p.score == 1.0
+
+
+def test_probing_runs_only_on_disagreement_and_answer_falls_back_to_consensus():
+    a = probed_analyzer().analyze([10, 10.1, 9.9, 10])
+    assert a.probe is None and a.answer == a.report.consensus
+
+
+def test_probing_abstains_below_min_score_and_needs_medium_probes():
+    a = probed_analyzer(min_score=1.01).analyze([10, 10, 10, 10, 10, 10, 10, 10, 10, 100])
+    assert a.probe.abstained and a.answer is None
+    plain = Analyzer(Numbers(), [Mean(), Median(), TrimmedMean()], LocationComparator(), prober=Prober())
+    assert plain.analyze([10, 10, 10, 10, 10, 10, 10, 10, 10, 100]).probe is None   # no probes: nothing to do

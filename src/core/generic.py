@@ -23,6 +23,7 @@ from .interfaces import (
     PairComparison,
     Pattern,
     PatternModel,
+    Probe,
     Reading,
     Representation,
 )
@@ -326,6 +327,26 @@ class PairwiseComparator(Comparator):
 
 
 @dataclass
+class ProbeResult:
+    """What probing found on one signal (issue #30).
+
+    candidates  the distinct answers: (estimate, names of the lenses that read it)
+    follows     per candidate, how many (probe, lens) readings followed its prediction
+    checks      per candidate, how many (probe, lens) readings were made
+    choice      the chosen candidate's estimate, or None when probing abstains
+    score       the chosen candidate's share of follows, 0..1: low on input with
+                nothing to find (no pitch, no orientation)
+    """
+
+    candidates: list[tuple[Any, tuple[str, ...]]]
+    follows: list[int]
+    checks: list[int]
+    choice: Any
+    score: float
+    abstained: bool = False
+
+
+@dataclass
 class Analysis:
     """Result of running the full loop on one signal."""
 
@@ -334,6 +355,79 @@ class Analysis:
     report: ComparisonReport | None
     pattern: Pattern | None = None
     context: dict = field(default_factory=dict)
+    probe: ProbeResult | None = None
+
+    @property
+    def answer(self) -> Any:
+        """The probe's choice where probing ran, else the comparator's consensus."""
+        if self.probe is not None:
+            return self.probe.choice
+        return self.report.consensus if self.report is not None else None
+
+
+class Prober:
+    """Settle a disagreement by asking the signal (issue #30, Exp 050).
+
+    The distinct answers of the lenses are the candidates (readings that agree
+    with a candidate's first, most confident member are merged into it, and the
+    candidate's estimate is ``comparator.fuse`` over them). Every reading counts,
+    trusted or not: the right lens is often the one marked blind (Exp 047). For
+    each candidate the medium supplies probes, perturbations with a known
+    effect; every lens reads every probe, and a lens *follows* when its reading
+    agrees (``comparator.agrees``) with the probe's prediction. The candidate
+    with the most follows wins (ties: more lenses behind it, then the higher
+    confidence). Untrained.
+
+    Probing runs only when there are at least ``min_candidates`` candidates
+    (default 2: the lenses disagree). With ``min_score`` set, it abstains when
+    the winner's share of follows is below it: on input with nothing to find,
+    no candidate follows its probes (Exp 050: AUC 0.93-0.98 for pitch).
+    """
+
+    def __init__(self, min_score: float | None = None, min_candidates: int = 2):
+        self.min_score = min_score
+        self.min_candidates = min_candidates
+
+    def candidates(self, comparator: "PairwiseComparator",
+                   readings: Mapping[str, Reading]) -> list[tuple[Any, tuple[str, ...]]]:
+        groups: list[list[Reading]] = []
+        for r in sorted((r for r in readings.values() if r.estimate is not None), key=lambda r: -r.confidence):
+            for g in groups:
+                if comparator.agrees(comparator.compare_pair(g[0], r)):
+                    g.append(r)
+                    break
+            else:
+                groups.append([r])
+        out = []
+        for g in groups:
+            weighted = [Reading(r.representation, r.estimate, max(r.confidence, 1e-9)) for r in g]
+            out.append((comparator.fuse(weighted), tuple(r.representation for r in g)))
+        return out
+
+    def settle(self, analyzer: "Analyzer", signal: Any, context: Mapping[str, Any],
+               report: ComparisonReport) -> ProbeResult | None:
+        comparator = analyzer.comparator
+        cands = self.candidates(comparator, report.readings)
+        if len(cands) < self.min_candidates:
+            return None
+        follows, checks = [], []
+        for estimate, _ in cands:
+            n_follow = n_check = 0
+            for probe in analyzer.medium.probes(signal, estimate, context):
+                target = Reading("probe", probe.predicted, 1.0)
+                for rep in analyzer.representations:
+                    reading = rep.read(probe.signal, context)
+                    n_check += 1
+                    n_follow += int(comparator.agrees(comparator.compare_pair(reading, target)))
+            follows.append(n_follow)
+            checks.append(n_check)
+        if not any(checks):
+            return None                     # the medium has no probes
+        best = max(range(len(cands)), key=lambda k: (
+            follows[k], len(cands[k][1]), max(report.readings[n].confidence for n in cands[k][1])))
+        score = follows[best] / checks[best] if checks[best] else 0.0
+        abstain = self.min_score is not None and score < self.min_score
+        return ProbeResult(cands, follows, checks, None if abstain else cands[best][0], score, abstain)
 
 
 class Analyzer:
@@ -345,7 +439,7 @@ class Analyzer:
 
     def __init__(self, medium: Medium, representations: Sequence[Representation],
                  comparator: Comparator, detector: BlindSpotDetector | None = None,
-                 pattern_model: PatternModel | None = None):
+                 pattern_model: PatternModel | None = None, prober: Prober | None = None):
         wrong = [r.name for r in representations if r.medium and r.medium != medium.name]
         if wrong:
             raise ValueError(f"Representations {wrong} are not for medium '{medium.name}'")
@@ -357,6 +451,7 @@ class Analyzer:
         self.comparator = comparator
         self.detector = detector or ConfidenceThresholdDetector()
         self.pattern_model = pattern_model
+        self.prober = prober
 
     def analyze(self, signal: Any, context: Mapping[str, Any] | None = None) -> Analysis:
         context = dict(context or {})
@@ -367,4 +462,5 @@ class Analyzer:
         assessments = {n: self.detector.assess(rd, signal, context) for n, rd in readings.items()}
         report = self.comparator.compare(readings, assessments)
         pattern = self.pattern_model.assign(report) if self.pattern_model else None
-        return Analysis(self.medium.name, False, report, pattern, context)
+        probe = self.prober.settle(self, signal, context, report) if self.prober else None
+        return Analysis(self.medium.name, False, report, pattern, context, probe)

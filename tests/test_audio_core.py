@@ -131,3 +131,19 @@ def test_family_votes_undo_the_spectral_trio_on_a_missing_fundamental():
     fused = comp.compare(plain.readings)
     assert set(fused.consensus_from) <= {"acf", "cepstrum"}
     assert abs(1200 * np.log2(fused.consensus / 220.0)) < 50
+
+
+def test_lowpass_probe_follows_the_true_pitch_not_its_octave():
+    """Issue #30: cut at 1.5 x the candidate; the lenses still read the true f0,
+    but cutting at 1.5 x the octave above leaves the fundamental, so they do not read 2 f0."""
+    from core import Prober
+
+    x = tone(200.0, range(1, 6))
+    an = make_audio_analyzer(lenses=("stft", "acf", "cepstrum"), prober=Prober())
+    ctx = {"sr": SR}
+    for candidate, follows in ((200.0, 3), (400.0, 0)):
+        (probe,) = an.medium.probes(x, candidate, ctx)
+        rd = [r.read(probe.signal, ctx) for r in an.representations]
+        target = type(rd[0])("probe", probe.predicted, 1.0)
+        n = sum(an.comparator.agrees(an.comparator.compare_pair(r, target)) for r in rd)
+        assert n == follows, (candidate, [r.estimate for r in rd])

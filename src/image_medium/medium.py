@@ -15,6 +15,8 @@ try:  # installed package: representation_core
         ConfidenceThresholdDetector,
         Medium,
         PairwiseComparator,
+        Probe,
+        Prober,
         Reading,
         Representation,
     )
@@ -27,6 +29,8 @@ except ImportError:  # plain checkout: src/core
         ConfidenceThresholdDetector,
         Medium,
         PairwiseComparator,
+        Probe,
+        Prober,
         Reading,
         Representation,
     )
@@ -103,6 +107,22 @@ class ImagePatch(Medium):
 
     def is_empty(self, signal: np.ndarray, context: Mapping[str, Any]) -> bool:
         return bool(np.std(signal) < FLAT_STD)
+
+    #: Probes (issue #30). A Gaussian blur keeps a coarse dominant pattern and removes
+    #: noise and fine, weaker detail (prediction: the candidate). A rotation by a known
+    #: angle moves every real structure by that angle; ``ndimage.rotate`` by +a moves the
+    #: orientation the lenses read by -a (mod 180). Reflect padding keeps the corners
+    #: from adding edges.
+    #: Default set: the best of five on synthetic patches, also best on held-out BSDS500 (Exp 057).
+    PROBE_BLUR = (1.5, 3.0)
+    PROBE_ROTATE = (30.0, 60.0)
+
+    def probes(self, signal: np.ndarray, candidate: float, context: Mapping[str, Any]):
+        out = [Probe(f"blur {s:g}", ndimage.gaussian_filter(signal, s, mode="reflect"), candidate)
+               for s in self.PROBE_BLUR]
+        out += [Probe(f"rotate {a:g}", ndimage.rotate(signal, a, reshape=False, mode="reflect", order=1),
+                      (candidate - a) % 180.0) for a in self.PROBE_ROTATE]
+        return out
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -305,11 +325,11 @@ class OrientationComparator(PairwiseComparator):
 
 
 def make_image_analyzer(lenses: Sequence[str] = ALL_LENSES,
-                        threshold: float = VOTING_THRESHOLD) -> Analyzer:
+                        threshold: float = VOTING_THRESHOLD, prober: Prober | None = None) -> Analyzer:
     """A core Analyzer for image orientation with the given lenses (names from ``ALL_LENSES``)."""
     unknown = [n for n in lenses if n not in LENSES]
     if unknown:
         raise ValueError(f"Unknown representations: {unknown}. Available: {list(LENSES)}")
     detector = ConfidenceThresholdDetector(threshold)
     return Analyzer(ImagePatch(), [LENSES[n]() for n in lenses],
-                    OrientationComparator(detector=detector), detector=detector)
+                    OrientationComparator(detector=detector), detector=detector, prober=prober)

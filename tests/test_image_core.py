@@ -138,3 +138,17 @@ def test_quorum_stops_the_fft_lens_answering_alone_on_smooth_noise():
         answered["quorum"] += quorum.analyze(x).report.consensus is not None
     assert answered["legacy"] >= 8
     assert answered["quorum"] <= 2
+
+
+def test_rotation_probe_predicts_the_orientation_the_lenses_read():
+    """Issue #30: rotating by a known angle moves every real structure by it; the probe's
+    prediction must match what the lenses read, and a wrong candidate is not followed."""
+    from core import Prober
+
+    an = make_image_analyzer(prober=Prober())
+    patch = grating(40.0, period=12.0)
+    for candidate, want in ((40.0, True), (100.0, False)):
+        for probe in an.medium.probes(patch, candidate, {}):
+            rd = [r.read(probe.signal, {}) for r in an.representations]
+            follow = [abs(angle_diff(r.estimate, probe.predicted)) < 10.0 for r in rd]
+            assert all(follow) if want else not any(follow), (probe.name, candidate, [r.estimate for r in rd])

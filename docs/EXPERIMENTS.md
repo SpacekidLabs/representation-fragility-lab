@@ -1324,6 +1324,95 @@ For the warning, combine the lead's divergence with its own confidence. Neither 
 
 ![Exp 056](../results/exp056_lead_lens.png)
 
+### Phase 37 — Probing in the Core (Exp 057)
+
+#### Exp 057 — Does the Probe Work Through the Core, and Does It Carry Over to Images?
+Exp 050 settled pitch disagreements by perturbing the frame with a known effect and keeping the candidate the lenses still read. Its best chooser, the untrained low-pass follow count, lived only in the experiment. Issue #30 moves it into the core and tries it on a second medium.
+
+**Core change (opt-in).**
+- **`Medium.probes(signal, candidate, context)`:** a new hook that returns `Probe(name, signal, predicted)`. Each probe is a perturbed signal plus the estimate a lens should read on it *if* the candidate is right. The default returns no probes.
+- **`core.Prober(min_score=None)`:**
+  - The candidates are the distinct answers of all lenses, trusted or not. Readings that agree with a candidate's most confident member are merged into it, and its value comes from `fuse`.
+  - Every lens reads every probe. A lens *follows* when it agrees with the prediction.
+  - The candidate with the most follows wins. Ties go to more lenses, then to the higher confidence.
+  - `ProbeResult.score` is the winner's share of follows. With `min_score` set, the prober abstains below it.
+  - It runs only when there are at least two candidates.
+- **`Analyzer(prober=...)`:** fills `Analysis.probe`. `Analysis.answer` is the probe's choice where probing ran, and the consensus elsewhere.
+- **Audio probe:** a 5th-order low-pass at 1.5× the candidate.
+- **Image probes:** Gaussian blur at σ 1.5 and 3 (prediction: the candidate), and rotation by 30° and 60° with reflect padding (prediction: the candidate minus the angle, mod 180). The test confirms that sign.
+- **Not done:** time series has no probe yet. A good candidate would be a band-stop at the candidate rate.
+- **Tests:** without `prober` nothing changes. All 92 tests pass, 5 of them new: on a toy medium, the audio low-pass and the image rotation.
+
+**1. Audio: the core reproduces Exp 050.** The method:
+- the same disagreement frames as Exp 050, rebuilt with its code;
+- 1,069 synthetic frames, 6,000 vocadito frames, and a seeded sample of 6,000 MDB-stem-synth frames;
+- run through `make_audio_analyzer(prober=Prober())`.
+
+Gross error (> 50 cents) on disagreement frames:
+
+| Dataset | Consensus | Quorum 2 | Best lens | Exp 050 low-pass count | **Core `Prober`** | Same choice | Oracle |
+|---|---|---|---|---|---|---|---|
+| Synthetic | 16.2% | 29.1% | 13.0% | 0.6% | **0.6%** | 100% | 0.3% |
+| vocadito | 14.5% | 39.9% | 11.6% | 3.9% | **3.8%** | 99.9% | 1.2% |
+| MDB-stem-synth | 17.6% | 42.5% | 24.1% | 5.6% | **5.6%** | 99.9% | 2.3% |
+
+- The core's lens readings match the cached ones on every frame (0 mismatches).
+- The few differing choices come from how candidates are formed. The core merges by agreement with the most confident member and fuses with the medium's weighted median; Exp 050 chained sorted estimates and took their geometric mean. Core minus Exp 050: 0.0, −0.1 [−0.2, 0.0] and 0.0 [−0.1, +0.1] pts.
+
+**Voicing with the low-pass probe alone.** The winner's share of follows separates pitched disagreement frames from unpitched frames with AUC 0.948 (synthetic), 0.897 (vocadito) and 0.979 (MDB). Exp 050's full five-probe count reached 0.98 / 0.93 / 0.98.
+
+With three lenses the share is coarse (0, ⅓, ⅔, 1). At `min_score=2/3`:
+
+| Dataset | Disagreement frames answered | Gross error, abstention counted | False answers on unpitched frames that reach the prober |
+|---|---|---|---|
+| MDB-stem-synth | 92.0% | 10.2% | 1.0% |
+| vocadito | 93.4% | 8.7% | 22.8% |
+
+So the low-pass alone is a good pitch chooser but only a fair voicing detector on real singing.
+
+**2. Images (new): probing beats the consensus but only ties the best lens.**
+- **Lenses:** the five classic orientation lenses.
+- **Disagreement patches:** 543 of 2,288 synthetic patches and 1,651 of 3,084 BSDS500 patches have two or more candidates.
+- **Probe set:** chosen on the synthetic patches. Two blurs and two rotations won there, and also did best on BSDS500, which was held out.
+
+| Probe set | Synthetic | BSDS500 (held out) | AUC, oriented vs unoriented (synthetic / BSDS500 run) |
+|---|---|---|---|
+| blur 1.5 | 30.0% | 30.2% | 0.830 / 0.803 |
+| blur 3 | 24.7% | 30.7% | 0.854 / 0.822 |
+| rotate 30 | 28.9% | 29.9% | 0.774 / 0.755 |
+| blur 1.5 + rotate 30 | 29.1% | 29.3% | 0.854 / 0.820 |
+| **blur 1.5, 3 + rotate 30, 60** (default) | **24.3%** | **28.1%** | 0.900 / 0.851 |
+| Consensus (legacy) | 37.6% | 41.1% | |
+| Quorum 2 | 47.1% | 65.4% | |
+| Best lens (Radon, in hindsight) | **18.8%** | 29.9% | |
+| Candidate oracle | 5.3% | 11.6% | |
+
+- **Against the consensus:** the default set is better by 13.3 pts on synthetic patches (CI −17.8 to −8.7) and by 13.0 on BSDS500 (−15.6 to −10.4).
+- **Against Radon:** it is worse by 5.5 pts on synthetic patches (+2.3 to +8.8) and ties on BSDS500 (−1.8, CI −5.4 to +1.9).
+- **Cost:** about 0.1 s per disagreement patch with 4 probes. All five lenses re-read 4 perturbed patches for each of up to 5 candidates.
+
+By condition:
+- **Photos:** the probe beats Radon where the patch is clean, JPEG-compressed, blurred or occluded (17.4 vs 19.6%, 17.3 vs 20.4%, 25.9 vs 29.1%, 58.1 vs 62.0%), and loses slightly under noise (16.6 vs 15.7%).
+- **Synthetic patches:** it loses on a weaker second grating (14.2 vs 1.1%) and does not fix occlusion (55.6 vs 57.0%, oracle 12.6%).
+
+**Key findings:**
+1. **Probing now lives in the core and reproduces Exp 050 exactly on audio.** Probing beats every voting rule on both real datasets, with no training: 3.8% / 5.6% gross error on disagreement frames against 14.5% / 17.6% for the consensus.
+2. **On images, probing is the first rule that matches the best single lens on photos.** No voting rule in Exp 044–047 got there. It still does not beat Radon, and it is far from the oracle (28% vs 12%).
+3. **Why images gain less: these probes cannot tell two real structures apart.** Blur and rotation move or keep *every* real structure the same way. An occluder's edge or a second grating therefore follows its probes as well as the true pattern does. The audio low-pass works because it treats the candidate's own frequency differently from its octaves. An image probe would need the same property, such as an oriented filter tied to the candidate, rather than a global change.
+4. **The follow share is also a "nothing here" score:** AUC 0.90–0.98 for pitch and 0.85–0.90 for orientation. A coarse low-pass-only score is not enough on real singing (22.8% false answers at ⅔).
+
+**Decision:**
+- `Prober` and `Medium.probes` are in the core. Audio and images implement the hook, and `make_audio_analyzer` / `make_image_analyzer` accept `prober=Prober()`.
+- Probing stays **opt-in**, because it costs extra lens reads on every disagreement frame (about 6 for audio, up to 100 for images).
+- For audio pitch it is the recommended way to settle disagreements.
+- For images it is an alternative to choosing Radon by hand when no labelled data says which lens is best.
+- `min_score` is available but has no default.
+
+- **Run**: `.venv/bin/python src/experiments/exp057_probing_in_core.py` (needs the caches of Exp 045, 046 and 050 and the raw audio datasets in `data/raw/`; about 15 minutes)
+- **Outputs**: [results/exp057_probing_in_core.png](../results/exp057_probing_in_core.png), [results/exp057_summary.json](../results/exp057_summary.json) (audio: core vs Exp 050 per dataset with CIs, voicing AUC and thresholds; images: every probe set with CIs against the consensus, quorum and best lens, per-condition errors, unoriented AUC)
+
+![Exp 057](../results/exp057_probing_in_core.png)
+
 ---
 
 ## Listen tests

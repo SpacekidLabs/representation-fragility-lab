@@ -29,6 +29,8 @@ try:  # installed package: representation_core
         ConfidenceThresholdDetector,
         Medium,
         PairwiseComparator,
+        Probe,
+        Prober,
         Reading,
         Representation,
     )
@@ -41,6 +43,8 @@ except ImportError:  # plain checkout: src/core
         ConfidenceThresholdDetector,
         Medium,
         PairwiseComparator,
+        Probe,
+        Prober,
         Reading,
         Representation,
     )
@@ -73,6 +77,23 @@ class AudioFrame(Medium):
 
     def is_empty(self, signal: np.ndarray, context: Mapping[str, Any]) -> bool:
         return bool(np.sqrt(np.mean(signal ** 2)) < SILENCE_RMS)
+
+    #: Low-pass probe (issue #30, Exp 050): cut at this multiple of the candidate f0.
+    #: If the candidate is right its fundamental survives and the lenses read it;
+    #: if the truth is 2c nothing pitched is left; if it is c / 2 the lenses go there.
+    LOWPASS_FACTOR = 1.5
+
+    def probes(self, signal: np.ndarray, candidate: float, context: Mapping[str, Any]):
+        from scipy.signal import butter, filtfilt
+
+        sr = context["sr"]
+        cut = self.LOWPASS_FACTOR * candidate / (0.5 * sr)
+        if cut >= 1.0:
+            low = signal.copy()
+        else:
+            b, a = butter(5, cut, btype="low")
+            low = filtfilt(b, a, signal)
+        return [Probe("lowpass", low, candidate)]
 
 
 class _PitchLens(Representation):
@@ -142,11 +163,12 @@ class PitchComparator(PairwiseComparator):
 
 
 def make_audio_analyzer(lenses: Sequence[str] = DEFAULT_LENSES,
-                        threshold: float = VOICING_THRESHOLD) -> Analyzer:
-    """A core Analyzer for audio pitch with the given lenses (names from ``ALL_LENSES``)."""
+                        threshold: float = VOICING_THRESHOLD, prober: Prober | None = None) -> Analyzer:
+    """A core Analyzer for audio pitch with the given lenses (names from ``ALL_LENSES``).
+    Pass ``prober=Prober()`` to settle disagreements with the low-pass probe (Exp 050 / 057)."""
     unknown = [n for n in lenses if n not in LENSES]
     if unknown:
         raise ValueError(f"Unknown representations: {unknown}. Available: {list(LENSES)}")
     detector = ConfidenceThresholdDetector(threshold)
     return Analyzer(AudioFrame(), [LENSES[n]() for n in lenses],
-                    PitchComparator(detector=detector), detector=detector)
+                    PitchComparator(detector=detector), detector=detector, prober=prober)

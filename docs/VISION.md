@@ -96,7 +96,7 @@ The 41 audio experiments are the proof of concept for this vision:
 | Vision component | Status in audio | Evidence |
 |---|---|---|
 | Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel; a learned lens (CREPE) as an opt-in core `Representation` | Exp 001–013, 028, 031, 052 |
-| Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
+| Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others. Probing to settle a disagreement is in the core (`Medium.probes`, `core.Prober`) | Exp 001–013, 050, 057 |
 | Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens. On real data, the history of disagreement predicts STFT and Cepstrum failures 4–8 frames (186–372 ms) ahead better than the current frame (+0.02–0.05 AUC), but most onsets are not foreseeable one frame ahead | Exp 015–016, 051 |
 | Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens. Where one lens is clearly better, an opt-in lead mode lets it answer and the others warn (Exp 056) | Exp 014, 017–018, 042, 056 |
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
@@ -169,6 +169,13 @@ quorum's false answers on noise (70% → 1%). The warning half holds only where 
 lenses are competent: their disagreement flags a wrong lead with AUC 0.82–0.92 in audio and
 synthetic images, but only 0.57–0.69 on ECG, where they share one blind spot. On real
 singing and photos the lead's own confidence warns as well or better.
+Exp 057 moves probing into the core (`Medium.probes`, `core.Prober`). On audio it reproduces
+Exp 050 exactly: 3.8% / 5.6% gross error on disagreement frames, against 14.5% / 17.6% for
+the consensus. On images, blur and rotation probes beat the consensus by 13 pts. On photos
+they are the first rule to match the best single lens (28.1% vs 29.9% for Radon), but they do
+not beat it. Global perturbations move every real structure alike, so they cannot tell the
+true pattern from an occluder's edge. Images need probes tied to the candidate, as the
+audio low-pass is.
 
 ---
 

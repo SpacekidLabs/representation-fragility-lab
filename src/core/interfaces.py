@@ -93,6 +93,19 @@ class ComparisonReport:
 
 
 @dataclass
+class Probe:
+    """A perturbation with a known effect (issue #30).
+
+    ``signal`` is the perturbed signal; ``predicted`` is the estimate a lens
+    should read on it *if* the candidate the probe was built for is right.
+    """
+
+    name: str
+    signal: Any
+    predicted: Any
+
+
+@dataclass
 class Pattern:
     """A named, inspectable pattern of disagreement found by a PatternModel."""
 
@@ -120,6 +133,15 @@ class Medium(ABC):
         """True when there is nothing to analyse (silence, a blank patch).
         Empty signals are reported, not compared. Default: never empty."""
         return False
+
+    def probes(self, signal: Any, candidate: Any, context: Mapping[str, Any]) -> Sequence["Probe"]:
+        """Perturbations with a known effect, for settling a disagreement (issue #30).
+
+        For a candidate answer, return probes whose ``predicted`` estimate is what
+        the lenses should read on the perturbed signal if the candidate is right.
+        Default: none (the medium cannot be probed, and ``Prober`` does nothing).
+        """
+        return ()
 
 
 class Representation(ABC):

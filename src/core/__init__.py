@@ -18,6 +18,7 @@ from .interfaces import (
     PairComparison,
     Pattern,
     PatternModel,
+    Probe,
     Reading,
     Representation,
 )
@@ -28,6 +29,8 @@ from .generic import (
     ConfidenceThresholdDetector,
     FamilyVotes,
     PairwiseComparator,
+    Prober,
+    ProbeResult,
 )
 
 __all__ = [
@@ -45,6 +48,9 @@ __all__ = [
     "PairwiseComparator",
     "Pattern",
     "PatternModel",
+    "Probe",
+    "Prober",
+    "ProbeResult",
     "Reading",
     "Representation",
 ]
