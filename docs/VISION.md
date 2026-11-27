@@ -95,14 +95,14 @@ The 41 audio experiments are the proof of concept for this vision:
 
 | Vision component | Status in audio | Evidence |
 |---|---|---|
-| Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel | Exp 001–013, 028, 031 |
+| Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel; a learned lens (CREPE) as an opt-in core `Representation` | Exp 001–013, 028, 031, 052 |
 | Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
 | Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens. On real data, the history of disagreement predicts STFT and Cepstrum failures 4–8 frames (186–372 ms) ahead better than the current frame (+0.02–0.05 AUC), but most onsets are not foreseeable one frame ahead | Exp 015–016, 051 |
 | Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens | Exp 014, 017–018, 042 |
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
-| Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens. Family-aware fusion (an agreement table) narrows the gap by 2.6–3.1 pts but cannot close it | Exp 044, 045, 047, issues #6, #21 |
+| Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens. Family-aware fusion (an agreement table) narrows the gap by 2.6–3.1 pts but cannot close it. A learned lens (frozen ImageNet CNN + linear read-out) leans to the local-gradient family and fails on photos | Exp 044, 045, 047, 052, issues #6, #21, #26 |
 | Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048). Probing the signal (low-pass at 1.5× each candidate) cuts gross error on disagreement frames to 3.9% / 5.6% vs 14.5% / 17.6% for the consensus on both real audio datasets, untrained (Exp 050) | Exp 045, 046, 048, 050, issues #7, #20, #22, #24 |
 
 **Honest gaps:** disagreement reliably *warns* that a lens is blind, in both media
@@ -134,6 +134,14 @@ candidate so far for the missing blind-spot / voicing detector; it is not in the
 Exp 051 looks at disagreement over time: the recent history adds a little warning
 4–8 frames ahead on real recordings, mostly for the STFT, whose blind spots build up
 gradually; ACF and Cepstrum failures mostly arrive without warning.
+Exp 052 adds a learned lens to each medium. CREPE does not join a classic audio family
+(failure correlation ~0.2 with STFT and ACF alike). It fails mostly where STFT and ACF fail
+together, and it is far more accurate (1.1% gross errors on real singing vs 4.2% for the best
+classic lens). Every fusion rule improves with it, but none beats CREPE alone: the rules
+assume comparable voters. For pitch the natural split is now that the learned lens answers
+and the classic lenses' disagreement warns. An ImageNet CNN with a linear read-out trained on
+synthetic patterns is a weak member of the local-gradient family and fails on photos, so
+a learned image lens still needs real training data.
 
 ---
 

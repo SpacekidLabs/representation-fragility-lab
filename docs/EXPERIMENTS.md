@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 31, Exp 001 to Exp 051)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 32, Exp 001 to Exp 052)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting; Exp 051 treats disagreement as a trajectory over time.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting; Exp 051 treats disagreement as a trajectory over time; Exp 052 adds a learned lens (CREPE, ImageNet CNN features) to the classic ones.
 
 ## Representations
 
@@ -1135,6 +1135,10 @@ Exp 050:      Probing: when lenses disagree, low-pass the frame at 1.5x each can
 Exp 051:      Disagreement over time: the last 8 frames add 0.02-0.05 AUC 4-8 hops ahead on
               held-out real data, mostly for the STFT, whose blind spots build up; most failure
               onsets are still not foreseeable one hop ahead
+Exp 052:      A learned lens: CREPE is in no classic family (phi ~0.2 with STFT and ACF alike)
+              and makes 1.1% gross errors on vocadito vs 4.2% for the best classic lens; it
+              cuts every fusion rule by 3-11 pts but none beats CREPE alone. A frozen ImageNet
+              CNN with a linear read-out leans to the local-gradient family and fails on photos
 ```
 
 **Next** (GitHub issues)
@@ -1145,6 +1149,7 @@ Exp 051:      Disagreement over time: the last 8 frames add 0.02-0.05 AUC 4-8 ho
 
 - Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049). Probing (Exp 050) answers far better where the lenses disagree, but it always answers; its follow count separates unpitched frames (AUC 0.93–0.98) without yet matching the quorum's false-answer rate on MDB-stem-synth.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
+- The learned lenses (Exp 052) are opt-in and need torch. CREPE was trained on MDB-stem-synth, so its MDB numbers are optimistic; on vocadito it is far better than every classic lens, and the fusion rules, built for comparable voters, still lose to CREPE alone. The CNN orientation read-out is fitted on synthetic patterns only and is not usable on photos.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
 ## Running the experiments

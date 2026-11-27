@@ -1,0 +1,6 @@
+# Optional: the learned lenses of Exp 052 (src/framework/learned.py, src/image_medium/learned.py).
+# Pinned for reproducibility. CREPE "full" weights ship inside torchcrepe; ResNet-18
+# IMAGENET1K_V1 weights download on first use (sha256 f37072fd...0e07ec).
+torch==2.15.0
+torchvision==0.29.2
+torchcrepe==0.0.24
