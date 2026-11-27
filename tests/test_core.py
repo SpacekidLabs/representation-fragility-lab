@@ -282,3 +282,35 @@ def test_min_score_abstains_when_no_group_is_likely_right():
     rd = _readings(a=(50.0, 0.9), b=(10.0, 0.9))
     assert LocationComparator(family=table, min_agreeing=1).compare(rd).consensus is not None
     assert LocationComparator(family=table, min_agreeing=1, min_score=0.5).compare(rd).consensus is None
+
+
+# ---------------------------------------------------------------------------
+# Lead lens: one lens answers, the others warn (issue #31)
+# ---------------------------------------------------------------------------
+
+def test_lead_lens_answers_alone_and_the_others_only_warn():
+    rd = _readings(mean=(50.0, 0.9), median=(10.0, 0.9), trimmed=(10.1, 0.8))
+    r = LocationComparator(lead="mean").compare(rd)
+    assert r.consensus == 50.0 and r.consensus_from == ("mean",)
+    assert r.warning == pytest.approx(r.divergence["mean"])
+    agree = LocationComparator(lead="median").compare(rd)
+    assert agree.consensus == 10.0
+    assert agree.warning < r.warning          # the others back the median, not the mean
+
+
+def test_blind_lead_abstains_or_falls_back_to_the_quorum():
+    rd = _readings(mean=(50.0, 0.2), median=(10.0, 0.9), trimmed=(10.1, 0.8))
+    assert LocationComparator(lead="mean").compare(rd).consensus is None
+    fb = LocationComparator(lead="mean", lead_fallback="quorum").compare(rd)
+    assert fb.consensus_from == ("median", "trimmed")
+    missing = _readings(median=(10.0, 0.9), trimmed=(10.1, 0.8))
+    assert LocationComparator(lead="mean").compare(missing).consensus is None
+    assert LocationComparator(lead="mean", lead_fallback="quorum").compare(missing).consensus == pytest.approx(10.05)
+
+
+def test_no_lead_leaves_the_default_unchanged():
+    rd = _readings(mean=(50.0, 0.95), median=(10.0, 0.9), trimmed=(10.1, 0.8))
+    r = LocationComparator().compare(rd)
+    assert r.warning is None and r.consensus_from == ("median", "trimmed")
+    with pytest.raises(ValueError):
+        LocationComparator(lead="mean", lead_fallback="vote")

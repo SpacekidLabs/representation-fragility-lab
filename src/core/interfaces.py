@@ -83,6 +83,7 @@ class ComparisonReport:
     consensus: Any                   # fused estimate, or None when there is no quorum
     assessments: dict[str, Assessment] = field(default_factory=dict)
     consensus_from: tuple[str, ...] = ()  # the representations fused into the consensus
+    warning: float | None = None     # lead mode only: the lead's divergence, 0 (others agree) .. 1
 
     def pair(self, a: str, b: str) -> PairComparison:
         for p in self.pairs:

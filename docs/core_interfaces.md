@@ -36,6 +36,7 @@ Most of the work is generic and already in `core.generic`:
 - Family-aware choice of group (issue #21, Exp 047), opt-in: `PairwiseComparator(family=...)` picks the best-scoring maximal agreeing group (of at least `min_agreeing`) instead of the largest. Two scorers, both learned from labelled readings and kept as plain tables:
   - `FamilyVotes.fit(confidences, failures)`: per-lens P(right | confidence bin) and pairwise failure correlation; a group scores `sum_i p_i / (1 + sum_j R_ij)`.
   - `AgreementTable.fit((group, right) examples)`: P(right | exactly this set of lenses agrees). Better on images; `min_score=0.5` abstains when no group is likely right.
+- Lead lens (issue #31, Exp 056), opt-in: `PairwiseComparator(lead="crepe")` lets one lens answer alone whenever it is trusted; the other lenses only warn, through `report.warning` (the lead's divergence, 0 = they agree). When the lead is blind or missing, `lead_fallback="abstain"` (default) gives no consensus and `"quorum"` uses the usual group choice. Use it where one lens is known to be better (CREPE for pitch, the peak counter for ECG, Radon on photos); without `lead` nothing changes.
 - `Analyzer`: the loop. It also checks that every representation belongs to the medium and that names are unique.
 
 So a medium is: one `Medium`, n `Representation`s, one `estimate_distance`, and optionally a `PatternModel`.

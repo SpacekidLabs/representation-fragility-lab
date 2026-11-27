@@ -98,7 +98,7 @@ The 41 audio experiments are the proof of concept for this vision:
 | Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel; a learned lens (CREPE) as an opt-in core `Representation` | Exp 001–013, 028, 031, 052 |
 | Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
 | Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens. On real data, the history of disagreement predicts STFT and Cepstrum failures 4–8 frames (186–372 ms) ahead better than the current frame (+0.02–0.05 AUC), but most onsets are not foreseeable one frame ahead | Exp 015–016, 051 |
-| Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens | Exp 014, 017–018, 042 |
+| Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens. Where one lens is clearly better, an opt-in lead mode lets it answer and the others warn (Exp 056) | Exp 014, 017–018, 042, 056 |
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms. The adaptive pitch tracker's gain is synthetic only (Exp 054); on real audio a quorum tracker replaces it | Exp 019–024, 033–041, 054 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
@@ -161,6 +161,14 @@ FFT and Gabor (images) are worth keeping; HOG and Cepstrum add almost nothing to
 lenses does not predict a lens's value; coverage does: being right where fewer than two
 other lenses are (Spearman +0.79). The next lens should be chosen by that coverage. For
 images that means a learned lens trained on real photos, where 31% of patches go unanswered.
+Exp 056 puts the "one lens answers, the others warn" split into the core as an opt-in
+`lead=` mode. Letting the best lens answer beats the quorum on every dataset where that lens
+is clearly better (−2 to −28 pts gross error, abstentions counted), and at the quorum's
+answer rate its answers are more accurate everywhere. On MIT-BIH it also removes the
+quorum's false answers on noise (70% → 1%). The warning half holds only where the other
+lenses are competent: their disagreement flags a wrong lead with AUC 0.82–0.92 in audio and
+synthetic images, but only 0.57–0.69 on ECG, where they share one blind spot. On real
+singing and photos the lead's own confidence warns as well or better.
 
 ---
 

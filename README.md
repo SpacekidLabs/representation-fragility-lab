@@ -104,8 +104,8 @@ flowchart TB
     subgraph R3["Learned lenses, a third medium, what each lens is worth"]
         direction LR
         J["Exp 052<br/>Learned lenses"] --> K["Exp 053<br/>Third medium:<br/>sensor signals"]
-        K --> L["Exp 054–055<br/>Tracker retired,<br/>lens value"]
-        L --> F["Next: probing #30,<br/>lead lens #31,<br/>photo lens #32,<br/>Lean proofs #11"]
+        K --> L["Exp 054–056<br/>Tracker retired,<br/>lens value,<br/>lead lens"]
+        L --> F["Next: probing #30,<br/>photo lens #32,<br/>Lean proofs #11"]
     end
     R1 --> R2 --> R3
 ```
@@ -121,6 +121,7 @@ flowchart TB
 | 053 | Does the core carry a third medium? | Unchanged; the warning holds (AUC 0.90–0.93), but three lenses share a blind spot and outvote the peak counter |
 | 054 | Why does the pitch tracker lose on real data? | Its median filter lags vibrato and note changes; the claim is retired and a quorum tracker beats fixed YIN |
 | 055 | Which lenses are worth keeping? | A lens's value follows its coverage (right where the others cannot agree), not its independence; HOG and Cepstrum add almost nothing |
+| 056 | Should the best lens answer alone, with the others as a warning? | Yes where one lens is clearly better (−2 to −28 pts vs the quorum; opt-in `lead=` in the core); the others warn well in audio, weakly on ECG |
 
 | | | | |
 |---|---|---|---|

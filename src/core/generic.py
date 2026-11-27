@@ -173,6 +173,12 @@ class PairwiseComparator(Comparator):
     at least ``min_agreeing`` members (1 if ``min_agreeing`` is None): lenses that
     tend to fail together count for less than independent ones. ``family`` may
     also be an ``AgreementTable`` (anything with ``score(group, readings)``).
+
+    Lead lens (issue #31). With ``lead`` (a representation name), the lead lens
+    answers alone whenever it is trusted, and the other lenses only warn:
+    ``report.warning`` is the lead's divergence. When the lead is blind or
+    missing, ``lead_fallback`` decides: ``"abstain"`` (no consensus) or
+    ``"quorum"`` (the usual group choice among the trusted readings).
     ``min_score`` then abstains when even the best group scores below it (for an
     ``AgreementTable``, 0.5 = answer only when the group is more likely right
     than wrong).
@@ -180,15 +186,20 @@ class PairwiseComparator(Comparator):
 
     def __init__(self, distance_weight: float = 0.5, outlier_margin: float = 0.10,
                  detector: BlindSpotDetector | None = None, min_agreeing: int | None = 2,
-                 family: "FamilyVotes | AgreementTable | None" = None, min_score: float | None = None):
+                 family: "FamilyVotes | AgreementTable | None" = None, min_score: float | None = None,
+                 lead: str | None = None, lead_fallback: str = "abstain"):
         if min_agreeing is not None and min_agreeing < 1:
             raise ValueError("min_agreeing must be >= 1 or None")
+        if lead_fallback not in ("abstain", "quorum"):
+            raise ValueError('lead_fallback must be "abstain" or "quorum"')
         self.distance_weight = distance_weight
         self.outlier_margin = outlier_margin
         self.detector = detector or ConfidenceThresholdDetector()
         self.min_agreeing = min_agreeing
         self.family = family
         self.min_score = min_score
+        self.lead = lead
+        self.lead_fallback = lead_fallback
 
     # -- medium-specific hooks ------------------------------------------------
 
@@ -279,13 +290,12 @@ class PairwiseComparator(Comparator):
 
         trusted_names = [n for n in names if not assessments[n].blind]
         trusted = [readings[n] for n in trusted_names]
-        if self.family is not None:
-            fused_from = self.family_group(readings, trusted_names, pairs)
-        elif self.min_agreeing is None:
-            fused_from = tuple(trusted_names)
+        if self.lead is not None and self.lead in trusted_names:
+            fused_from = (self.lead,)
+        elif self.lead is not None and self.lead_fallback == "abstain":
+            fused_from = ()
         else:
-            group = self.quorum_group(readings, trusted_names, pairs)
-            fused_from = group if len(group) >= self.min_agreeing else ()
+            fused_from = self.group(readings, trusted_names, pairs)
         outlier = None
         if len(names) >= 3 and trusted:
             ranked = sorted(names, key=divergence.get, reverse=True)
@@ -301,7 +311,18 @@ class PairwiseComparator(Comparator):
             consensus=self.fuse([readings[n] for n in fused_from]) if fused_from else None,
             assessments=dict(assessments),
             consensus_from=fused_from,
+            warning=divergence.get(self.lead) if self.lead is not None and len(names) >= 2 else None,
         )
+
+    def group(self, readings: Mapping[str, Reading], trusted: Sequence[str],
+              pairs: Sequence[PairComparison]) -> tuple[str, ...]:
+        """The group the consensus is fused from, under the quorum / family rules."""
+        if self.family is not None:
+            return self.family_group(readings, trusted, pairs)
+        if self.min_agreeing is None:
+            return tuple(trusted)
+        group = self.quorum_group(readings, trusted, pairs)
+        return group if len(group) >= self.min_agreeing else ()
 
 
 @dataclass

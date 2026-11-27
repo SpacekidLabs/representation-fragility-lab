@@ -1231,6 +1231,99 @@ Pairwise blind-spot overlap, the measure of Exp 043, does **not** predict what a
 
 ![Exp 055](../results/exp055_lens_value.png)
 
+### Phase 36 — One Lens Answers, the Others Warn (Exp 056)
+
+#### Exp 056 — Should the Best Lens Answer Alone, with the Others as a Warning?
+Exp 052 (CREPE) and Exp 053 (the ECG peak counter) reached the same decision: where one lens is clearly better, it should answer, and the other lenses should only warn. Issue #31 puts that rule in the core and tests it on all three media.
+
+**Core change (opt-in).** `PairwiseComparator(lead="crepe", lead_fallback="abstain" | "quorum")`:
+- when the lead lens is trusted, it is the answer (`consensus_from == (lead,)`);
+- `report.warning` is the lead's divergence from the other lenses (0 = they agree);
+- when the lead is blind or missing, the comparator abstains, or falls back to the usual quorum.
+
+Without `lead` nothing changes: the default is still quorum 2, and all 87 tests pass (3 new).
+
+**Method.**
+- **Leads:** the most accurate lens of each pool (Exp 052–055):
+  - CREPE among STFT, ACF and Cepstrum;
+  - Radon among tensor, HOG, FFT, Gabor and `cnn_aug`;
+  - the peak counter among FFT, ACF and wavelet.
+- **Data:** all readings come from the caches of Exp 045, 046, 052 and 053; no lens is re-run.
+- **Rules:**
+  - `q2`: the default quorum of two.
+  - `lead`: the lead answers when trusted, else abstains.
+  - `lead+quorum`: the lead answers when trusted, else the quorum.
+  - `lead raw`: the lead's estimate on every frame, as a reference.
+  - `lead+warn`: `lead`, minus its highest-warning answers, so that it answers exactly as often as q2. The threshold is set on the same data. This measures what the warning is worth at the same answer rate; it is not a tuned rule.
+- **CIs:** group bootstrap.
+
+**Gross error counting abstention as wrong, and false answers on null input** (q2 → `lead`):
+
+| Data (lead) | gross_all q2 | gross_all lead | Δ [CI95] | false answers q2 → lead |
+|---|---|---|---|---|
+| audio synthetic (CREPE) | 6.5% | **2.7%** | −3.9 [−4.6, −3.1] | 0.0% → 0.0% |
+| vocadito (CREPE) | 4.8% | **1.9%** | −2.9 [−3.8, −2.1] | 10.8% → **14.0%** |
+| MDB-stem-synth (CREPE) | 7.0% | **5.0%** | −2.0 [−2.4, −1.6] | 0.0% → 0.0% |
+| image synthetic (Radon) | 14.2% | **9.9%** | −4.3 [−6.6, −2.2] | 3.3% → 5.6% |
+| BSDS500 (Radon) | 41.0% | **26.6%** | −14.4 [−16.5, −12.1] | 3.3% → 5.6% |
+| ECG synthetic (peaks) | 51.4% | 49.1% | −2.3 [−11.7, +7.7], n.s. | 2.2% → 0.0% |
+| MIT-BIH + NSTDB (peaks) | 65.2% | **37.3%** | −27.9 [−35.6, −20.7] | 70.0% → **1.1%** |
+
+**At the same answer rate as q2** (`lead+warn`), gross error among the answers is lower everywhere:
+
+| Data | q2 | lead+warn |
+|---|---|---|
+| audio synthetic | 0.6% | 0.4% |
+| vocadito | 0.9% | 0.6% |
+| MDB-stem-synth | 1.1% | 0.6% |
+| image synthetic | 6.0% | 2.6% |
+| BSDS500 | 14.9% | 9.9% |
+| MIT-BIH | 6.2% | 0.8% |
+
+On synthetic ECG the lead answers less often than q2 (65.6% vs 71.1%), so there is nothing to remove; its error among answers is 22.5% vs 31.7%.
+
+**How well the others warn** (ROC AUC for "the lead is wrong", over the frames where it answers):
+
+| Data | core warning (lead divergence) | share of trusted others disagreeing | lead's own confidence |
+|---|---|---|---|
+| audio synthetic | **0.902** | 0.675 | 0.684 |
+| vocadito | 0.824 | 0.843 | **0.885** |
+| MDB-stem-synth | **0.826** | 0.811 | 0.789 |
+| image synthetic | **0.916** | 0.814 | 0.848 |
+| BSDS500 | 0.688 | 0.696 | **0.779** |
+| ECG synthetic | 0.546 | 0.544 | 0.279 (inverted) |
+| MIT-BIH | 0.573 | **0.686** | 0.560 |
+
+**What else the runs show.**
+- **The quorum rarely rescues the lead.** Where the answering lead is wrong, q2 is right on only 9–16% of those frames in audio and images, and on 0–0.5% in ECG.
+- **Falling back to the quorum when the lead is blind** adds answers: BSDS500 goes from 82.9% to 88.5%, and gross_all from 26.6% to 23.9%. But it brings back the quorum's false answers: vocadito 14.0% → 16.8%, MIT-BIH 1.1% → 70.0%, where the spectral family agrees confidently on noise.
+- **`lead raw` has the lowest gross_all everywhere** because it never abstains, but it answers on 87–100% of null input. Gross error alone rewards answering always; the false-answer column is the other half of the comparison.
+
+**Key findings:**
+1. **Letting the best lens answer beats the quorum on every dataset** where it is clearly better: −2.0 to −27.9 pts gross_all, all CIs below 0 except synthetic ECG, where the peak counter itself is weak (22.5% errors when it answers).
+2. **At the same answer rate as the quorum, the lead's answers are more accurate** on every dataset (the `lead+warn` table above). The gain is not only from answering more.
+3. **The others' warning works where the others are competent, and fades where they are not.** The lead's divergence is the best warning on synthetic audio and images (0.90–0.92) and on MDB-stem-synth (0.83). On vocadito and photos, the lead's own confidence is better (0.885, 0.779). On ECG every warning is weak (0.55–0.69): the other lenses share one blind spot, so disagreeing with them says little about the peak counter. "The others warn" is therefore not a free property of having more lenses; it is only as good as the other lenses.
+4. **Costs:**
+   - CREPE answers more breaths and consonants on vocadito (false answers 14.0% vs 10.8%).
+   - Radon answers 5.6% of unoriented patches (q2: 3.3%).
+   - On MIT-BIH the lead removes almost all false answers (70.0% → 1.1%), because q2's agreeing group was the spectral family that is wrong on noise.
+5. **Limits:**
+   - The lead is chosen in hindsight from Exp 052–055; a new medium needs labelled data to pick it.
+   - `lead+warn` sets its threshold on the evaluation data.
+   - The image and ECG null sets are small (90 windows each).
+
+**Decision:** `lead=` is in the core as an opt-in mode, with `lead_fallback="abstain"` as the default fallback (the quorum fallback brings back the quorum's false answers). The core default stays quorum 2, which needs no knowledge of which lens is best. Use `lead=` where one lens is known to be better:
+- audio pitch with CREPE installed;
+- ECG heart rate with the peak counter;
+- orientation on photos with Radon.
+
+For the warning, combine the lead's divergence with its own confidence. Neither one dominates on real data, and both are weak on ECG.
+
+- **Run**: `.venv/bin/python src/experiments/exp056_lead_lens.py` (needs the Exp 045, 046, 052 and 053 caches in `data/processed`; about 10 s, no lens is re-run)
+- **Outputs**: [results/exp056_lead_lens.png](../results/exp056_lead_lens.png), [results/exp056_summary.json](../results/exp056_summary.json) (every rule per dataset with answer rate, gross error, false answers and CIs against q2, the warning AUCs, and how often q2 is right where the lead is wrong)
+
+![Exp 056](../results/exp056_lead_lens.png)
+
 ---
 
 ## Listen tests
