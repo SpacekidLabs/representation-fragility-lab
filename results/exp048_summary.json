@@ -1,0 +1,1145 @@
+{
+  "features": {
+    "disagreement": [
+      "divergence",
+      "overall",
+      "own_conf",
+      "others_conf",
+      "closest_dist",
+      "octave_rel"
+    ],
+    "state": [
+      "divergence",
+      "overall",
+      "own_conf",
+      "others_conf",
+      "closest_dist",
+      "octave_rel",
+      "z1",
+      "z2",
+      "z1^2",
+      "z2^2",
+      "z1*z2",
+      "assumption"
+    ]
+  },
+  "choosers": {
+    "disagreement": [
+      "disagreement",
+      false
+    ],
+    "state": [
+      "state",
+      false
+    ],
+    "unpitched": [
+      "disagreement",
+      true
+    ]
+  },
+  "transfer": {
+    "synthetic + MDB-stem-synth -> vocadito": {
+      "n": 17955,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9835700362016151,
+      "chooser_disagreement_abstain_gross_when_answering": 0.013420158550396376,
+      "pick_share_disagreement": {
+        "stft": 0.5517683096630465,
+        "acf": 0.12720690615427457,
+        "cepstrum": 0.32102478418267894
+      },
+      "chooser_state_abstain_answer_rate": 0.9842940685045948,
+      "chooser_state_abstain_gross_when_answering": 0.01329711990041306,
+      "pick_share_state": {
+        "stft": 0.53895850737956,
+        "acf": 0.12737399053188528,
+        "cepstrum": 0.3336675020885547
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9832915622389307,
+      "chooser_unpitched_abstain_gross_when_answering": 0.013197394505805721,
+      "pick_share_unpitched": {
+        "stft": 0.5492620439988861,
+        "acf": 0.12965747702589808,
+        "cepstrum": 0.3210804789752158
+      },
+      "gross_all": {
+        "consensus": 0.055639097744360905,
+        "q2": 0.16274018379281538,
+        "routed": 0.06003898635477583,
+        "most_confident": 0.03670286828181565,
+        "best_lens": 0.041882483987747146,
+        "hindsight": 0.003954330270119744,
+        "chooser_disagreement": 0.01798941798941799,
+        "chooser_disagreement_abstain": 0.02962962962962963,
+        "chooser_state": 0.01927039821776664,
+        "chooser_state_abstain": 0.028794207741576164,
+        "chooser_unpitched": 0.01793372319688109,
+        "chooser_unpitched_abstain": 0.029685324422166526
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.7284482758620691,
+        "chooser_disagreement_abstain": 0.5032327586206896,
+        "chooser_state": 0.7036637931034483,
+        "chooser_state_abstain": 0.5193965517241379,
+        "chooser_unpitched": 0.7295258620689655,
+        "chooser_unpitched_abstain": 0.5021551724137931
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.03764967975494292,
+        "ci95": [
+          -0.04895511500609534,
+          -0.02621835454787121
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.023893065998329157,
+        "ci95": [
+          -0.03161433721672854,
+          -0.01703669270164298
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.018713450292397658,
+        "ci95": [
+          -0.025804403690995164,
+          -0.012215325062903081
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.036368699526594266,
+        "ci95": [
+          -0.04682652149267216,
+          -0.025725520577878826
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.022612085769980507,
+        "ci95": [
+          -0.030646033687116544,
+          -0.015247841130909191
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": -0.017432470064049008,
+        "ci95": [
+          -0.024249079740021755,
+          -0.011206525808861325
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.03770537454747981,
+        "ci95": [
+          -0.04892849316589599,
+          -0.026383532185337333
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.023948760790866056,
+        "ci95": [
+          -0.03159516696248943,
+          -0.017001614663321885
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.018769145084934557,
+        "ci95": [
+          -0.02580473575840769,
+          -0.012349434224813766
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.3627175743964065,
+        "q2": 0.06625491297024144,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.6327905670971364,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 0.6984839977540708,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.6148231330713082
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.009189640768588136,
+          "q2": 0.020885547201336674,
+          "routed": 0.07769423558897243,
+          "most_confident": 0.01615148983570036,
+          "best_lens": 0.010582010582010581,
+          "hindsight": 0.000278473962684489,
+          "chooser_disagreement": 0.010025062656641603,
+          "chooser_disagreement_abstain": 0.010303536619326092,
+          "chooser_state": 0.009189640768588136,
+          "chooser_state_abstain": 0.009189640768588136,
+          "chooser_unpitched": 0.009746588693957114,
+          "chooser_unpitched_abstain": 0.010025062656641603
+        },
+        "noise": {
+          "consensus": 0.08465608465608465,
+          "q2": 0.25322565673442865,
+          "routed": 0.06098579782790309,
+          "most_confident": 0.0353661932609301,
+          "best_lens": 0.060892973173674925,
+          "hindsight": 0.006033602524830595,
+          "chooser_disagreement": 0.021256845818249326,
+          "chooser_disagreement_abstain": 0.04028589993502274,
+          "chooser_state": 0.023948760790866053,
+          "chooser_state_abstain": 0.03926482873851295,
+          "chooser_unpitched": 0.02134967047247749,
+          "chooser_unpitched_abstain": 0.040471549243479066
+        },
+        "clipping": {
+          "consensus": 0.015037593984962405,
+          "q2": 0.03313840155945419,
+          "routed": 0.039543302701197436,
+          "most_confident": 0.06126427179058758,
+          "best_lens": 0.01615148983570036,
+          "hindsight": 0.001392369813422445,
+          "chooser_disagreement": 0.01615148983570036,
+          "chooser_disagreement_abstain": 0.016986911723753828,
+          "chooser_state": 0.015316067947646894,
+          "chooser_state_abstain": 0.016986911723753828,
+          "chooser_unpitched": 0.015873015873015872,
+          "chooser_unpitched_abstain": 0.016986911723753828
+        }
+      },
+      "voicing_gate": {
+        "0.3": {
+          "voiced_answered": 0.9159565580618212,
+          "gross_all": 0.09440267335004177,
+          "false_answer_unpitched": 0.12408759124087591
+        },
+        "0.5": {
+          "voiced_answered": 0.9636869952659426,
+          "gross_all": 0.047674742411584516,
+          "false_answer_unpitched": 0.2914093206064009
+        },
+        "0.7": {
+          "voiced_answered": 0.9850737956001114,
+          "gross_all": 0.027457532720690615,
+          "false_answer_unpitched": 0.5547445255474452
+        },
+        "0.9": {
+          "voiced_answered": 0.9983291562238931,
+          "gross_all": 0.018379281537176273,
+          "false_answer_unpitched": 0.8753509264458169
+        }
+      }
+    },
+    "synthetic + vocadito -> MDB-stem-synth": {
+      "n": 64335,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9926634025025258,
+      "chooser_disagreement_abstain_gross_when_answering": 0.02859245572553748,
+      "pick_share_disagreement": {
+        "stft": 0.4075231211626642,
+        "acf": 0.1891505401414471,
+        "cepstrum": 0.4033263386958887
+      },
+      "chooser_state_abstain_answer_rate": 0.9924924224761017,
+      "chooser_state_abstain_gross_when_answering": 0.028487752928647497,
+      "pick_share_state": {
+        "stft": 0.3979016087666123,
+        "acf": 0.20222274034351442,
+        "cepstrum": 0.3998756508898733
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9781767311727676,
+      "chooser_unpitched_abstain_gross_when_answering": 0.02234193005037263,
+      "pick_share_unpitched": {
+        "stft": 0.3753633325561514,
+        "acf": 0.3273024014921893,
+        "cepstrum": 0.2973342659516593
+      },
+      "gross_all": {
+        "consensus": 0.07321053858708323,
+        "q2": 0.1816585062563146,
+        "routed": 0.11185202455894926,
+        "most_confident": 0.04485894147820005,
+        "best_lens": 0.09935493899121785,
+        "hindsight": 0.008517914043677625,
+        "chooser_disagreement": 0.03340327970777959,
+        "chooser_disagreement_abstain": 0.035719281883889016,
+        "chooser_state": 0.03321675604258957,
+        "chooser_state_abstain": 0.03578145643895236,
+        "chooser_unpitched": 0.033558716095437945,
+        "chooser_unpitched_abstain": 0.04367762493199658
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.6153291686689092,
+        "chooser_disagreement_abstain": 0.5795290725612687,
+        "chooser_state": 0.618212397885632,
+        "chooser_state_abstain": 0.5785679961556944,
+        "chooser_unpitched": 0.6129264776549735,
+        "chooser_unpitched_abstain": 0.4565112926477655
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.03980725887930364,
+        "ci95": [
+          -0.04453176563657304,
+          -0.03512096037766007
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.06595165928343825,
+        "ci95": [
+          -0.07626743149082983,
+          -0.055670378129506114
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.011455661770420456,
+        "ci95": [
+          -0.015884541271072167,
+          -0.00694071776593816
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.039993782544493664,
+        "ci95": [
+          -0.04464096016581198,
+          -0.03525402010491217
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.06613818294862828,
+        "ci95": [
+          -0.07652145218156017,
+          -0.05593112270854179
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": -0.011642185435610478,
+        "ci95": [
+          -0.016070575150062886,
+          -0.007128545066045072
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.03965182249164529,
+        "ci95": [
+          -0.04433194927281385,
+          -0.035036324953231064
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.06579622289577991,
+        "ci95": [
+          -0.07630484785148678,
+          -0.05549770893210084
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.011300225382762104,
+        "ci95": [
+          -0.015756548415057216,
+          -0.006743727084252126
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.9897260273972602,
+        "q2": 0.0,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.2671232876712329,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 0.815068493150685,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.0958904109589041
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.014144711276909925,
+          "q2": 0.014688738633714152,
+          "routed": 0.06699308308074921,
+          "most_confident": 0.0038859096914587703,
+          "best_lens": 0.02657962228957799,
+          "hindsight": 7.771819382917541e-05,
+          "chooser_disagreement": 0.01437786585839745,
+          "chooser_disagreement_abstain": 0.01437786585839745,
+          "chooser_state": 0.014300147664568275,
+          "chooser_state_abstain": 0.014300147664568275,
+          "chooser_unpitched": 0.01437786585839745,
+          "chooser_unpitched_abstain": 0.01437786585839745
+        },
+        "noise": {
+          "consensus": 0.10849459858552887,
+          "q2": 0.28633973213129194,
+          "routed": 0.1460324862050206,
+          "most_confident": 0.04551695551928706,
+          "best_lens": 0.14566980130048443,
+          "hindsight": 0.013497059661666796,
+          "chooser_disagreement": 0.041941918603144994,
+          "chooser_disagreement_abstain": 0.04580192222999404,
+          "chooser_state": 0.04160513976321857,
+          "chooser_state_abstain": 0.04587964042382322,
+          "chooser_unpitched": 0.04222688531385197,
+          "chooser_unpitched_abstain": 0.05909173337478304
+        },
+        "clipping": {
+          "consensus": 0.02642418590191964,
+          "q2": 0.03458459625398306,
+          "routed": 0.054169581098935264,
+          "most_confident": 0.08385793114168026,
+          "best_lens": 0.0331856687650579,
+          "hindsight": 0.0020206730395585606,
+          "chooser_disagreement": 0.026812776871065515,
+          "chooser_disagreement_abstain": 0.026812776871065515,
+          "chooser_state": 0.026968213258723867,
+          "chooser_state_abstain": 0.026968213258723867,
+          "chooser_unpitched": 0.026735058677236342,
+          "chooser_unpitched_abstain": 0.026735058677236342
+        }
+      },
+      "voicing_gate": {
+        "0.3": {
+          "voiced_answered": 0.919981347633481,
+          "gross_all": 0.09766068236574182,
+          "false_answer_unpitched": 0.0
+        },
+        "0.5": {
+          "voiced_answered": 0.9537576746716406,
+          "gross_all": 0.06635579389134996,
+          "false_answer_unpitched": 0.0
+        },
+        "0.7": {
+          "voiced_answered": 0.9729229812699153,
+          "gross_all": 0.0491800730551022,
+          "false_answer_unpitched": 0.0
+        },
+        "0.9": {
+          "voiced_answered": 0.991140125903474,
+          "gross_all": 0.03618559104686407,
+          "false_answer_unpitched": 0.0
+        }
+      }
+    },
+    "synthetic -> vocadito": {
+      "n": 17955,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9848510164299638,
+      "chooser_disagreement_abstain_gross_when_answering": 0.0200192275066448,
+      "pick_share_disagreement": {
+        "stft": 0.8365357839042049,
+        "acf": 0.16329713171818436,
+        "cepstrum": 0.0001670843776106934
+      },
+      "chooser_state_abstain_answer_rate": 0.9914230019493178,
+      "chooser_state_abstain_gross_when_answering": 0.03067243413291388,
+      "pick_share_state": {
+        "stft": 0.8458368142578669,
+        "acf": 0.15288220551378445,
+        "cepstrum": 0.0012809802283486494
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9807852965747702,
+      "chooser_unpitched_abstain_gross_when_answering": 0.015843270868824533,
+      "pick_share_unpitched": {
+        "stft": 0.8622667780562517,
+        "acf": 0.13756613756613756,
+        "cepstrum": 0.0001670843776106934
+      },
+      "gross_all": {
+        "consensus": 0.055639097744360905,
+        "q2": 0.16274018379281538,
+        "routed": 0.06003898635477583,
+        "most_confident": 0.03670286828181565,
+        "best_lens": 0.041882483987747146,
+        "hindsight": 0.003954330270119744,
+        "chooser_disagreement": 0.034753550543024224,
+        "chooser_disagreement_abstain": 0.03486494012809802,
+        "chooser_state": 0.03898635477582846,
+        "chooser_state_abstain": 0.03898635477582846,
+        "chooser_unpitched": 0.03324979114452799,
+        "chooser_unpitched_abstain": 0.034753550543024224
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.404094827586207,
+        "chooser_disagreement_abstain": 0.40193965517241387,
+        "chooser_state": 0.32219827586206906,
+        "chooser_state_abstain": 0.32219827586206906,
+        "chooser_unpitched": 0.4331896551724138,
+        "chooser_unpitched_abstain": 0.404094827586207
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.02088554720133668,
+        "ci95": [
+          -0.02920445647689219,
+          -0.013421917834039216
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.007128933444722922,
+        "ci95": [
+          -0.020989584540520627,
+          0.007075553934518718
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.001949317738791423,
+        "ci95": [
+          -0.010317717431559148,
+          0.005774045659844613
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.016652742968532447,
+        "ci95": [
+          -0.02466269520988747,
+          -0.009787549966515518
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.0028961292119186882,
+        "ci95": [
+          -0.018077643690180053,
+          0.01289400222547128
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": 0.002283486494012811,
+        "ci95": [
+          -0.007785422637542187,
+          0.011809965173614701
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.022389306599832917,
+        "ci95": [
+          -0.030774866205332138,
+          -0.014762109211307127
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.008632692843219159,
+        "ci95": [
+          -0.021574000651269683,
+          0.004889437851018405
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.0034530771372876592,
+        "ci95": [
+          -0.011212789373695095,
+          0.003924840734637452
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.3627175743964065,
+        "q2": 0.06625491297024144,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.9236384053902302,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 0.8461538461538461,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.5272318921953958
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.009189640768588136,
+          "q2": 0.020885547201336674,
+          "routed": 0.07769423558897243,
+          "most_confident": 0.01615148983570036,
+          "best_lens": 0.010582010582010581,
+          "hindsight": 0.000278473962684489,
+          "chooser_disagreement": 0.013366750208855471,
+          "chooser_disagreement_abstain": 0.013366750208855471,
+          "chooser_state": 0.013088276246170982,
+          "chooser_state_abstain": 0.013088276246170982,
+          "chooser_unpitched": 0.012531328320802004,
+          "chooser_unpitched_abstain": 0.012531328320802004
+        },
+        "noise": {
+          "consensus": 0.08465608465608465,
+          "q2": 0.25322565673442865,
+          "routed": 0.06098579782790309,
+          "most_confident": 0.0353661932609301,
+          "best_lens": 0.060892973173674925,
+          "hindsight": 0.006033602524830595,
+          "chooser_disagreement": 0.0439060614499211,
+          "chooser_disagreement_abstain": 0.04409171075837742,
+          "chooser_state": 0.05123920913394597,
+          "chooser_state_abstain": 0.05123920913394597,
+          "chooser_unpitched": 0.042142393019586,
+          "chooser_unpitched_abstain": 0.0446486586837464
+        },
+        "clipping": {
+          "consensus": 0.015037593984962405,
+          "q2": 0.03313840155945419,
+          "routed": 0.039543302701197436,
+          "most_confident": 0.06126427179058758,
+          "best_lens": 0.01615148983570036,
+          "hindsight": 0.001392369813422445,
+          "chooser_disagreement": 0.028682818156502365,
+          "chooser_disagreement_abstain": 0.028682818156502365,
+          "chooser_state": 0.028125870231133387,
+          "chooser_state_abstain": 0.028125870231133387,
+          "chooser_unpitched": 0.02729044834307992,
+          "chooser_unpitched_abstain": 0.02729044834307992
+        }
+      },
+      "voicing_gate": {
+        "0.3": {
+          "voiced_answered": 0.9488721804511279,
+          "gross_all": 0.07290448343079922,
+          "false_answer_unpitched": 0.33801235261089274
+        },
+        "0.5": {
+          "voiced_answered": 0.9703146755778335,
+          "gross_all": 0.05491506544138123,
+          "false_answer_unpitched": 0.47950589556428974
+        },
+        "0.7": {
+          "voiced_answered": 0.9834029518240045,
+          "gross_all": 0.045001392369813424,
+          "false_answer_unpitched": 0.6440202133632791
+        },
+        "0.9": {
+          "voiced_answered": 0.9950431634642161,
+          "gross_all": 0.03753829016986912,
+          "false_answer_unpitched": 0.8697361033127456
+        }
+      }
+    },
+    "synthetic -> MDB-stem-synth": {
+      "n": 64335,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9869588870754644,
+      "chooser_disagreement_abstain_gross_when_answering": 0.028978203351392215,
+      "pick_share_disagreement": {
+        "stft": 0.8395119297427528,
+        "acf": 0.1567109660371493,
+        "cepstrum": 0.003777104220097925
+      },
+      "chooser_state_abstain_answer_rate": 0.9926634025025258,
+      "chooser_state_abstain_gross_when_answering": 0.03526298482689507,
+      "pick_share_state": {
+        "stft": 0.8528639154426051,
+        "acf": 0.14286158389679024,
+        "cepstrum": 0.004274500660604648
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9781611875340017,
+      "chooser_unpitched_abstain_gross_when_answering": 0.022707770538693786,
+      "pick_share_unpitched": {
+        "stft": 0.8558482940856454,
+        "acf": 0.142317556539986,
+        "cepstrum": 0.0018341493743685396
+      },
+      "gross_all": {
+        "consensus": 0.07321053858708323,
+        "q2": 0.1816585062563146,
+        "routed": 0.11185202455894926,
+        "most_confident": 0.04485894147820005,
+        "best_lens": 0.09935493899121785,
+        "hindsight": 0.008517914043677625,
+        "chooser_disagreement": 0.03822180772518847,
+        "chooser_disagreement_abstain": 0.041641408253672185,
+        "chooser_state": 0.0406310717338929,
+        "chooser_state_abstain": 0.042340871998134764,
+        "chooser_unpitched": 0.03845496230667599,
+        "chooser_unpitched_abstain": 0.04405067226237662
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.5408457472369054,
+        "chooser_disagreement_abstain": 0.487986544930322,
+        "chooser_state": 0.5036040365209035,
+        "chooser_state_abstain": 0.4771744353676117,
+        "chooser_unpitched": 0.537241710716002,
+        "chooser_unpitched_abstain": 0.4507448342143201
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.034988730861894766,
+        "ci95": [
+          -0.04017429097549795,
+          -0.029925864765818076
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.06113313126602938,
+        "ci95": [
+          -0.07312688648146097,
+          -0.048876647031574794
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.00663713375301158,
+        "ci95": [
+          -0.011478353278768626,
+          -0.001991482905363308
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.03257946685319033,
+        "ci95": [
+          -0.03800038395913457,
+          -0.027315327900357535
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.058723867257324945,
+        "ci95": [
+          -0.07118887223565741,
+          -0.04640547916061862
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": -0.004227869744307146,
+        "ci95": [
+          -0.009566767454697396,
+          0.0008513892663341599
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.03475557628040724,
+        "ci95": [
+          -0.03978083546920148,
+          -0.0299802758517053
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.060899976684541855,
+        "ci95": [
+          -0.07282394567662775,
+          -0.048776294572648315
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.006403979171524056,
+        "ci95": [
+          -0.011094079101333958,
+          -0.001970359792251424
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.9897260273972602,
+        "q2": 0.0,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.25,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 0.6712328767123288,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.2191780821917808
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.014144711276909925,
+          "q2": 0.014688738633714152,
+          "routed": 0.06699308308074921,
+          "most_confident": 0.0038859096914587703,
+          "best_lens": 0.02657962228957799,
+          "hindsight": 7.771819382917541e-05,
+          "chooser_disagreement": 0.01437786585839745,
+          "chooser_disagreement_abstain": 0.01437786585839745,
+          "chooser_state": 0.0142224294707391,
+          "chooser_state_abstain": 0.014300147664568275,
+          "chooser_unpitched": 0.01437786585839745,
+          "chooser_unpitched_abstain": 0.01437786585839745
+        },
+        "noise": {
+          "consensus": 0.10849459858552887,
+          "q2": 0.28633973213129194,
+          "routed": 0.1460324862050206,
+          "most_confident": 0.04551695551928706,
+          "best_lens": 0.14566980130048443,
+          "hindsight": 0.013497059661666796,
+          "chooser_disagreement": 0.04810756198025958,
+          "chooser_disagreement_abstain": 0.05328877490220461,
+          "chooser_state": 0.05222662625320588,
+          "chooser_state_abstain": 0.05448045387425196,
+          "chooser_unpitched": 0.04911789850003886,
+          "chooser_unpitched_abstain": 0.05839226963032046
+        },
+        "clipping": {
+          "consensus": 0.02642418590191964,
+          "q2": 0.03458459625398306,
+          "routed": 0.054169581098935264,
+          "most_confident": 0.08385793114168026,
+          "best_lens": 0.0331856687650579,
+          "hindsight": 0.0020206730395585606,
+          "chooser_disagreement": 0.03240848682676615,
+          "chooser_disagreement_abstain": 0.03396285070334965,
+          "chooser_state": 0.0322530504391078,
+          "chooser_state_abstain": 0.03396285070334965,
+          "chooser_unpitched": 0.030543250174865935,
+          "chooser_unpitched_abstain": 0.030698686562524287
+        }
+      },
+      "voicing_gate": {
+        "0.3": {
+          "voiced_answered": 0.938167404989508,
+          "gross_all": 0.08612730240149219,
+          "false_answer_unpitched": 0.14383561643835616
+        },
+        "0.5": {
+          "voiced_answered": 0.95607367684775,
+          "gross_all": 0.07086344913344214,
+          "false_answer_unpitched": 0.17123287671232876
+        },
+        "0.7": {
+          "voiced_answered": 0.9684775005828865,
+          "gross_all": 0.060604647547990984,
+          "false_answer_unpitched": 0.2876712328767123
+        },
+        "0.9": {
+          "voiced_answered": 0.9850625631460325,
+          "gross_all": 0.04653765446491023,
+          "false_answer_unpitched": 0.5513698630136986
+        }
+      }
+    }
+  },
+  "within": {
+    "vocadito": {
+      "n": 17955,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9981063770537455,
+      "chooser_disagreement_abstain_gross_when_answering": 0.014396518051448022,
+      "pick_share_disagreement": {
+        "stft": 0.5069340016708438,
+        "acf": 0.2197159565580618,
+        "cepstrum": 0.2733500417710944
+      },
+      "chooser_state_abstain_answer_rate": 0.9977165135059872,
+      "chooser_state_abstain_gross_when_answering": 0.014123032265267389,
+      "pick_share_state": {
+        "stft": 0.48270676691729325,
+        "acf": 0.23893065998329155,
+        "cepstrum": 0.2783625730994152
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9850737956001114,
+      "chooser_unpitched_abstain_gross_when_answering": 0.011081585345168768,
+      "pick_share_unpitched": {
+        "stft": 0.3764967975494291,
+        "acf": 0.6217209690893901,
+        "cepstrum": 0.0017822333611807297
+      },
+      "gross_all": {
+        "consensus": 0.055639097744360905,
+        "q2": 0.16274018379281538,
+        "routed": 0.06003898635477583,
+        "most_confident": 0.03670286828181565,
+        "best_lens": 0.041882483987747146,
+        "hindsight": 0.003954330270119744,
+        "chooser_disagreement": 0.015705931495405178,
+        "chooser_disagreement_abstain": 0.016262879420774156,
+        "chooser_state": 0.015650236702868282,
+        "chooser_state_abstain": 0.016374269005847954,
+        "chooser_unpitched": 0.015037593984962405,
+        "chooser_unpitched_abstain": 0.02584238373712058
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.7726293103448276,
+        "chooser_disagreement_abstain": 0.7618534482758621,
+        "chooser_state": 0.7737068965517242,
+        "chooser_state_abstain": 0.759698275862069,
+        "chooser_unpitched": 0.7855603448275863,
+        "chooser_unpitched_abstain": 0.5765086206896551
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.03993316624895572,
+        "ci95": [
+          -0.05261769184947031,
+          -0.027149270784923095
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.026176552492341968,
+        "ci95": [
+          -0.03248461886409438,
+          -0.020633057574234046
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.02099693678641047,
+        "ci95": [
+          -0.02775836395105422,
+          -0.014561433447098978
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.03998886104149262,
+        "ci95": [
+          -0.052919395357453124,
+          -0.027156469283284305
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.026232247284878864,
+        "ci95": [
+          -0.03260112851629047,
+          -0.020682419885782878
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": -0.021052631578947364,
+        "ci95": [
+          -0.0277942834180437,
+          -0.014496345720195918
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.0406015037593985,
+        "ci95": [
+          -0.053772729992503016,
+          -0.027664700716307444
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.02684489000278474,
+        "ci95": [
+          -0.033018134030233355,
+          -0.02146673160746993
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.02166527429685324,
+        "ci95": [
+          -0.029070602751998593,
+          -0.014689840326224326
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.3627175743964065,
+        "q2": 0.06625491297024144,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.8556990454800674,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 0.8394160583941606,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.3587871982032566
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.009189640768588136,
+          "q2": 0.020885547201336674,
+          "routed": 0.07769423558897243,
+          "most_confident": 0.01615148983570036,
+          "best_lens": 0.010582010582010581,
+          "hindsight": 0.000278473962684489,
+          "chooser_disagreement": 0.009189640768588136,
+          "chooser_disagreement_abstain": 0.009189640768588136,
+          "chooser_state": 0.009468114731272625,
+          "chooser_state_abstain": 0.009468114731272625,
+          "chooser_unpitched": 0.00835421888053467,
+          "chooser_unpitched_abstain": 0.00835421888053467
+        },
+        "noise": {
+          "consensus": 0.08465608465608465,
+          "q2": 0.25322565673442865,
+          "routed": 0.06098579782790309,
+          "most_confident": 0.0353661932609301,
+          "best_lens": 0.060892973173674925,
+          "hindsight": 0.006033602524830595,
+          "chooser_disagreement": 0.017822333611807295,
+          "chooser_disagreement_abstain": 0.018750580154088925,
+          "chooser_state": 0.017729508957579132,
+          "chooser_state_abstain": 0.01893622946254525,
+          "chooser_unpitched": 0.01735821034066648,
+          "chooser_unpitched_abstain": 0.0353661932609301
+        },
+        "clipping": {
+          "consensus": 0.015037593984962405,
+          "q2": 0.03313840155945419,
+          "routed": 0.039543302701197436,
+          "most_confident": 0.06126427179058758,
+          "best_lens": 0.01615148983570036,
+          "hindsight": 0.001392369813422445,
+          "chooser_disagreement": 0.015873015873015872,
+          "chooser_disagreement_abstain": 0.015873015873015872,
+          "chooser_state": 0.015594541910331383,
+          "chooser_state_abstain": 0.015594541910331383,
+          "chooser_unpitched": 0.014759120022277916,
+          "chooser_unpitched_abstain": 0.014759120022277916
+        }
+      }
+    },
+    "MDB-stem-synth": {
+      "n": 64335,
+      "best_lens_name": "acf",
+      "chooser_disagreement_abstain_answer_rate": 0.9832439574104298,
+      "chooser_disagreement_abstain_gross_when_answering": 0.02481938757765939,
+      "pick_share_disagreement": {
+        "stft": 0.4328437087122095,
+        "acf": 0.11034429159866324,
+        "cepstrum": 0.4568119996891272
+      },
+      "chooser_state_abstain_answer_rate": 0.9835392865469806,
+      "chooser_state_abstain_gross_when_answering": 0.025001580378026425,
+      "pick_share_state": {
+        "stft": 0.45183803528406,
+        "acf": 0.11060853345768244,
+        "cepstrum": 0.4375534312582576
+      },
+      "chooser_unpitched_abstain_answer_rate": 0.9831040646615372,
+      "chooser_unpitched_abstain_gross_when_answering": 0.024759676195294712,
+      "pick_share_unpitched": {
+        "stft": 0.43334110515271623,
+        "acf": 0.11273801196860185,
+        "cepstrum": 0.4539208828786819
+      },
+      "gross_all": {
+        "consensus": 0.07321053858708323,
+        "q2": 0.1816585062563146,
+        "routed": 0.11185202455894926,
+        "most_confident": 0.04485894147820005,
+        "best_lens": 0.09935493899121785,
+        "hindsight": 0.008517914043677625,
+        "chooser_disagreement": 0.03189554674749359,
+        "chooser_disagreement_abstain": 0.0411595554519313,
+        "chooser_state": 0.031973264941322764,
+        "chooser_state_abstain": 0.04105074998057045,
+        "chooser_unpitched": 0.03178674127613274,
+        "chooser_unpitched_abstain": 0.04123727364576047
+      },
+      "gap_closed": {
+        "chooser_disagreement": 0.6386352715040846,
+        "chooser_disagreement_abstain": 0.49543488707352235,
+        "chooser_state": 0.6374339259971168,
+        "chooser_state_abstain": 0.4971167707832774,
+        "chooser_unpitched": 0.6403171552138396,
+        "chooser_unpitched_abstain": 0.49423354156655463
+      },
+      "chooser_disagreement_minus_consensus": {
+        "diff": -0.04131499183958964,
+        "ci95": [
+          -0.04595069554639796,
+          -0.036739152518789446
+        ]
+      },
+      "chooser_disagreement_minus_best_lens": {
+        "diff": -0.06745939224372426,
+        "ci95": [
+          -0.07793716059123054,
+          -0.05715373712011477
+        ]
+      },
+      "chooser_disagreement_minus_most_confident": {
+        "diff": -0.012963394730706457,
+        "ci95": [
+          -0.01725882026233051,
+          -0.0085197714296194
+        ]
+      },
+      "chooser_state_minus_consensus": {
+        "diff": -0.04123727364576047,
+        "ci95": [
+          -0.04581022646902297,
+          -0.0367148783811368
+        ]
+      },
+      "chooser_state_minus_best_lens": {
+        "diff": -0.06738167404989509,
+        "ci95": [
+          -0.07789290948143353,
+          -0.05699511127622464
+        ]
+      },
+      "chooser_state_minus_most_confident": {
+        "diff": -0.012885676536877284,
+        "ci95": [
+          -0.017169060232301737,
+          -0.00875948559684742
+        ]
+      },
+      "chooser_unpitched_minus_consensus": {
+        "diff": -0.04142379731095049,
+        "ci95": [
+          -0.04609830411784964,
+          -0.03683602425424808
+        ]
+      },
+      "chooser_unpitched_minus_best_lens": {
+        "diff": -0.0675681977150851,
+        "ci95": [
+          -0.07801966545637075,
+          -0.05733647409331143
+        ]
+      },
+      "chooser_unpitched_minus_most_confident": {
+        "diff": -0.013072200202067306,
+        "ci95": [
+          -0.017370715805335144,
+          -0.008608098890381227
+        ]
+      },
+      "false_answer_unpitched": {
+        "consensus": 0.9897260273972602,
+        "q2": 0.0,
+        "chooser_disagreement": 1.0,
+        "chooser_disagreement_abstain": 0.1643835616438356,
+        "chooser_state": 1.0,
+        "chooser_state_abstain": 1.0,
+        "chooser_unpitched": 1.0,
+        "chooser_unpitched_abstain": 0.1404109589041096
+      },
+      "by_family": {
+        "clean": {
+          "consensus": 0.014144711276909925,
+          "q2": 0.014688738633714152,
+          "routed": 0.06699308308074921,
+          "most_confident": 0.0038859096914587703,
+          "best_lens": 0.02657962228957799,
+          "hindsight": 7.771819382917541e-05,
+          "chooser_disagreement": 0.01437786585839745,
+          "chooser_disagreement_abstain": 0.01437786585839745,
+          "chooser_state": 0.014066993083080749,
+          "chooser_state_abstain": 0.014066993083080749,
+          "chooser_unpitched": 0.01437786585839745,
+          "chooser_unpitched_abstain": 0.01437786585839745
+        },
+        "noise": {
+          "consensus": 0.10849459858552887,
+          "q2": 0.28633973213129194,
+          "routed": 0.1460324862050206,
+          "most_confident": 0.04551695551928706,
+          "best_lens": 0.14566980130048443,
+          "hindsight": 0.013497059661666796,
+          "chooser_disagreement": 0.039403124271391934,
+          "chooser_disagreement_abstain": 0.05484313877878812,
+          "chooser_state": 0.03968809098209891,
+          "chooser_state_abstain": 0.054791326649568664,
+          "chooser_unpitched": 0.039221781819123856,
+          "chooser_unpitched_abstain": 0.05497266910183674
+        },
+        "clipping": {
+          "consensus": 0.02642418590191964,
+          "q2": 0.03458459625398306,
+          "routed": 0.054169581098935264,
+          "most_confident": 0.08385793114168026,
+          "best_lens": 0.0331856687650579,
+          "hindsight": 0.0020206730395585606,
+          "chooser_disagreement": 0.02689049506489469,
+          "chooser_disagreement_abstain": 0.02689049506489469,
+          "chooser_state": 0.026735058677236342,
+          "chooser_state_abstain": 0.026812776871065515,
+          "chooser_unpitched": 0.02689049506489469,
+          "chooser_unpitched_abstain": 0.02689049506489469
+        }
+      }
+    }
+  },
+  "weights_disagreement_trained_on_synthetic_plus_mdb": {
+    "stft": {
+      "bias": -3.397,
+      "divergence": 0.762,
+      "overall": 0.38,
+      "own_conf": -0.705,
+      "others_conf": 0.914,
+      "closest_dist": 0.92,
+      "octave_rel": 0.323
+    },
+    "acf": {
+      "bias": -2.895,
+      "divergence": 0.337,
+      "overall": 0.196,
+      "own_conf": -0.927,
+      "others_conf": 0.039,
+      "closest_dist": 0.336,
+      "octave_rel": -0.14
+    },
+    "cepstrum": {
+      "bias": -2.07,
+      "divergence": 0.829,
+      "overall": 0.325,
+      "own_conf": -0.93,
+      "others_conf": -0.582,
+      "closest_dist": 1.577,
+      "octave_rel": -0.244
+    }
+  }
+}

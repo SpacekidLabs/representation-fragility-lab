@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 27, Exp 001 to Exp 047)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 28, Exp 001 to Exp 048)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame.
 
 ## Representations
 
@@ -816,6 +816,40 @@ Gross error, abstention counted as wrong (within-dataset cross-validation; BSDS5
 
 ---
 
+### Phase 28 — A Learned Lens Chooser (Exp 048)
+
+#### Exp 048 — Can a Model Pick the Right Lens in Each Frame?
+On vocadito the consensus is grossly wrong on 5.6% of frames, while the best lens for each frame (picked with hindsight) is wrong on 0.4%. Exp 047 showed that fusing only the *trusted* lenses cannot close that gap, because the confidence threshold usually marks the right lens blind. Issue #22 tries a chooser that looks at every lens: per lens, a logistic model predicts P(this lens is grossly wrong in this frame) from Exp 042's six disagreement features. In each frame it answers with the lens that has the lowest P(wrong). Adding the framework's state features and the lens's assumption score (`chooser_state`) changes nothing (±0.2 pts).
+
+The main test is issue #22's Done-when: train on synthetic audio + MDB-stem-synth, test on vocadito (no vocadito frame in training). Also the mirror, synthetic-only training, and 5-fold cross-validation by recording on each real dataset. Abstention counts as wrong; gap closed = (consensus − chooser) / (consensus − hindsight).
+
+| Train → test | Consensus (old rule) | Quorum 2 | Most confident lens | Best lens | **Chooser** | Gap closed | Hindsight |
+|---|---|---|---|---|---|---|---|
+| synthetic + MDB → **vocadito** | 5.6% | 16.3% | 3.7% | 4.2% (ACF) | **1.8%** | **73%** | 0.4% |
+| synthetic + vocadito → MDB | 7.3% | 18.2% | 4.5% | 9.9% (ACF) | **3.3%** | 62% | 0.9% |
+| synthetic → vocadito | 5.6% | 16.3% | 3.7% | 4.2% | 3.5% | 40% | 0.4% |
+| synthetic → MDB | 7.3% | 18.2% | 4.5% | 9.9% | 3.8% | 54% | 0.9% |
+| vocadito, cross-validated | 5.6% | 16.3% | 3.7% | 4.2% | 1.6% | 77% | 0.4% |
+| MDB, cross-validated | 7.3% | 18.2% | 4.5% | 9.9% | 3.2% | 64% | 0.9% |
+
+On held-out vocadito, chooser − consensus = −3.8 pts (95% CI −4.9 to −2.6), chooser − best lens = −2.4 pts (−3.2 to −1.7), chooser − most confident lens = −1.9 pts (−2.6 to −1.2); group bootstrap over recordings.
+
+**Key findings:**
+1. **Issue #22's Done-when is met.** On held-out vocadito the chooser closes 73% of the gap between the consensus and the hindsight-best lens (1.8% gross errors), and it beats the best single lens and the most confident lens significantly. This is the first answer from the lenses that beats the best lens on real singing (Exp 045 found the consensus only tied).
+2. **Its gain comes from the lenses the gate throws away.** It picks STFT in 55% of vocadito frames, cepstrum in 32% and ACF in 13%. Only 3.9% of its picks are below the 0.5 confidence threshold, but in 82% of the frames where it is right and the consensus is wrong, it picked a lens the gate had marked blind. This agrees with Exp 047: the right lens is usually present but not trusted.
+3. **Real training data matters, synthetic alone is not enough.** Trained on synthetic frames only, the chooser closes 40–54% of the gap, never picks cepstrum, and is no better than "most confident lens" on vocadito (−0.2 pts, CI −1.0 to +0.6).
+4. **The weights are readable** (`results/exp048_summary.json`): for every lens, its own confidence lowers P(wrong) and its distance to the closest other lens raises it. Cepstrum leans most on agreement (weight +1.6), STFT on the other lenses' confidence (+0.9).
+5. **It does not know when there is no pitch.** The chooser always answers, so it gives a pitch for every unpitched frame (breaths, consonants), which the quorum of Exp 046 had cut to 7%. Adding unpitched training frames and abstaining when P(wrong) > 0.5 still answers 61% of them on vocadito. A separate voicing gate in front of the chooser works on MDB-stem-synth (0% false answers at 3.6–9.8% gross error) but not on singing. On vocadito it only trades one error for the other: 29% false answers at 4.8% gross error, 12% at 9.4%. That still beats the old consensus on both counts (36% and 5.6%), but no setting matches the quorum's 7% without giving up voiced frames.
+
+**Decision:** the chooser stays an experiment for now and is not in the library. Choosing the lens and deciding whether there is a pitch at all are separate problems; the second one, a learned voicing / blind-spot detector, is the next step (Exp 047 points the same way).
+
+- **Run**: `.venv/bin/python src/experiments/exp048_lens_chooser.py` (uses the caches of Exp 045 and 046 in `data/processed/`; about 2 minutes)
+- **Outputs**: [results/exp048_lens_chooser.png](../results/exp048_lens_chooser.png), [results/exp048_summary.json](../results/exp048_summary.json) (includes the per-lens weights, pick shares, per-family errors and the voicing-gate sweep)
+
+![Exp 048](../results/exp048_lens_chooser.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -945,6 +979,9 @@ Exp 046:      A quorum (2 agreeing lenses) before the consensus: false answers o
 Exp 047:      Family-aware fusion: a table of which agreement patterns were right cuts image
               consensus error by 2.6–3.1 pts, but no choice among trusted groups can beat the
               best lens; the limit is the confidence gate that marks the right lens blind
+Exp 048:      A learned lens chooser on held-out vocadito: 1.8% gross errors vs 5.6% consensus
+              and 4.2% best lens (73% of the gap to hindsight closed), but it cannot tell when
+              there is no pitch at all
 ```
 
 **Next** (GitHub issues)

@@ -103,7 +103,7 @@ The 41 audio experiments are the proof of concept for this vision:
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
 | Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens. Family-aware fusion (an agreement table) narrows the gap by 2.6–3.1 pts but cannot close it | Exp 044, 045, 047, issues #6, #21 |
-| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them | Exp 045, 046, issues #7, #20 |
+| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048) | Exp 045, 046, 048, issues #7, #20, #22 |
 
 **Honest gaps:** disagreement reliably *warns* that a lens is blind, in both media
 and on real data (Exp 045). Turning that warning into a better *answer* is the
@@ -118,6 +118,10 @@ also when trained on synthetic patches and used on photos. It still cannot beat 
 single lens, and no choice among the trusted lenses could: when the best lens is right and
 no trusted group is, the confidence threshold had marked that lens blind (93–100% of
 cases). The next gain has to come from the blind-spot detector, not the fusion rule.
+Exp 048 confirms it from the other side: a learned chooser that looks at every lens,
+trusted or not, beats the best single lens on held-out real singing for the first time
+(1.8% vs 4.2% gross errors; the consensus makes 5.6%). It cannot tell when there is no
+pitch at all, though, so a learned voicing / blind-spot detector is the open piece.
 
 ---
 
