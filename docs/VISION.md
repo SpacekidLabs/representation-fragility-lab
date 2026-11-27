@@ -183,6 +183,9 @@ High-level steps; concrete tickets will be opened against these.
    datasets with ground truth, in every medium.
 6. **Applications.** Keep shipping practical tools (e.g. the adaptive tuner)
    as demonstrations of the core, not as the core itself.
+7. **Third medium.** Run a third, unrelated medium (periodic sensor signals)
+   on the unchanged core, to check that the claims are not an audio/image
+   coincidence (Exp 053, issue #27).
 
 ---
 

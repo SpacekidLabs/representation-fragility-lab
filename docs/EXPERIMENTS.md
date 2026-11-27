@@ -1126,7 +1126,7 @@ Group-bootstrap 95% CIs (fused minus best lens): synthetic AgreementTable +0.9 p
 ### Phase 34 — Why the Pitch-Tracker Gain Does Not Hold on Real Data (Exp 054)
 
 #### Exp 054 — What Breaks the Adaptive Pitch Tracker on Real Voice, and Can It Be Fixed?
-Exp 045 found that the framework's `AdaptivePitchTracker` loses to fixed YIN on real recordings: 24.2% vs 7.6% gross errors (> 50 cents) on clean vocadito. Issue #28 asks why, and whether it can be fixed. (The issue says "Exp 053"; that number went to the third medium, #27.)
+Exp 045 found that the framework's `AdaptivePitchTracker` loses to fixed YIN on real recordings: 24.2% vs 7.6% gross errors (> 50 cents) on clean vocadito. Issue #28 asks why, and whether it can be fixed.
 
 **Method.** The setup is Exp 045's: hop 512 at 22.05 kHz, clean and 10 dB noise, vocadito (40 tracks, 22 898 annotated hops per condition) and MDB-stem-synth (first 30 s of 230 stems, 99 879 hops).
 - Every per-hop ingredient is cached once:
@@ -1177,7 +1177,7 @@ Error by context, clean (fixed YIN / tracker): vocadito onset 9.3 / 26.3%, offse
 ### Phase 35 — Which Lenses Are Worth Keeping (Exp 055)
 
 #### Exp 055 — What Does Each Lens Add, and What Kind of Lens Should Come Next?
-Every earlier experiment added lenses. This one removes them, one at a time and in pairs, and measures what the system loses (issue #29; the issue says "Exp 054", which went to #28).
+Every earlier experiment added lenses. This one removes them, one at a time and in pairs, and measures what the system loses (issue #29).
 
 **Method.**
 - **Pools**: audio = STFT, ACF, Cepstrum + CREPE (Exp 052); images = tensor, HOG, FFT, Gabor, Radon + `cnn_aug` (the augmented CNN read-out of Exp 052). All readings come from the caches of Exp 045, 046 and 052; no lens is re-run.

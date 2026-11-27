@@ -4,7 +4,7 @@
 > Look through many lenses at once, compare what they see, and the
 > disagreements reveal what the signal really is.
 
-Audio is the first medium, images the second. Full goal and roadmap: [docs/VISION.md](docs/VISION.md).
+Audio is the first medium, images the second, periodic sensor signals the third. Full goal and roadmap: [docs/VISION.md](docs/VISION.md).
 
 ## The loop
 
@@ -17,15 +17,16 @@ flowchart LR
     R1 & R2 & R3 --> D[Blind-spot detector<br/>per reading]
     D --> C[Comparator<br/>distance, outlier, consensus]
     C --> P[Pattern model<br/>which lenses fail together]
-    P --> A[Answer, or abstain<br/>when every lens is blind]
+    P --> A[Answer, or abstain<br/>when fewer than two<br/>trusted lenses agree]
 ```
 
 One medium-agnostic core ([`src/core`](src/core), [design note](docs/core_interfaces.md)). A medium only adds its lenses and a distance function.
 
 | Medium | Quantity | Lenses |
 |---|---|---|
-| Audio | pitch (f0) | STFT, ACF, Cepstrum (+ CQT, wavelet) |
-| Images | dominant orientation | structure tensor, HOG, FFT, Gabor, Radon |
+| Audio | pitch (f0) | STFT, ACF, Cepstrum (+ CQT, wavelet); CREPE as an opt-in learned lens |
+| Images | dominant orientation | structure tensor, HOG, FFT, Gabor, Radon; a CNN read-out as an opt-in learned lens |
+| Sensor time series | rate of a periodic signal (e.g. heart rate) | FFT, ACF, wavelet, peak counter |
 
 ## Headline results
 
@@ -94,8 +95,24 @@ flowchart LR
     D --> E["Exp 044<br/>Second medium:<br/>images"]
     E --> G["Exp 045<br/>Real data"]
     G --> H["Exp 046<br/>Consensus<br/>quorum"]
-    H --> F["Next: Lean proofs #11"]
+    H --> I["Exp 047–051<br/>Fusion, chooser,<br/>abstention, probing,<br/>time"]
+    I --> J["Exp 052<br/>Learned lenses"]
+    J --> K["Exp 053<br/>Third medium:<br/>sensor signals"]
+    K --> L["Exp 054–055<br/>Tracker retired,<br/>lens value"]
+    L --> F["Next: probing in the core #30,<br/>lead lens #31, photo lens #32,<br/>Lean proofs #11"]
 ```
+
+| Exp | Question | Answer |
+|---|---|---|
+| 047 | Does knowing which lenses fail together improve fusion? | On images, by 2.6–3.1 pts; it still cannot beat the best single lens |
+| 048 | Can a model pick the right lens per frame? | Yes on real singing (1.8% vs 4.2% for the best lens), but it cannot tell when there is no pitch |
+| 049 | Can a rule answer more than the quorum without more false answers? | A learned gate can, on MDB-stem-synth and photos; on real singing nothing beats the quorum |
+| 050 | Can perturbing the signal settle a disagreement? | Low-pass probing cuts gross error on disagreement frames to 3.9% / 5.6% (from 14.5% / 17.6%), untrained |
+| 051 | Does the recent history of disagreement warn earlier? | A little, 4–8 frames ahead, mostly for the STFT |
+| 052 | Is a learned lens a new family? | CREPE fails on its own and is far more accurate; it should answer while the classic lenses warn |
+| 053 | Does the core carry a third medium? | Unchanged; the warning holds (AUC 0.90–0.93), but three lenses share a blind spot and outvote the peak counter |
+| 054 | Why does the pitch tracker lose on real data? | Its median filter lags vibrato and note changes; the claim is retired and a quorum tracker beats fixed YIN |
+| 055 | Which lenses are worth keeping? | A lens's value follows its coverage (right where the others cannot agree), not its independence; HOG and Cepstrum add almost nothing |
 
 | | | | |
 |---|---|---|---|
@@ -111,6 +128,7 @@ Every experiment, with numbers and caveats: [docs/EXPERIMENTS.md](docs/EXPERIMEN
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt && pip install -e .
+pip install -r requirements-learned.txt   # optional: the learned lenses (CREPE, CNN), needs torch
 python -m pytest tests
 ```
 
@@ -129,18 +147,22 @@ Library reference and examples: [docs/API.md](docs/API.md). Running each experim
 
 ```
 src/core/            medium-agnostic interfaces and loop
-src/framework/       audio: lenses, disagreement, state-space engine, plugins
-src/image_medium/    images: five orientation lenses
+src/framework/       audio: lenses, disagreement, state-space engine, plugins, learned lens (CREPE)
+src/image_medium/    images: five orientation lenses, learned lens (CNN read-out)
+src/timeseries_medium/  sensor time series: four rate lenses
+src/representations/, signals/, perturbations/, metrics/   building blocks of the early experiments (Exp 001–013)
+src/vst_prototype/   C++ plugin prototype
 src/experiments/     one script per experiment
 data/                dataset setup (data/README.md); downloads are not committed
 results/             plots and summaries
 docs/                vision, experiments, API, design notes
 tests/               pytest
+lean/                Lean 4 proofs of core statements (issue #11)
 ```
 
 ## Known limits
 
-- Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds, the framework's pitch-tracker gain does not (Exp 054 says why; the quorum tracker that replaces it beats fixed YIN), and unpitched real frames fool the consensus.
-- More lenses are not more independent votes: lenses that share a blind spot outvote the others.
+- Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds and the framework's pitch-tracker gain does not (Exp 054 says why; the quorum tracker that replaces it beats fixed YIN). Unpitched real frames fooled the old consensus; the quorum (Exp 046) fixes that at the cost of more abstentions.
+- More lenses are not more independent votes: lenses that share a blind spot outvote the others (images, and ECG heart rate in Exp 053). Turning disagreement into a better answer works on synthetic audio and MDB-stem-synth, ties on real singing, and fails on images and ECG.
 - Not every lens earns its place (Exp 055): HOG and Cepstrum add almost nothing to the answer, and a lens's value follows how often it is right where the others cannot agree, not how independent its blind spots are.
 - The framework's DSP gains are small and depend on the baseline (see Exp 035 and Exp 041 in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)).
