@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 30, Exp 001 to Exp 050)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 31, Exp 001 to Exp 051)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting; Exp 051 treats disagreement as a trajectory over time.
 
 ## Representations
 
@@ -948,6 +948,53 @@ Over the whole dataset (consensus where the lenses agree, the chooser where they
 
 ---
 
+### Phase 31 — Disagreement over Time (Exp 051)
+
+#### Exp 051 — Does the Recent History of Disagreement Predict the Next Blind Spot?
+Exp 042 predicts a lens's blind spot from one frame's disagreement. Issue #25 asks whether the *trajectory* of disagreement predicts a blind spot on the next frames, before it happens (extending Exp 029). Every hop of each recording is read (2048-sample frames, hop 1024 = 46 ms):
+
+- **Synthetic:** 4-second harmonic signals (1, 3, 10, 20 harmonics, vibrato, an octave glide, a pulse train) at the six f0s of Exp 042 (42 signals).
+- **vocadito:** all 40 tracks.
+- **MDB-stem-synth:** 20 s of each of the 230 stems, from 1 s before the first annotated f0.
+
+Each recording is run under four conditions that **change over time**, so blind spots come and go: clean; a noise ramp (SNR 5 + 15 sin(2πt / 4 s) dB, −10 to 20 dB); a low-pass sweep (cutoff 150 Hz–4 kHz and back every 6 s); a high-pass sweep (40 Hz–1.6 kHz every 5 s, which removes the fundamental for part of the time). This gives 14 280 / 70 148 / 389 404 hops, 14 280 / 28 676 / 157 524 of them with a pitch target.
+
+Target: lens L is wrong (> 50 cents or no estimate) on frame t + k, k = 0, 1, 2, 4, 8 hops (0–370 ms ahead), using frames ≤ t only. Both predictors are logistic regressions per lens and horizon:
+- **current:** the six per-frame disagreement features of Exp 042 at frame t.
+- **history:** current, plus the same features averaged over the last 8 frames (persistence), their lag-1 values, slopes of divergence / confidence / overall disagreement (trend), the lens's pitch jump and pitch spread over the window, frames since the lens last jumped by > 50 cents, and frames since the last silent or all-unconfident frame (onset).
+
+Metrics: ROC AUC on all targets; AUC **before failure** (only targets where the lens is still right at t, so the failure has not started); and **onset lead**: for failure onsets (wrong at o, right on the 3 voiced frames before), the share caught by the k-step predictor at o − k at a 10% false-alarm rate. Held-out real data = train on synthetic + one real dataset, test on the other; grouped 5-fold CV by track inside each dataset gives the same picture.
+
+AUC, current → history, on held-out real data (Δ with 95% group-bootstrap CI over tracks):
+
+| Test set | Lens | k = 1 (46 ms) | k = 2 (93 ms) | k = 4 (186 ms) | k = 8 (372 ms) | Before failure, k = 4 |
+|---|---|---|---|---|---|---|
+| vocadito | STFT | 0.930 → 0.944 (+0.013) | 0.886 → 0.906 (+0.020) | 0.812 → 0.850 (**+0.039**, CI +0.030 to +0.047) | 0.760 → 0.800 (+0.040) | 0.630 → **0.711** |
+| | ACF | 0.893 → 0.893 (0.000, n.s.) | 0.847 → 0.846 (n.s.) | 0.784 → 0.799 (+0.015) | 0.736 → 0.756 (+0.019) | 0.847 → 0.837 |
+| | Cepstrum | 0.882 → 0.887 (+0.005) | 0.823 → 0.846 (+0.023) | 0.757 → 0.801 (**+0.045**) | 0.729 → 0.766 (+0.038) | 0.794 → 0.794 |
+| MDB-stem-synth | STFT | 0.945 → 0.960 (+0.015) | 0.915 → 0.937 (+0.022) | 0.876 → 0.902 (+0.026) | 0.821 → 0.848 (+0.026) | 0.596 → **0.713** |
+| | ACF | 0.917 → 0.925 (+0.008) | 0.898 → 0.898 (n.s.) | 0.856 → 0.860 (n.s.) | 0.808 → 0.811 (n.s.) | 0.865 → 0.852 |
+| | Cepstrum | 0.951 → 0.957 (+0.006) | 0.934 → 0.945 (+0.011) | 0.911 → 0.929 (+0.018) | 0.887 → 0.907 (+0.020) | 0.917 → 0.925 |
+
+Failure onsets caught k hops ahead at 10% false alarms, current → history (held out): vocadito STFT 14 → 10% (k = 1), 11 → 10% (k = 4), 15 → 21% (k = 8); ACF 51 → 43%, 13 → 23%, 19 → 22%; Cepstrum 14 → 9%, 5 → 9%, 14 → 17%. MDB-stem-synth STFT 22 → 17%, 18 → 20%, 19 → 19%; ACF 58 → 56%, 33 → 43%, 26 → 33%; Cepstrum 44 → 35%, 24 → 35%, 22 → 36%.
+
+**Key findings:**
+1. **Issue #25's Done-when is met on AUC.** On held-out real data the history predictor beats the current-frame one for STFT and Cepstrum at every horizon from 1 to 8 hops (CIs exclude zero), and for ACF at 4–8 hops on vocadito. The gain grows with the horizon: 0 to +0.015 one hop ahead, +0.015–0.045 four to eight hops ahead. The current frame's information decays faster than the history's.
+2. **The STFT's blind spots build up; the others' arrive suddenly.** Before the failure starts, the current frame barely predicts an STFT failure (AUC 0.55–0.67, close to chance); history raises it to 0.65–0.78 at every horizon on both real datasets. For ACF and Cepstrum the before-failure AUC does not change (±0.01): their blind spots either show in the current frame already or are not foreseeable from disagreement at all.
+3. **Lead time improves only at longer horizons, and only somewhat.** Most real failure onsets are not foreseeable one hop ahead: 9–58% are caught at 10% false alarms, and history does not raise that (it is often a few points lower). At 4–8 hops ahead history catches more onsets for ACF and Cepstrum (e.g. MDB Cepstrum 22 → 36% at 372 ms), but the share stays low.
+4. **Where history helps** (k = 2, by condition): mostly under the noise ramp and the low-pass sweep (STFT on the noise ramp 0.80 → 0.85 on vocadito, 0.82 → 0.87 on MDB), and for Cepstrum under the high-pass sweep on MDB (0.47 → 0.60). On clean vocadito the ACF gets slightly *worse* with history (0.71 → 0.67).
+5. **Synthetic → real transfer holds.** Training on synthetic + the other real dataset gives the same AUCs as cross-validation inside the test dataset (within 0.01–0.02), so the history features are not tied to one corpus.
+6. **Reader quirk found:** the Cepstrum reader returns a NaN confidence on all-zero frames (5 184 hops of digital silence in MDB stems), which makes the comparison's divergence NaN. The experiment treats those as "no reading"; the reader itself is unchanged.
+
+**Decision:** keep the per-frame predictor as the default warning (it is as good one hop ahead and simpler). Where a warning is wanted 100–400 ms ahead, e.g. to switch lenses or smooth a tuner before a failure, the history features add 0.02–0.05 AUC, mostly for the STFT. The features live in this experiment for now.
+
+- **Run**: `.venv/bin/python src/experiments/exp051_disagreement_over_time.py` (needs the raw datasets in `data/raw/`; about 10 minutes the first time, then the per-hop readings are cached in `data/processed/exp051_seq_*.pkl` and the evaluation takes about 10 minutes, mostly the bootstrap)
+- **Outputs**: [results/exp051_disagreement_over_time.png](../results/exp051_disagreement_over_time.png), [results/exp051_summary.json](../results/exp051_summary.json) (every lens, horizon and plan, with CIs, before-failure AUC, onset recall and per-condition AUC)
+
+![Exp 051](../results/exp051_disagreement_over_time.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -1085,6 +1132,9 @@ Exp 049:      When to abstain: a learned gate keeps the quorum's false-answer ra
 Exp 050:      Probing: when lenses disagree, low-pass the frame at 1.5x each candidate and keep
               the one the lenses still read. Gross error on disagreement frames 3.9% vs 14.5%
               consensus (vocadito), 5.6% vs 17.6% (MDB), untrained; ~2x the reading cost there
+Exp 051:      Disagreement over time: the last 8 frames add 0.02-0.05 AUC 4-8 hops ahead on
+              held-out real data, mostly for the STFT, whose blind spots build up; most failure
+              onsets are still not foreseeable one hop ahead
 ```
 
 **Next** (GitHub issues)

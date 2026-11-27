@@ -97,7 +97,7 @@ The 41 audio experiments are the proof of concept for this vision:
 |---|---|---|
 | Multiple representations | ✅ STFT, ACF, Cepstrum, CQT, Wavelet, Mel | Exp 001–013, 028, 031 |
 | Blind-spot mapping | ✅ Each representation's failure signature mapped; probe signals that blind one lens and spare others | Exp 001–013 |
-| Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens | Exp 015–016 |
+| Self-confidence / failure forecasting | ✅ Per-representation confidence predicts failure before it happens. On real data, the history of disagreement predicts STFT and Cepstrum failures 4–8 frames (186–372 ms) ahead better than the current frame (+0.02–0.05 AUC), but most onsets are not foreseeable one frame ahead | Exp 015–016, 051 |
 | Comparison & fusion | ✅ Explicit disagreement (`src/framework/disagreement.py`): it predicts blind spots (AUC 0.95–0.99) and the consensus beats any single lens | Exp 014, 017–018, 042 |
 | Pattern discovery | ✅ Disagreement patterns: which lenses fail together and when | Exp 025–031, 043 |
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
@@ -131,6 +131,9 @@ this cuts gross errors from 14.5% to 3.9% (vocadito) and 17.6% to 5.6% (MDB-stem
 with no training, beating the best single lens on both real datasets. The same follow
 count also separates unpitched frames (AUC 0.93–0.98), so probing is the strongest
 candidate so far for the missing blind-spot / voicing detector; it is not in the core yet.
+Exp 051 looks at disagreement over time: the recent history adds a little warning
+4–8 frames ahead on real recordings, mostly for the STFT, whose blind spots build up
+gradually; ACF and Cepstrum failures mostly arrive without warning.
 
 ---
 
