@@ -33,6 +33,9 @@ Most of the work is generic and already in `core.generic`:
   - `estimate_distance(a, b) -> (distance 0..1, relation label, details)`: how far apart two of its estimates are, and how they relate.
   - optionally `fuse(readings)`: how to combine trusted estimates (default: take the most confident).
   - optionally `agrees(pair)`: what counts as agreement for the quorum (default: relation `"agree"`).
+- Family-aware choice of group (issue #21, Exp 047), opt-in: `PairwiseComparator(family=...)` picks the best-scoring maximal agreeing group (of at least `min_agreeing`) instead of the largest. Two scorers, both learned from labelled readings and kept as plain tables:
+  - `FamilyVotes.fit(confidences, failures)`: per-lens P(right | confidence bin) and pairwise failure correlation; a group scores `sum_i p_i / (1 + sum_j R_ij)`.
+  - `AgreementTable.fit((group, right) examples)`: P(right | exactly this set of lenses agrees). Better on images; `min_score=0.5` abstains when no group is likely right.
 - `Analyzer`: the loop. It also checks that every representation belongs to the medium and that names are unique.
 
 So a medium is: one `Medium`, n `Representation`s, one `estimate_distance`, and optionally a `PatternModel`.
@@ -77,8 +80,9 @@ jump an octave up together. With the default three lenses, ACF + Cepstrum
 outvote STFT and the consensus is right. With all five, the spectral trio wins
 and the consensus is wrong (`tests/test_audio_core.py`). This is Exp 043's
 co-failure finding seen from the other side. Adding lenses only helps when
-their blind spots differ, so the default stays at three until a fusion rule
-accounts for shared blind spots.
+their blind spots differ, so the default stays at three. A `FamilyVotes` that knows
+STFT, CQT and wavelet fail together restores the right answer with all five
+(`tests/test_audio_core.py`, issue #21).
 
 ## Second medium: images (issue #6)
 
@@ -117,7 +121,9 @@ aggregation carried over unchanged. Two limits of the generic logic showed up:
   lenses fail in families (local gradient lenses vs global spectral/projection
   lenses), so the weighted median picks the family that is wrong. Exp 044's best
   single lens (Radon, 4.8% gross errors) beats the consensus (9.8%) and a learned
-  choice of lens (5.6%).
+  choice of lens (5.6%). Exp 047 adds family-aware group choice (`AgreementTable`:
+  6.8%), but even the best possible choice among trusted groups (5.6%) cannot beat
+  Radon: the right lens is usually below the confidence threshold.
 
 ## Design choices
 

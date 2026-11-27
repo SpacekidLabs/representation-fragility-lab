@@ -21,9 +21,17 @@ from .interfaces import (
     Reading,
     Representation,
 )
-from .generic import Analysis, Analyzer, ConfidenceThresholdDetector, PairwiseComparator
+from .generic import (
+    AgreementTable,
+    Analysis,
+    Analyzer,
+    ConfidenceThresholdDetector,
+    FamilyVotes,
+    PairwiseComparator,
+)
 
 __all__ = [
+    "AgreementTable",
     "Analysis",
     "Analyzer",
     "Assessment",
@@ -31,6 +39,7 @@ __all__ = [
     "Comparator",
     "ComparisonReport",
     "ConfidenceThresholdDetector",
+    "FamilyVotes",
     "Medium",
     "PairComparison",
     "PairwiseComparator",

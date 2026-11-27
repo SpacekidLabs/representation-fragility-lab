@@ -111,3 +111,23 @@ def test_one_confident_lens_does_not_make_a_pitch():
     # an octave relation is not agreement
     rd["cepstrum"] = Reading("cepstrum", 360.0, 0.8)
     assert PitchComparator().compare(rd).consensus is None
+
+
+def test_family_votes_undo_the_spectral_trio_on_a_missing_fundamental():
+    """Issue #21: when STFT, CQT and wavelet are known to fail together, the five-lens
+    consensus follows ACF + Cepstrum again on a missing fundamental."""
+    from itertools import combinations
+
+    from core import ConfidenceThresholdDetector, FamilyVotes
+    from framework.audio import PitchComparator
+    from framework.disagreement import VOICING_THRESHOLD
+
+    spectral = {"stft", "cqt", "wavelet"}
+    corr = {frozenset(p): (0.9 if set(p) <= spectral else 0.0) for p in combinations(ALL_LENSES, 2)}
+    fv = FamilyVotes({n: [0.8] * 5 for n in ALL_LENSES}, corr)
+    frame = tone(220.0, range(2, 11))
+    plain = make_audio_analyzer(ALL_LENSES).analyze(frame, {"sr": SR}).report
+    comp = PitchComparator(detector=ConfidenceThresholdDetector(VOICING_THRESHOLD), family=fv)
+    fused = comp.compare(plain.readings)
+    assert set(fused.consensus_from) <= {"acf", "cepstrum"}
+    assert abs(1200 * np.log2(fused.consensus / 220.0)) < 50

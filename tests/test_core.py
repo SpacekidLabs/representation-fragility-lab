@@ -2,6 +2,7 @@
 
 import os
 import statistics
+from itertools import combinations
 import subprocess
 import sys
 
@@ -208,3 +209,76 @@ def test_quorum_tie_goes_to_the_more_confident_group():
 def test_min_agreeing_must_be_positive():
     with pytest.raises(ValueError):
         LocationComparator(min_agreeing=0)
+
+
+# ---------------------------------------------------------------------------
+# Family-aware choice of group (issue #21)
+# ---------------------------------------------------------------------------
+
+from core import FamilyVotes  # noqa: E402
+
+
+def _family_votes(rho_abc=1.0):
+    """a, b, c always fail together; d and e fail independently. All equally reliable."""
+    names = "abcde"
+    rel = {n: [0.8] * 5 for n in names}
+    corr = {}
+    for x, y in combinations(names, 2):
+        corr[frozenset((x, y))] = rho_abc if {x, y} <= set("abc") else 0.0
+    return FamilyVotes(rel, corr)
+
+
+def test_a_correlated_family_counts_as_one_vote():
+    fv = _family_votes(1.0)
+    rd = _readings(a=(50.0, 0.9), b=(50.1, 0.9), c=(50.2, 0.9), d=(10.0, 0.9), e=(10.1, 0.9))
+    # independent counting: three beats two
+    assert LocationComparator().compare(rd).consensus_from == ("a", "b", "c")
+    # family-aware: a+b+c score 3 * 0.8 / 3 = 0.8, d+e score 1.6
+    r = LocationComparator(family=fv).compare(rd)
+    assert r.consensus_from == ("d", "e")
+    assert fv.score(("a", "b", "c"), rd) == pytest.approx(0.8)
+    assert fv.score(("d", "e"), rd) == pytest.approx(1.6)
+
+
+def test_independent_family_votes_reduce_to_reliability_vote():
+    fv = _family_votes(0.0)
+    rd = _readings(a=(50.0, 0.9), b=(50.1, 0.9), c=(50.2, 0.9), d=(10.0, 0.9), e=(10.1, 0.9))
+    assert LocationComparator(family=fv).compare(rd).consensus_from == ("a", "b", "c")
+
+
+def test_family_choice_keeps_the_quorum():
+    fv = _family_votes(1.0)
+    rd = _readings(a=(50.0, 0.9), b=(10.0, 0.9), c=(30.0, 0.9), d=(70.0, 0.9), e=(90.0, 0.9))
+    assert LocationComparator(family=fv).compare(rd).consensus is None
+    assert LocationComparator(family=fv, min_agreeing=1).compare(rd).consensus is not None
+
+
+def test_family_votes_fit_learns_reliability_and_failure_correlation():
+    conf = [{"x": 0.9, "y": 0.9, "z": 0.9}] * 8
+    # x and y fail together on the first 4 signals; z fails on alternate ones
+    fail = [{"x": i < 4, "y": i < 4, "z": i % 2 == 0} for i in range(8)]
+    fv = FamilyVotes.fit(conf, fail)
+    assert fv.correlation[frozenset(("x", "y"))] == pytest.approx(1.0)
+    assert fv.correlation[frozenset(("x", "z"))] == pytest.approx(0.0)
+    assert fv.reliability("x", 0.9) == pytest.approx((4 + 1) / (8 + 2))
+    assert FamilyVotes.fit(conf, fail, independent=True).correlation[frozenset(("x", "y"))] == 0.0
+
+
+def test_agreement_table_trusts_the_group_that_was_right_before():
+    from core import AgreementTable
+    # in training, a+b+c agreeing was usually wrong, d+e agreeing usually right
+    examples = [(("a", "b", "c"), i < 2) for i in range(10)] + [(("d", "e"), i < 9) for i in range(10)]
+    table = AgreementTable.fit(examples)
+    assert table.score(("a", "b", "c")) == pytest.approx(3 / 12)
+    assert table.score(("e", "d")) == pytest.approx(10 / 12)
+    assert table.score(("x", "y")) == pytest.approx(0.5)  # unseen group: the prior
+    rd = _readings(a=(50.0, 0.9), b=(50.1, 0.9), c=(50.2, 0.9), d=(10.0, 0.9), e=(10.1, 0.9))
+    assert LocationComparator(family=table).compare(rd).consensus_from == ("d", "e")
+
+
+def test_min_score_abstains_when_no_group_is_likely_right():
+    from core import AgreementTable
+    table = AgreementTable.fit([(("a",), False)] * 9 + [(("a",), True)] + [(("b",), False)] * 5)
+    rd = _readings(a=(50.0, 0.9), b=(10.0, 0.9))
+    assert LocationComparator(family=table, min_agreeing=1).compare(rd).consensus is not None
+    assert LocationComparator(family=table, min_agreeing=1, min_score=0.5).compare(rd).consensus is None

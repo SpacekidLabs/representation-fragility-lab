@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 26, Exp 001 to Exp 046)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 27, Exp 001 to Exp 047)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together.
 
 ## Representations
 
@@ -777,6 +777,45 @@ Old rule → quorum of 2 (the new default). The quorum's increase in gross error
 
 ---
 
+### Phase 27 — Fusion That Knows Which Lenses Fail Together (Exp 047)
+
+#### Exp 047 — Can Knowing the Families Make the Consensus Beat the Best Lens?
+Exp 044 found that image lenses fail in families: a family that is wrong together outvotes the lens that is right, so the consensus (9.8% gross errors) loses to the best single lens (Radon, 4.8%). Issue #21 adds two ways for the core's `PairwiseComparator` to pick **which** agreeing group to trust instead of the largest one, both learned from labelled readings and both plain, inspectable tables:
+
+- `FamilyVotes`: each lens gets a reliability (P(right | confidence bin)) and each pair a failure correlation (phi coefficient of their wrong/right indicators). A group scores `sum_i p_i / (1 + sum_j R_ij)`, so lenses that always fail together count as one vote.
+- `AgreementTable`: for each set of lenses, how often its fused answer was right when exactly that set formed a maximal agreeing group. Optional `min_score=0.5` abstains when no group is more likely right than wrong.
+
+Like Exp 046, the experiment recomputes the consensus from the readings cached by Exp 042, 044 and 045. Models are trained by 5-fold cross-validation split by image / recording ("within"), or on the synthetic set of the same medium and scored on the real one ("transfer"). Two references show the limits: the best single lens (chosen with hindsight), and an oracle that always picks the right agreeing group of trusted lenses, which is the best any method here could do.
+
+Gross error, abstention counted as wrong (within-dataset cross-validation; BSDS500 transfer in brackets):
+
+| Dataset | Old rule | Quorum 2 | `FamilyVotes`, ≥1 | `AgreementTable`, ≥1 | Best lens | Group oracle | Oracle, every lens trusted |
+|---|---|---|---|---|---|---|---|
+| Synthetic images | 9.8% | 15.1% | 9.7% | **6.8%** | 4.8% (Radon) | 5.6% | 1.6% |
+| BSDS500 | 24.4% | 42.3% | 22.8% (23.5%) | **21.8%** (21.8%) | 18.1% (Radon) | 19.6% | 8.0% |
+| Synthetic audio | 6.5% | 11.7% | 6.5% | 6.8% | 4.3% (STFT) | 6.1% | 0.1% |
+| vocadito | 5.6% | 16.3% | 5.4% | 5.4% | 4.2% (ACF) | 4.3% | 0.4% |
+| MDB-stem-synth | 7.3% | 18.2% | 7.7% | 10.2% | 9.9% (ACF) | 5.8% | 0.9% |
+
+`AgreementTable` vs the old rule on images: −3.1 pts (synthetic) and −2.6 pts (BSDS500, also when trained only on synthetic patches); vs `FamilyVotes`: −3.0 and −1.0 pts. All group-bootstrap 95% CIs exclude 0. It is still worse than the best lens (+2.0 and +3.7 pts). On audio it does not help: trained on synthetic audio it is worse than the old rule on both real datasets (+4.2 pts vocadito, +2.2 pts MDB).
+
+**Key findings:**
+1. **The pairwise discount does almost nothing.** `FamilyVotes` changes the error by less than 1 pt anywhere, with or without the quorum. Setting every correlation to 0 (a plain reliability vote) moves it by at most 0.7 pts, so the correlations themselves add almost nothing. A pair that fails together half the time still counts as 1.3 votes, which is enough to outvote a single lens that is right.
+2. **Measuring each agreement pattern directly works on images.** The table learns, for example, that FFT + Gabor agreeing without Radon was right 13% of the time, and Radon on its own 85% of the time. On the "weaker second pattern" condition, image error falls from 23% (old rule) to 1.0%, level with the best lens. The table carries over from synthetic patches to real photos unchanged (21.8% both ways).
+3. **No choice among agreeing groups can beat the best lens on images.** Even the group oracle makes 5.6% / 19.6% gross errors, more than Radon's 4.8% / 18.1%. That is why the Done-when of issue #21 is not met.
+4. **The bottleneck is the trust gate, not the vote.** On frames where the best lens is right but no trusted group is, the best lens had been marked blind (confidence < 0.5) in 93–100% of cases. With every lens trusted, the group oracle falls to 1.6% (synthetic images), 8.0% (BSDS500) and under 1% for audio. The next gain has to come from a better blind-spot detector, not a better fusion rule.
+5. **With three nearly independent audio lenses there are no families to correct** (failure correlation ≤ 0.32). The table only adds noise, and synthetic-trained tables mislead on real voice. On a five-lens audio set, `FamilyVotes` does fix the missing-fundamental case where STFT, CQT and wavelet outvote ACF and Cepstrum (`tests/test_audio_core.py`), but there is no cached five-lens data to measure it at scale.
+6. **Abstaining below 50% is not a free lunch.** `min_score=0.5` brings false answers on unoriented noise down from 48% to 6% and makes answers more accurate (2.8% gross error when answering on synthetic images), but it abstains more than the old rule and helps less than the quorum on real audio.
+
+**Decision:** both scorers are in the core as opt-in options (`family=`, `min_score=`). The default is unchanged: the largest agreeing group, quorum 2. Use an `AgreementTable` for media whose lenses fail in families (images); not for the three-lens audio set.
+
+- **Run**: `.venv/bin/python src/experiments/exp047_family_fusion.py` (uses the caches of Exp 045 and 046 in `data/processed/`; under a minute)
+- **Outputs**: [results/exp047_family_fusion.png](../results/exp047_family_fusion.png), [results/exp047_summary.json](../results/exp047_summary.json) (includes the learned correlations and agreement tables)
+
+![Exp 047](../results/exp047_family_fusion.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -903,6 +942,9 @@ Exp 045:      Real data (vocadito, MDB-stem-synth, BSDS500): disagreement still 
               spots; the consensus gain holds on MDB only; the framework tracker does not beat YIN
 Exp 046:      A quorum (2 agreeing lenses) before the consensus: false answers on unpitched /
               unoriented input fall to 0–7%, at the cost of abstaining on noisy frames
+Exp 047:      Family-aware fusion: a table of which agreement patterns were right cuts image
+              consensus error by 2.6–3.1 pts, but no choice among trusted groups can beat the
+              best lens; the limit is the confidence gate that marks the right lens blind
 ```
 
 **Next** (GitHub issues)
@@ -912,7 +954,7 @@ Exp 046:      A quorum (2 agreeing lenses) before the consensus: false answers o
 **Known limits**
 
 - Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise.
-- More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044).
+- More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
 ## Running the experiments

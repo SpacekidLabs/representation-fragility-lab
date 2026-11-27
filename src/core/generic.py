@@ -44,6 +44,112 @@ class ConfidenceThresholdDetector(BlindSpotDetector):
         return Assessment(reading.representation, float(reading.confidence), blind, reasons)
 
 
+class FamilyVotes:
+    """How much to trust an agreeing group when lenses fail in families (issue #21).
+
+    Learned from labelled readings (which lens was wrong on which signal):
+
+    reliability(name, confidence)
+        P(lens is right | its confidence), from equal-width confidence bins on
+        [0, 1] with a Beta(prior, prior) prior per bin.
+    correlation[{a, b}]
+        Failure correlation of two lenses: the phi coefficient of their
+        wrong/right indicators, clipped to [0, 1]. 0 = they fail independently
+        (or never fail), 1 = they always fail together.
+
+    A group's score is the sum of its members' reliabilities, each divided by
+    one plus its failure correlation with the other members:
+
+        score(G) = sum_{i in G} p_i / (1 + sum_{j in G, j != i} R_ij)
+
+    So k lenses that always fail together count as one vote, and k independent
+    lenses count as k. With every correlation 0 this is a plain reliability vote.
+    All numbers are kept in plain dicts so the weights stay inspectable.
+    """
+
+    def __init__(self, reliability: Mapping[str, Sequence[float]],
+                 correlation: Mapping[frozenset, float]):
+        self.bins = {n: list(v) for n, v in reliability.items()}
+        self.correlation = {frozenset(k): float(v) for k, v in correlation.items()}
+
+    @classmethod
+    def fit(cls, confidences: Sequence[Mapping[str, float]], failures: Sequence[Mapping[str, bool]],
+            bins: int = 5, prior: float = 1.0, independent: bool = False) -> "FamilyVotes":
+        """Learn from one dict of confidences and one dict of failures per signal.
+
+        ``independent=True`` sets every correlation to 0 (the ablation: a
+        reliability vote that ignores families).
+        """
+        if len(confidences) != len(failures) or not failures:
+            raise ValueError("need one confidence dict and one failure dict per signal")
+        names = list(failures[0])
+        reliability = {}
+        for n in names:
+            right = [0.0] * bins
+            total = [0.0] * bins
+            for c, f in zip(confidences, failures):
+                b = min(int(float(c[n]) * bins), bins - 1) if c[n] > 0 else 0
+                total[b] += 1
+                right[b] += 0.0 if f[n] else 1.0
+            reliability[n] = [(r + prior) / (t + 2 * prior) for r, t in zip(right, total)]
+        correlation = {}
+        m = len(failures)
+        for a, b in combinations(names, 2):
+            if independent:
+                correlation[frozenset((a, b))] = 0.0
+                continue
+            fa = [bool(f[a]) for f in failures]
+            fb = [bool(f[b]) for f in failures]
+            pa, pb = sum(fa) / m, sum(fb) / m
+            pab = sum(x and y for x, y in zip(fa, fb)) / m
+            denom = (pa * (1 - pa) * pb * (1 - pb)) ** 0.5
+            phi = (pab - pa * pb) / denom if denom > 0 else 0.0
+            correlation[frozenset((a, b))] = min(max(phi, 0.0), 1.0)
+        return cls(reliability, correlation)
+
+    def reliability(self, name: str, confidence: float) -> float:
+        bins = self.bins[name]
+        k = len(bins)
+        b = min(int(float(confidence) * k), k - 1) if confidence > 0 else 0
+        return bins[b]
+
+    def score(self, group: Sequence[str], readings: Mapping[str, Reading]) -> float:
+        total = 0.0
+        for i in group:
+            shared = sum(self.correlation.get(frozenset((i, j)), 0.0) for j in group if j != i)
+            total += self.reliability(i, readings[i].confidence) / (1.0 + shared)
+        return total
+
+
+class AgreementTable:
+    """P(the fused answer is right | exactly these lenses form an agreeing group).
+
+    The group-level alternative to ``FamilyVotes`` (issue #21, Exp 047). Instead
+    of building a group's trust from pairwise failure correlations, it counts,
+    on labelled signals, how often each maximal agreeing group (keyed by its set
+    of lens names) gave a right answer. A group never seen in training gets the
+    prior, 0.5. The table is plain data: ``table[frozenset(names)] = (right, seen)``.
+    """
+
+    def __init__(self, table: Mapping[frozenset, tuple[float, float]], prior: float = 1.0):
+        self.table = {frozenset(k): (float(r), float(n)) for k, (r, n) in table.items()}
+        self.prior = prior
+
+    @classmethod
+    def fit(cls, examples, prior: float = 1.0) -> "AgreementTable":
+        """``examples``: (group names, right?) pairs, one per maximal agreeing group per signal."""
+        table: dict[frozenset, list[float]] = {}
+        for group, right in examples:
+            cell = table.setdefault(frozenset(group), [0.0, 0.0])
+            cell[0] += 1.0 if right else 0.0
+            cell[1] += 1.0
+        return cls({k: tuple(v) for k, v in table.items()}, prior)
+
+    def score(self, group: Sequence[str], readings: Mapping[str, Reading] | None = None) -> float:
+        r, n = self.table.get(frozenset(group), (0.0, 0.0))
+        return (r + self.prior) / (n + 2 * self.prior)
+
+
 class PairwiseComparator(Comparator):
     """Pairwise comparison with medium-specific distance, generic aggregation.
 
@@ -61,16 +167,28 @@ class PairwiseComparator(Comparator):
     ``k`` members, the consensus is ``fuse`` over it; otherwise there is no
     consensus. ``min_agreeing = None`` is the legacy rule: ``fuse`` over all
     trusted readings, even a single one.
+
+    Family-aware choice (issue #21). With ``family`` (a ``FamilyVotes``), the
+    group is not the largest one but the best-scoring maximal agreeing group of
+    at least ``min_agreeing`` members (1 if ``min_agreeing`` is None): lenses that
+    tend to fail together count for less than independent ones. ``family`` may
+    also be an ``AgreementTable`` (anything with ``score(group, readings)``).
+    ``min_score`` then abstains when even the best group scores below it (for an
+    ``AgreementTable``, 0.5 = answer only when the group is more likely right
+    than wrong).
     """
 
     def __init__(self, distance_weight: float = 0.5, outlier_margin: float = 0.10,
-                 detector: BlindSpotDetector | None = None, min_agreeing: int | None = 2):
+                 detector: BlindSpotDetector | None = None, min_agreeing: int | None = 2,
+                 family: "FamilyVotes | AgreementTable | None" = None, min_score: float | None = None):
         if min_agreeing is not None and min_agreeing < 1:
             raise ValueError("min_agreeing must be >= 1 or None")
         self.distance_weight = distance_weight
         self.outlier_margin = outlier_margin
         self.detector = detector or ConfidenceThresholdDetector()
         self.min_agreeing = min_agreeing
+        self.family = family
+        self.min_score = min_score
 
     # -- medium-specific hooks ------------------------------------------------
 
@@ -107,6 +225,30 @@ class PairwiseComparator(Comparator):
                 return best
         return ()
 
+    def agreeing_groups(self, trusted: Sequence[str], pairs: Sequence[PairComparison]) -> list[tuple[str, ...]]:
+        """Every maximal group of trusted readings that pairwise agree (exhaustive)."""
+        agree = {frozenset((p.a, p.b)) for p in pairs if self.agrees(p)}
+        cliques = [g for size in range(len(trusted), 0, -1) for g in combinations(trusted, size)
+                   if all(frozenset(ab) in agree for ab in combinations(g, 2))]
+        return [g for g in cliques if not any(set(g) < set(h) for h in cliques)]
+
+    def family_group(self, readings: Mapping[str, Reading], trusted: Sequence[str],
+                     pairs: Sequence[PairComparison]) -> tuple[str, ...]:
+        """The maximal agreeing group with the highest ``FamilyVotes.score`` among
+        those with at least ``min_agreeing`` members (empty if none). Ties go to
+        the higher total confidence, then to the earlier group."""
+        k = self.min_agreeing or 1
+        best, best_key = (), None
+        for g in self.agreeing_groups(trusted, pairs):
+            if len(g) < k:
+                continue
+            key = (self.family.score(g, readings), sum(readings[n].confidence for n in g))
+            if best_key is None or key > best_key:
+                best, best_key = g, key
+        if best and self.min_score is not None and best_key[0] < self.min_score:
+            return ()
+        return best
+
 
     def compare_pair(self, a: Reading, b: Reading) -> PairComparison:
         if a.estimate is None and b.estimate is None:
@@ -137,7 +279,9 @@ class PairwiseComparator(Comparator):
 
         trusted_names = [n for n in names if not assessments[n].blind]
         trusted = [readings[n] for n in trusted_names]
-        if self.min_agreeing is None:
+        if self.family is not None:
+            fused_from = self.family_group(readings, trusted_names, pairs)
+        elif self.min_agreeing is None:
             fused_from = tuple(trusted_names)
         else:
             group = self.quorum_group(readings, trusted_names, pairs)
