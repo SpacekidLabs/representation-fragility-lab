@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 28, Exp 001 to Exp 048)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 29, Exp 001 to Exp 049)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain.
 
 ## Representations
 
@@ -850,6 +850,53 @@ On held-out vocadito, chooser − consensus = −3.8 pts (95% CI −4.9 to −2.
 
 ---
 
+### Phase 29 — When to Abstain (Exp 049)
+
+#### Exp 049 — Can a Rule Keep the Quorum's Few False Answers but Answer More?
+The quorum of Exp 046 cut false answers on unpitched / unoriented input to 0–7%, but it answers only 66–75% of noisy pitched frames and 35% of noisy photo patches. Issue #23 asks for a rule that keeps quorum 2's false-answer rate while answering more. Every rule below starts from the same per-frame facts: the largest agreeing group of trusted lenses, its size and its fused estimate. Each has a knob that is swept:
+
+- **Confident singleton** (τ): quorum 2, but one lens may answer alone if its confidence ≥ τ.
+- **Noise-adaptive quorum** (c): quorum 1 when the frame looks clean (mean confidence of all lenses ≥ c), quorum 2 otherwise.
+- **Wider agreement** (m): quorum 2 with "agree" widened to m × 50 cents / 10°.
+- **Lower trust** (θ): quorum 2 with lenses trusted from confidence θ instead of 0.5 (Exp 047/048: the right lens is often just below the gate).
+- **Learned gate** (t): a logistic model on six frame features (group size, the group's max / mean confidence, all lenses' mean / max confidence, overall disagreement) predicts whether the quorum-1 answer is right; answer when P(right) ≥ t. Unpitched / unoriented frames are labelled wrong and repeated to balance the classes. 5-fold cross-validation by recording / image.
+
+A setting **beats quorum 2** on a dataset when its false-answer rate is no higher, its answer rate is higher and its gross error (abstention counted as wrong) is lower. The readings are the caches of Exp 042, 044 and 045; the unoriented set for BSDS500 is Exp 044's 90 noise patches.
+
+| Dataset | Rule | Answer rate | Noisy frames answered | False answers | Gross error when answering | Gross error, abstain = wrong |
+|---|---|---|---|---|---|---|
+| MDB-stem-synth | quorum 2 | 83.2% | 72.5% | 0% | 1.6% | 18.2% |
+| | **learned, t = 0.5** | **88.5%** | **80.9%** | **0%** | 1.9% | **13.2%** (−5.0, CI −5.6 to −4.5) |
+| | adaptive, c = 0.6 | 85.4% | 75.7% | 0% | 2.1% | 16.4% |
+| BSDS500 | quorum 2 | 67.2% | 35.2% | 3.3% | 14.1% | 42.3% |
+| | **learned, t = 0.5** | **68.8%** | **50.3%** | **1.1%** | **11.2%** | **38.9%** (−3.4, CI −4.8 to −1.8) |
+| | adaptive, c = 0.4 | 72.6% | 36.6% | 3.3% | 18.4% | 40.8% |
+| Synthetic images | quorum 2 | 90.5% | 58.1% | 3.3% | 6.2% | 15.1% |
+| | **learned, t = 0.3** | **92.4%** | **76.6%** | **2.2%** | **4.9%** | **12.1%** (−3.0, CI −3.7 to −2.3) |
+| | adaptive, c = 0.4 | 92.4% | 60.9% | 3.3% | 7.2% | 14.2% |
+| vocadito | quorum 2 | 84.6% | 75.4% | 6.6% | 1.0% | 16.3% |
+| | learned, t = 0.5 | 86.1% | 77.0% | 8.0% | 1.3% | 15.0% |
+| | learned, t = 0.6 | 83.1% | 72.2% | 6.1% | 1.2% | 18.0% |
+| | adaptive, c = 0.9 (only "winner") | 84.8% | 75.4% | 6.6% | 1.2% | 16.3% (±0.0) |
+
+CIs are 95% group-bootstrap intervals over recordings / images for the difference to quorum 2. Synthetic audio is left out of the table: none of its 90 unpitched frames is ever answered by any rule, so it cannot tell the rules apart.
+
+**Key findings:**
+1. **Issue #23's Done-when is met on three of four informative datasets.** A learned gate keeps quorum 2's false-answer rate (or lowers it) and answers more: on MDB-stem-synth 5.3 pts more frames with no false answers; on noisy photo patches 50% answered instead of 35%, with fewer false answers and more accurate answers.
+2. **On real singing no rule can.** On vocadito every rule's curve passes through quorum 2's point: answering more always costs false answers at the same rate. The only setting that formally beats it (adaptive, c = 0.9) differs by 0.2 pts. This is the same wall as Exp 048: breaths and consonants look pitched to all three lenses.
+3. **The hand-made rules barely help.** The noise-adaptive quorum is the only one that ever beats quorum 2 (by 1–5 pts of answer rate), and its best threshold differs by medium (c ≈ 0.4 for images, ≥ 0.6 for audio). Letting a confident single lens answer, widening the agreement tolerance or lowering the trust threshold all buy answers with false answers at a worse rate than quorum 2 itself.
+4. **The learned gate's threshold is an operating point, not a constant.** t = 0.5 is the best setting for real data; on synthetic images it is too strict (86% answered) and t = 0.3 wins. Without class balancing the gate never learns the rare null frames (99% false answers on MDB-stem-synth in a first run), so the balancing matters.
+5. **Caveat:** the image null sets are 90 synthetic noise patches, so one false answer is 1.1 pts; BSDS500 has no real "no orientation" set.
+
+**Decision:** quorum 2 stays the core default; it is the safe choice when no labelled data is available. A learned gate is the better rule wherever there is labelled data for the medium, but it lives in this experiment for now. Together with Exp 047 and 048, the open piece is the same: a learned blind-spot / voicing detector in the core, which would also fix the vocadito case if it can learn what an unpitched frame looks like.
+
+- **Run**: `.venv/bin/python src/experiments/exp049_abstention.py` (uses the caches of Exp 045 and 046 in `data/processed/`; under a minute)
+- **Outputs**: [results/exp049_abstention.png](../results/exp049_abstention.png), [results/exp049_summary.json](../results/exp049_summary.json) (every setting on every dataset)
+
+![Exp 049](../results/exp049_abstention.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -982,6 +1029,8 @@ Exp 047:      Family-aware fusion: a table of which agreement patterns were righ
 Exp 048:      A learned lens chooser on held-out vocadito: 1.8% gross errors vs 5.6% consensus
               and 4.2% best lens (73% of the gap to hindsight closed), but it cannot tell when
               there is no pitch at all
+Exp 049:      When to abstain: a learned gate keeps the quorum's false-answer rate and answers
+              more (MDB +5.3 pts, noisy photos 50% vs 35%); on real singing no rule can
 ```
 
 **Next** (GitHub issues)
@@ -990,7 +1039,7 @@ Exp 048:      A learned lens chooser on held-out vocadito: 1.8% gross errors vs 
 
 **Known limits**
 
-- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise.
+- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049).
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 

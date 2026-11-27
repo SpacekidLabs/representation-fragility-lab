@@ -122,6 +122,9 @@ Exp 048 confirms it from the other side: a learned chooser that looks at every l
 trusted or not, beats the best single lens on held-out real singing for the first time
 (1.8% vs 4.2% gross errors; the consensus makes 5.6%). It cannot tell when there is no
 pitch at all, though, so a learned voicing / blind-spot detector is the open piece.
+Exp 049 finds the same on the abstention side: a learned gate keeps the quorum's
+false-answer rate and answers more on MDB-stem-synth and photos, but on real singing
+no rule beats the quorum.
 
 ---
 
