@@ -29,7 +29,8 @@ packages = [
     "representation_intelligence",
     "representation_intelligence.plugins",
     "representation_core",
-    "representation_image"
+    "representation_image",
+    "representation_timeseries"
 ]
 
 [tool.setuptools.package-dir]
@@ -37,3 +38,4 @@ representation_intelligence = "src/framework"
 "representation_intelligence.plugins" = "src/framework/plugins"
 representation_core = "src/core"
 representation_image = "src/image_medium"
+representation_timeseries = "src/timeseries_medium"
