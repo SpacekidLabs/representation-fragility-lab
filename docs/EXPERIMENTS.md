@@ -1174,6 +1174,63 @@ Error by context, clean (fixed YIN / tracker): vocadito onset 9.3 / 26.3%, offse
 
 ![Exp 054](../results/exp054_tracker_on_real_data.png)
 
+### Phase 35 — Which Lenses Are Worth Keeping (Exp 055)
+
+#### Exp 055 — What Does Each Lens Add, and What Kind of Lens Should Come Next?
+Every earlier experiment added lenses. This one removes them, one at a time and in pairs, and measures what the system loses (issue #29; the issue says "Exp 054", which went to #28).
+
+**Method.**
+- **Pools**: audio = STFT, ACF, Cepstrum + CREPE (Exp 052); images = tensor, HOG, FFT, Gabor, Radon + `cnn_aug` (the augmented CNN read-out of Exp 052). All readings come from the caches of Exp 045, 046 and 052; no lens is re-run.
+- **Data**: synthetic audio (3,240 frames), vocadito (17,955), MDB-stem-synth (64,335); synthetic patches (2,288) and BSDS500 (3,084). False answers use each dataset's null frames (the synthetic unoriented patches for both image sets, as in Exp 049).
+- **Lens sets**: the full pool, every drop-1 set and every drop-2 set, on the unchanged quorum-2 comparator (Exp 046).
+- **Metrics**: gross error counting abstention as wrong (`gross_all`), gross error among answers, abstention, false answers on null input, the warning AUC (each remaining lens's divergence for "this lens is wrong", no training) and the consensus AUC (overall disagreement for "the answer is wrong").
+- **Value of a lens** = how much worse the metric gets without it; 95% CI by group bootstrap over recordings / images.
+- **Blind-spot overlap** per lens (Exp 043/052): mean and max φ correlation of its gross errors with the other lenses, plus **coverage** = share of frames where it is right and fewer than two other lenses are (the frames where only it can complete a right quorum).
+
+**Value of each lens** (extra `gross_all` when it is dropped, pts, with CI; positive = the lens helps):
+
+| Medium / data | Full pool: gross_all (answer) | Lens values |
+|---|---|---|
+| audio synthetic | 6.5% (94.0%) | CREPE **+5.2** [4.0, 6.5] · STFT **+4.7** [3.7, 5.9] · ACF +0.6 [0.2, 1.1] · Cepstrum +0.2 [0.0, 0.5] |
+| vocadito | 4.8% (96.0%) | CREPE **+11.5** [9.2, 13.8] · STFT **+6.0** [5.2, 6.9] · ACF **+5.2** [2.9, 7.6] · Cepstrum +0.3 [0.0, 0.6] |
+| MDB-stem-synth | 7.0% (94.0%) | CREPE **+11.2** [10.3, 12.1] · STFT **+7.3** [6.5, 8.1] · ACF +3.5 [2.8, 4.2] · Cepstrum +0.5 [0.3, 0.7] |
+| image synthetic | 14.2% (91.3%) | Radon **+4.4** [3.6, 5.2] · FFT +2.0 [1.2, 2.8] · Gabor +1.0 [0.2, 1.7] · cnn_aug +0.9 [0.5, 1.4] · tensor +0.7 [0.0, 1.4] · HOG 0.0 [−0.5, 0.4] |
+| BSDS500 | 41.0% (69.4%) | Radon **+10.9** [9.4, 12.5] · FFT **+9.2** [7.6, 10.8] · Gabor **+4.8** [3.8, 5.9] · cnn_aug +1.4 [0.8, 1.9] · tensor +0.6 [0.2, 0.9] · HOG +0.1 [−0.1, 0.2] |
+
+**What the value is made of.**
+- **Almost all of it is abstention.** With quorum 2, a lens is valuable when it completes right quorums that would otherwise not form. Dropping CREPE on real audio raises abstention by 11 pts but moves the error *among answers* by only +0.1 / +0.6 pts. Across all lenses and datasets, the gross error among answers moves by at most 0.6 pts in audio; in images, dropping FFT or Gabor on photos even *lowers* it (−7.4 / −4.3 pts) because the system then answers only the easy patches.
+- **False answers go the other way.** Fewer lenses mean fewer chance quorums on null input: dropping STFT, ACF or CREPE cuts false answers on vocadito by 4–5 pts (10.8% with the full pool). Dropping Cepstrum cuts them by 0.8 pts.
+- **The warning barely depends on any one lens.** The mean warning AUC changes by less than 0.07 for every drop. Cepstrum's one job is the consensus warning on synthetic audio: without it the overall disagreement predicts a wrong answer much worse (AUC −0.42); on real audio the loss is 0.06–0.08. On images, dropping tensor, HOG or cnn_aug slightly *raises* the warning AUC: they add noise to the divergence.
+- **Pairs.** In audio, dropping two lenses leaves two, so the quorum then needs both to agree, and abstention explodes (+41–58 pts for any two of STFT, ACF and CREPE). That is a property of a fixed quorum of 2, not of the lenses. The cheap pairs are STFT + Cepstrum (+6.5–8.7 pts) and ACF + Cepstrum on synthetic. On photos, the three global lenses back each other up: dropping FFT + Gabor costs 24.3 pts, 10.3 more than the two single drops added together; Gabor + Radon 10.1 more. Tensor + HOG together cost 0.7–1.4 pts.
+
+**What predicts value** (Spearman over all 22 lens × dataset points):
+
+| Predictor | ρ with value | p |
+|---|---|---|
+| Coverage (right where fewer than two others are) | **+0.79** | < 0.001 |
+| Own gross error | −0.55 | 0.006 |
+| Mean φ with the other lenses (Exp 043 overlap) | −0.06 | 0.79 |
+| Max φ with the closest lens | −0.14 | 0.51 |
+
+Pairwise blind-spot overlap, the measure of Exp 043, does **not** predict what a lens is worth. On MDB-stem-synth CREPE overlaps the others about as much as ACF does (mean φ 0.21 vs 0.22) and is still the most valuable lens. What matters is where a lens is right: on the frames where the rest of the pool cannot form a right quorum. Accuracy helps only because accurate lenses tend to cover more of those frames.
+
+**Key findings:**
+1. **Worth keeping**: CREPE, STFT and ACF in audio; Radon, FFT and Gabor in images. Each has a CI above zero on every real dataset.
+2. **Nearly free to drop**: HOG (0.0–0.1 pts, CI includes 0) and Cepstrum (+0.2–0.5 pts for the answer). Cepstrum still earns its place as a warning lens on synthetic audio (consensus AUC +0.42), and on real audio it is the cheapest lens to drop for fewer false answers. Tensor and `cnn_aug` add under 1.5 pts.
+3. **The local-gradient family is redundant behind the global one** on both image datasets: tensor and HOG together are worth 0.7–1.4 pts, while any two of FFT, Gabor and Radon are worth 5–8 pts on synthetic patches and 24–27 pts on photos.
+4. **A lens's worth is its coverage, not its independence.** Blind-spot overlap with the other lenses (Exp 043) has no relation to value (ρ ≈ 0); coverage of the frames where the pool fails to form a right quorum does (ρ = +0.79).
+5. **Limits**: values are measured under the quorum-2 rule, where most of the value is answered frames; under another fusion rule (Exp 047, 048) the ranking could differ. The pair results in audio are dominated by the quorum needing unanimity once two lenses are left. Image null frames are synthetic for both image datasets.
+
+**Recommendation — the next lens:** do not add another lens from a family that already exists (a second gradient lens, a second periodicity lens). Add the lens most likely to be **right where the current pool cannot form a quorum**:
+- **Images**: a lens that is right on photos where the global lenses fail. BSDS500 leaves 31% of patches without an answer and 41% wrong overall, and the only learned lens is trained on synthetic patterns (62% gross errors on photos). The candidate is a learned orientation read-out **trained on real photos**, judged by its coverage of those unanswered patches, not by its accuracy alone.
+- **Audio**: CREPE already covers most frames; the remaining 4–6% unanswered frames on real audio are where a new lens has to be right. The candidate is a second accurate lens independent of CREPE, or Exp 050's probing as a lens, judged by coverage on the frames where the current quorum abstains.
+- Coverage (right where fewer than two others are) is cheap to compute from cached readings and should be the admission test for any new lens.
+
+- **Run**: `.venv/bin/python src/experiments/exp055_lens_value.py` (needs the Exp 045, 046 and 052 caches in `data/processed`; about 20 s, no lens is re-run)
+- **Outputs**: [results/exp055_lens_value.png](../results/exp055_lens_value.png), [results/exp055_summary.json](../results/exp055_summary.json) (every lens set with all metrics and per-lens warning AUCs, the value of each lens with CIs, pair values and interactions, overlap and coverage per lens)
+
+![Exp 055](../results/exp055_lens_value.png)
+
 ---
 
 ## Listen tests

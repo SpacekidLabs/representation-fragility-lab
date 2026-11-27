@@ -154,6 +154,13 @@ recordings. Its median filter assumes the pitch holds still for about 100 ms, wh
 vibrato and note changes break. Its adaptive windows also hurt under noise. What does help
 is the quorum of plain lenses with a YIN fallback, which beats fixed YIN on both real audio
 datasets.
+Exp 055 asks what each lens is worth by removing it. Under the quorum, a lens's value is
+almost all in the frames it lets the system answer. CREPE, STFT and ACF (audio) and Radon,
+FFT and Gabor (images) are worth keeping; HOG and Cepstrum add almost nothing to the answer
+(Cepstrum still sharpens the warning on synthetic audio). Blind-spot overlap with the other
+lenses does not predict a lens's value; coverage does: being right where fewer than two
+other lenses are (Spearman +0.79). The next lens should be chosen by that coverage. For
+images that means a learned lens trained on real photos, where 31% of patches go unanswered.
 
 ---
 

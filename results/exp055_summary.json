@@ -1,0 +1,2386 @@
+{
+  "pools": {
+    "audio": [
+      "stft",
+      "acf",
+      "cepstrum",
+      "crepe"
+    ],
+    "image": [
+      "tensor",
+      "hog",
+      "fft",
+      "gabor",
+      "radon",
+      "cnn_aug"
+    ]
+  },
+  "calibration": {
+    "crepe": [
+      0.105,
+      0.872
+    ],
+    "cnn_aug": [
+      0.284,
+      0.803
+    ]
+  },
+  "media": {
+    "audio": {
+      "synthetic": {
+        "n": 3240,
+        "n_null": 90,
+        "sets": {
+          "full": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9853271889400922,
+              "acf": 0.8905217221990187,
+              "cepstrum": 0.964272353161242,
+              "crepe": 0.9282007577355689
+            },
+            "warning_auc_mean": 0.9420805055089805,
+            "consensus_auc": 0.9343717892264788,
+            "answer": 0.9401234567901234,
+            "gross_answer": 0.005909389363099146,
+            "gross_all": 0.0654320987654321,
+            "false_answer": 0.0
+          },
+          "-stft": {
+            "lenses": [
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.8696682922333979,
+              "cepstrum": 0.9641208574947001,
+              "crepe": 0.9054349385289129
+            },
+            "warning_auc_mean": 0.9130746960856703,
+            "consensus_auc": 0.8842826086956522,
+            "answer": 0.8922839506172839,
+            "gross_answer": 0.005534417156693186,
+            "gross_all": 0.11265432098765432,
+            "false_answer": 0.0
+          },
+          "-acf": {
+            "lenses": [
+              "stft",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9848755760368664,
+              "cepstrum": 0.966750354626512,
+              "crepe": 0.9060087249284876
+            },
+            "warning_auc_mean": 0.9525448851972887,
+            "consensus_auc": 0.9122188988589787,
+            "answer": 0.9333333333333333,
+            "gross_answer": 0.00496031746031746,
+            "gross_all": 0.0712962962962963,
+            "false_answer": 0.0
+          },
+          "-cepstrum": {
+            "lenses": [
+              "stft",
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9357073732718894,
+              "acf": 0.9064761567856883,
+              "crepe": 0.7626971335994127
+            },
+            "warning_auc_mean": 0.8682935545523301,
+            "consensus_auc": 0.5102798926036265,
+            "answer": 0.937962962962963,
+            "gross_answer": 0.005923000987166831,
+            "gross_all": 0.06759259259259259,
+            "false_answer": 0.0
+          },
+          "-crepe": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.9871013824884792,
+              "acf": 0.8333984848192083,
+              "cepstrum": 0.9544441326848734
+            },
+            "warning_auc_mean": 0.9249813333308537,
+            "consensus_auc": 0.9076340326340326,
+            "answer": 0.8882716049382716,
+            "gross_answer": 0.006254343293954135,
+            "gross_all": 0.11728395061728394,
+            "false_answer": 0.0
+          },
+          "-stft-acf": {
+            "lenses": [
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "cepstrum": 0.9705129029492455,
+              "crepe": 0.8136755237910405
+            },
+            "warning_auc_mean": 0.892094213370143,
+            "consensus_auc": NaN,
+            "answer": 0.5268518518518519,
+            "gross_answer": 0.0,
+            "gross_all": 0.47314814814814815,
+            "false_answer": 0.0
+          },
+          "-stft-cepstrum": {
+            "lenses": [
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.9127366448124306,
+              "crepe": 0.7665448776906785
+            },
+            "warning_auc_mean": 0.8396407612515545,
+            "consensus_auc": 0.3888494318181818,
+            "answer": 0.8731481481481481,
+            "gross_answer": 0.004595263343937788,
+            "gross_all": 0.1308641975308642,
+            "false_answer": 0.0
+          },
+          "-stft-crepe": {
+            "lenses": [
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "acf": 0.7339039909867998,
+              "cepstrum": 0.9461513280957725
+            },
+            "warning_auc_mean": 0.8400276595412861,
+            "consensus_auc": 0.7951199838677153,
+            "answer": 0.5111111111111111,
+            "gross_answer": 0.0018115942028985507,
+            "gross_all": 0.4898148148148148,
+            "false_answer": 0.0
+          },
+          "-acf-cepstrum": {
+            "lenses": [
+              "stft",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9381705069124424,
+              "crepe": 0.742336154449798
+            },
+            "warning_auc_mean": 0.8402533306811202,
+            "consensus_auc": 0.4624682814302191,
+            "answer": 0.8966049382716049,
+            "gross_answer": 0.0051635111876075735,
+            "gross_all": 0.10802469135802469,
+            "false_answer": 0.0
+          },
+          "-acf-crepe": {
+            "lenses": [
+              "stft",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.8511129032258065,
+              "cepstrum": 0.9449773584611547
+            },
+            "warning_auc_mean": 0.8980451308434806,
+            "consensus_auc": NaN,
+            "answer": 0.49506172839506174,
+            "gross_answer": 0.0,
+            "gross_all": 0.5049382716049383,
+            "false_answer": 0.0
+          },
+          "-cepstrum-crepe": {
+            "lenses": [
+              "stft",
+              "acf"
+            ],
+            "warning_auc": {
+              "stft": 0.9085691244239631,
+              "acf": 0.8935271131748195
+            },
+            "warning_auc_mean": 0.9010481187993913,
+            "consensus_auc": 0.1764982664685488,
+            "answer": 0.8354938271604938,
+            "gross_answer": 0.005541189508681197,
+            "gross_all": 0.16913580246913582,
+            "false_answer": 0.0
+          }
+        },
+        "value": {
+          "stft": {
+            "gross_all": 0.04722222222222222,
+            "gross_all_ci95": [
+              0.03734567901234568,
+              0.05895061728395062
+            ],
+            "gross_answer": -0.00037497220640596036,
+            "abstention": 0.0478395061728395,
+            "false_answer": 0.0,
+            "warning_auc": 0.014590248279606236,
+            "consensus_auc": 0.05008918053082656
+          },
+          "acf": {
+            "gross_all": 0.005864197530864201,
+            "gross_all_ci95": [
+              0.001851851851851852,
+              0.011111111111111112
+            ],
+            "gross_answer": -0.0009490719027816863,
+            "abstention": 0.006790123456790087,
+            "false_answer": 0.0,
+            "warning_auc": 0.006721881415012361,
+            "consensus_auc": 0.022152890367500122
+          },
+          "cepstrum": {
+            "gross_all": 0.0021604938271604923,
+            "gross_all_ci95": [
+              0.0,
+              0.0049382716049382715
+            ],
+            "gross_answer": 1.361162406768486e-05,
+            "abstention": 0.002160493827160437,
+            "false_answer": 0.0,
+            "warning_auc": 0.06638966840589648,
+            "consensus_auc": 0.4240918966228523
+          },
+          "crepe": {
+            "gross_all": 0.05185185185185184,
+            "gross_all_ci95": [
+              0.03981481481481482,
+              0.0654320987654321
+            ],
+            "gross_answer": 0.00034495393085498885,
+            "abstention": 0.051851851851851816,
+            "false_answer": 0.0,
+            "warning_auc": 0.02172575476926401,
+            "consensus_auc": 0.02673775659244615
+          }
+        },
+        "pairs": {
+          "stft+acf": {
+            "gross_all": 0.40771604938271605,
+            "interaction": 0.35462962962962963,
+            "answer": 0.5268518518518519,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.892094213370143
+          },
+          "stft+cepstrum": {
+            "gross_all": 0.0654320987654321,
+            "interaction": 0.016049382716049387,
+            "answer": 0.8731481481481481,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8396407612515545
+          },
+          "stft+crepe": {
+            "gross_all": 0.4243827160493827,
+            "interaction": 0.3253086419753086,
+            "answer": 0.5111111111111111,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8400276595412861
+          },
+          "acf+cepstrum": {
+            "gross_all": 0.042592592592592585,
+            "interaction": 0.03456790123456789,
+            "answer": 0.8966049382716049,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8402533306811202
+          },
+          "acf+crepe": {
+            "gross_all": 0.4395061728395062,
+            "interaction": 0.3817901234567902,
+            "answer": 0.49506172839506174,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8980451308434806
+          },
+          "cepstrum+crepe": {
+            "gross_all": 0.10370370370370371,
+            "interaction": 0.04969135802469138,
+            "answer": 0.8354938271604938,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9010481187993913
+          }
+        },
+        "cheapest_pair_to_drop": "acf+cepstrum",
+        "overlap": {
+          "stft": {
+            "gross": 0.043209876543209874,
+            "mean_phi": 0.03525546156648035,
+            "max_phi": 0.1914545195796391,
+            "closest": "crepe",
+            "coverage": 0.04135802469135803
+          },
+          "acf": {
+            "gross": 0.06882716049382716,
+            "mean_phi": 0.11765697172893401,
+            "max_phi": 0.1779135118968117,
+            "closest": "cepstrum",
+            "coverage": 0.0049382716049382715
+          },
+          "cepstrum": {
+            "gross": 0.26666666666666666,
+            "mean_phi": 0.04001891414337739,
+            "max_phi": 0.1779135118968117,
+            "closest": "acf",
+            "coverage": 0.004629629629629629
+          },
+          "crepe": {
+            "gross": 0.011419753086419753,
+            "mean_phi": 0.1314477627610493,
+            "max_phi": 0.1914545195796391,
+            "closest": "stft",
+            "coverage": 0.03734567901234568
+          }
+        }
+      },
+      "vocadito": {
+        "n": 17955,
+        "n_null": 1781,
+        "sets": {
+          "full": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9918444358302809,
+              "acf": 0.8530105461565957,
+              "cepstrum": 0.9548240592533309,
+              "crepe": 0.8489529074916894
+            },
+            "warning_auc_mean": 0.9121579871829743,
+            "consensus_auc": 0.8785971329644074,
+            "answer": 0.9602896129211919,
+            "gross_answer": 0.00887368054750029,
+            "gross_all": 0.048231690336953494,
+            "false_answer": 0.10780460415496912
+          },
+          "-stft": {
+            "lenses": [
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.8704863142376206,
+              "cepstrum": 0.9632136330315602,
+              "crepe": 0.8570633401771531
+            },
+            "warning_auc_mean": 0.8969210958154447,
+            "consensus_auc": 0.8272566920586925,
+            "answer": 0.8949596212754107,
+            "gross_answer": 0.0036094343145186385,
+            "gross_all": 0.10827067669172932,
+            "false_answer": 0.058955642897248736
+          },
+          "-acf": {
+            "lenses": [
+              "stft",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9867254317683616,
+              "cepstrum": 0.956609281889394,
+              "crepe": 0.772415892195246
+            },
+            "warning_auc_mean": 0.9052502019510005,
+            "consensus_auc": 0.8160681415462625,
+            "answer": 0.9058758006126427,
+            "gross_answer": 0.006640024592683677,
+            "gross_all": 0.10013923698134225,
+            "false_answer": 0.06457046603032005
+          },
+          "-cepstrum": {
+            "lenses": [
+              "stft",
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9903759576390947,
+              "acf": 0.8375200670095889,
+              "crepe": 0.7962754491517297
+            },
+            "warning_auc_mean": 0.8747238246001378,
+            "consensus_auc": 0.802708723456673,
+            "answer": 0.9601225285435812,
+            "gross_answer": 0.011775625036255004,
+            "gross_all": 0.05118351434140908,
+            "false_answer": 0.09994385176866928
+          },
+          "-crepe": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.9852455941479864,
+              "acf": 0.7365854823688595,
+              "cepstrum": 0.9326489320799545
+            },
+            "warning_auc_mean": 0.8848266695322667,
+            "consensus_auc": 0.8557774627421405,
+            "answer": 0.8458368142578669,
+            "gross_answer": 0.010140251530914598,
+            "gross_all": 0.16274018379281538,
+            "false_answer": 0.06625491297024144
+          },
+          "-stft-acf": {
+            "lenses": [
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "cepstrum": 0.9730869199531664,
+              "crepe": 0.7792659660834826
+            },
+            "warning_auc_mean": 0.8761764430183245,
+            "consensus_auc": 0.7085950206430627,
+            "answer": 0.4454469507101086,
+            "gross_answer": 0.000625156289072268,
+            "gross_all": 0.5548315232525759,
+            "false_answer": 0.006176305446378439
+          },
+          "-stft-cepstrum": {
+            "lenses": [
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.9247749186497655,
+              "crepe": 0.8495157803949879
+            },
+            "warning_auc_mean": 0.8871453495223767,
+            "consensus_auc": 0.6011024542373622,
+            "answer": 0.8892787524366472,
+            "gross_answer": 0.002880941942756936,
+            "gross_all": 0.11328320802005012,
+            "false_answer": 0.05053340819764177
+          },
+          "-stft-crepe": {
+            "lenses": [
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "acf": 0.7165823223559473,
+              "cepstrum": 0.9363690632948336
+            },
+            "warning_auc_mean": 0.8264756928253905,
+            "consensus_auc": 0.7718642479110227,
+            "answer": 0.4435533277638541,
+            "gross_answer": 0.0013812154696132596,
+            "gross_all": 0.5570593149540518,
+            "false_answer": 0.01347557551937114
+          },
+          "-acf-cepstrum": {
+            "lenses": [
+              "stft",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9779741174014464,
+              "crepe": 0.6293243678699043
+            },
+            "warning_auc_mean": 0.8036492426356754,
+            "consensus_auc": 0.576095635401247,
+            "answer": 0.8335839598997494,
+            "gross_answer": 0.007015433954700341,
+            "gross_all": 0.1722639933166249,
+            "false_answer": 0.06288601909039865
+          },
+          "-acf-crepe": {
+            "lenses": [
+              "stft",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.8664598913228989,
+              "cepstrum": 0.9026496282273593
+            },
+            "warning_auc_mean": 0.8845547597751291,
+            "consensus_auc": 0.5547934993290592,
+            "answer": 0.37360066833751043,
+            "gross_answer": 0.0001490757304710793,
+            "gross_all": 0.6264550264550265,
+            "false_answer": 0.004491858506457047
+          },
+          "-cepstrum-crepe": {
+            "lenses": [
+              "stft",
+              "acf"
+            ],
+            "warning_auc": {
+              "stft": 0.974053039780721,
+              "acf": 0.779106362571595
+            },
+            "warning_auc_mean": 0.876579701176158,
+            "consensus_auc": 0.6453256217700258,
+            "answer": 0.7743803954330271,
+            "gross_answer": 0.010356731875719217,
+            "gross_all": 0.23363965469228626,
+            "false_answer": 0.057271195957327346
+          }
+        },
+        "value": {
+          "stft": {
+            "gross_all": 0.06003898635477583,
+            "gross_all_ci95": [
+              0.05196524430820308,
+              0.06876649916451884
+            ],
+            "gross_answer": -0.0052642462329816515,
+            "abstention": 0.06532999164578113,
+            "false_answer": -0.04884896125772038,
+            "warning_auc": -0.011325258181572631,
+            "consensus_auc": 0.05134044090571499
+          },
+          "acf": {
+            "gross_all": 0.051907546644388756,
+            "gross_all_ci95": [
+              0.02859634892182238,
+              0.07632059543518276
+            ],
+            "gross_answer": -0.002233655954816613,
+            "abstention": 0.05441381230854914,
+            "false_answer": -0.043234138124649074,
+            "warning_auc": 0.026623598907433228,
+            "consensus_auc": 0.06252899141814494
+          },
+          "cepstrum": {
+            "gross_all": 0.0029518240044555874,
+            "gross_all_ci95": [
+              0.000367486586747884,
+              0.006248683105925757
+            ],
+            "gross_answer": 0.002901944488754714,
+            "abstention": 0.0001670843776107045,
+            "false_answer": -0.007860752386299838,
+            "warning_auc": 0.023212138559384237,
+            "consensus_auc": 0.07588840950773446
+          },
+          "crepe": {
+            "gross_all": 0.11450849345586189,
+            "gross_all_ci95": [
+              0.0922888367469778,
+              0.13807323041382938
+            ],
+            "gross_answer": 0.0012665709834143082,
+            "abstention": 0.11445279866332492,
+            "false_answer": -0.04154969118472768,
+            "warning_auc": 0.04839967754780239,
+            "consensus_auc": 0.02281967022226694
+          }
+        },
+        "pairs": {
+          "stft+acf": {
+            "gross_all": 0.5065998329156224,
+            "interaction": 0.3946532999164578,
+            "answer": 0.4454469507101086,
+            "false_answer": 0.006176305446378439,
+            "warning_auc_mean": 0.8761764430183245
+          },
+          "stft+cepstrum": {
+            "gross_all": 0.06505151768309664,
+            "interaction": 0.0020607073238652213,
+            "answer": 0.8892787524366472,
+            "false_answer": 0.05053340819764177,
+            "warning_auc_mean": 0.8871453495223767
+          },
+          "stft+crepe": {
+            "gross_all": 0.5088276246170983,
+            "interaction": 0.33428014480646057,
+            "answer": 0.4435533277638541,
+            "false_answer": 0.01347557551937114,
+            "warning_auc_mean": 0.8264756928253905
+          },
+          "acf+cepstrum": {
+            "gross_all": 0.12403230297967141,
+            "interaction": 0.06917293233082705,
+            "answer": 0.8335839598997494,
+            "false_answer": 0.06288601909039865,
+            "warning_auc_mean": 0.8036492426356754
+          },
+          "acf+crepe": {
+            "gross_all": 0.578223336118073,
+            "interaction": 0.4118072960178223,
+            "answer": 0.37360066833751043,
+            "false_answer": 0.004491858506457047,
+            "warning_auc_mean": 0.8845547597751291
+          },
+          "cepstrum+crepe": {
+            "gross_all": 0.18540796435533277,
+            "interaction": 0.06794764689501528,
+            "answer": 0.7743803954330271,
+            "false_answer": 0.057271195957327346,
+            "warning_auc_mean": 0.876579701176158
+          }
+        },
+        "cheapest_pair_to_drop": "stft+cepstrum",
+        "overlap": {
+          "stft": {
+            "gross": 0.14307992202729045,
+            "mean_phi": 0.07918417717612158,
+            "max_phi": 0.20410161778086455,
+            "closest": "crepe",
+            "coverage": 0.025118351434140908
+          },
+          "acf": {
+            "gross": 0.041882483987747146,
+            "mean_phi": 0.1682365235796616,
+            "max_phi": 0.22928203849550763,
+            "closest": "cepstrum",
+            "coverage": 0.02729044834307992
+          },
+          "cepstrum": {
+            "gross": 0.22456140350877193,
+            "mean_phi": 0.08606338387659608,
+            "max_phi": 0.22928203849550763,
+            "closest": "acf",
+            "coverage": 0.009913673071567809
+          },
+          "crepe": {
+            "gross": 0.010526315789473684,
+            "mean_phi": 0.1583287831370407,
+            "max_phi": 0.20999748444969904,
+            "closest": "acf",
+            "coverage": 0.05235310498468393
+          }
+        }
+      },
+      "MDB-stem-synth": {
+        "n": 64335,
+        "n_null": 292,
+        "sets": {
+          "full": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9878208071328541,
+              "acf": 0.8545478949933469,
+              "cepstrum": 0.9540944119898973,
+              "crepe": 0.892296403337431
+            },
+            "warning_auc_mean": 0.9221898793633824,
+            "consensus_auc": 0.8661330365796339,
+            "answer": 0.9401725343903008,
+            "gross_answer": 0.010696690143173627,
+            "gross_all": 0.06988419989119453,
+            "false_answer": 0.0
+          },
+          "-stft": {
+            "lenses": [
+              "acf",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.8600520688872585,
+              "cepstrum": 0.9586736645946385,
+              "crepe": 0.8727017572005004
+            },
+            "warning_auc_mean": 0.8971424968941325,
+            "consensus_auc": 0.8658325910716215,
+            "answer": 0.8619414004818527,
+            "gross_answer": 0.005716552756388293,
+            "gross_all": 0.14298593300691692,
+            "false_answer": 0.0
+          },
+          "-acf": {
+            "lenses": [
+              "stft",
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9833294384633877,
+              "cepstrum": 0.9532928392605352,
+              "crepe": 0.8349915921264599
+            },
+            "warning_auc_mean": 0.9238712899501276,
+            "consensus_auc": 0.8150846421232971,
+            "answer": 0.9006761482863138,
+            "gross_answer": 0.0057640866338769525,
+            "gross_all": 0.1045154270614751,
+            "false_answer": 0.0
+          },
+          "-cepstrum": {
+            "lenses": [
+              "stft",
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9854318899313698,
+              "acf": 0.8585583908721136,
+              "crepe": 0.8705931122849552
+            },
+            "warning_auc_mean": 0.9048611310294795,
+            "consensus_auc": 0.8039454714657029,
+            "answer": 0.9388979560115023,
+            "gross_answer": 0.014816899543076618,
+            "gross_all": 0.0750136006839201,
+            "false_answer": 0.0
+          },
+          "-crepe": {
+            "lenses": [
+              "stft",
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.9691660940372901,
+              "acf": 0.7695913911943629,
+              "cepstrum": 0.937606304718925
+            },
+            "warning_auc_mean": 0.8921212633168594,
+            "consensus_auc": 0.8307774901733536,
+            "answer": 0.8318489158311961,
+            "gross_answer": 0.016237830969598445,
+            "gross_all": 0.1816585062563146,
+            "false_answer": 0.0
+          },
+          "-stft-acf": {
+            "lenses": [
+              "cepstrum",
+              "crepe"
+            ],
+            "warning_auc": {
+              "cepstrum": 0.9641074279213332,
+              "crepe": 0.7679947001053525
+            },
+            "warning_auc_mean": 0.8660510640133429,
+            "consensus_auc": 0.7142511639155934,
+            "answer": 0.5141991140125903,
+            "gross_answer": 9.068649678062936e-05,
+            "gross_all": 0.48584751690370714,
+            "false_answer": 0.0
+          },
+          "-stft-cepstrum": {
+            "lenses": [
+              "acf",
+              "crepe"
+            ],
+            "warning_auc": {
+              "acf": 0.9206411086705836,
+              "crepe": 0.8899280569675625
+            },
+            "warning_auc_mean": 0.905284582819073,
+            "consensus_auc": 0.6539086522178472,
+            "answer": 0.8467552654076319,
+            "gross_answer": 0.004368896394742639,
+            "gross_all": 0.15694412061863683,
+            "false_answer": 0.0
+          },
+          "-stft-crepe": {
+            "lenses": [
+              "acf",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "acf": 0.752991017217581,
+              "cepstrum": 0.941764469541315
+            },
+            "warning_auc_mean": 0.847377743379448,
+            "consensus_auc": 0.5548244268399415,
+            "answer": 0.5078106784798321,
+            "gross_answer": 0.0023262932353841446,
+            "gross_all": 0.4933706380663713,
+            "false_answer": 0.0
+          },
+          "-acf-cepstrum": {
+            "lenses": [
+              "stft",
+              "crepe"
+            ],
+            "warning_auc": {
+              "stft": 0.9801050458549924,
+              "crepe": 0.7875939251195818
+            },
+            "warning_auc_mean": 0.8838494854872871,
+            "consensus_auc": 0.67504882648954,
+            "answer": 0.8207663013911557,
+            "gross_answer": 0.0062495265510188625,
+            "gross_all": 0.18436309940156992,
+            "false_answer": 0.0
+          },
+          "-acf-crepe": {
+            "lenses": [
+              "stft",
+              "cepstrum"
+            ],
+            "warning_auc": {
+              "stft": 0.8499673020570284,
+              "cepstrum": 0.8999629946532427
+            },
+            "warning_auc_mean": 0.8749651483551355,
+            "consensus_auc": 0.7553836875155213,
+            "answer": 0.4381440895313593,
+            "gross_answer": 3.547608911593586e-05,
+            "gross_all": 0.5618714541074066,
+            "false_answer": 0.0
+          },
+          "-cepstrum-crepe": {
+            "lenses": [
+              "stft",
+              "acf"
+            ],
+            "warning_auc": {
+              "stft": 0.9555866297619453,
+              "acf": 0.8247387510668472
+            },
+            "warning_auc_mean": 0.8901626904143962,
+            "consensus_auc": 0.6835456867292309,
+            "answer": 0.7515038470505946,
+            "gross_answer": 0.016401919417556053,
+            "gross_all": 0.26082225849071267,
+            "false_answer": 0.0
+          }
+        },
+        "value": {
+          "stft": {
+            "gross_all": 0.07310173311572239,
+            "gross_all_ci95": [
+              0.06541660609725798,
+              0.08104124499595988
+            ],
+            "gross_answer": -0.004980137386785335,
+            "abstention": 0.07823113390844805,
+            "false_answer": 0.0,
+            "warning_auc": 0.0031704065460926114,
+            "consensus_auc": 0.00030044550801244796
+          },
+          "acf": {
+            "gross_all": 0.03463122717028057,
+            "gross_all_ci95": [
+              0.027820315607370385,
+              0.042396744213739276
+            ],
+            "gross_answer": -0.004932603509296675,
+            "abstention": 0.03949638610398698,
+            "false_answer": 0.0,
+            "warning_auc": 0.02086591753659987,
+            "consensus_auc": 0.0510483944563368
+          },
+          "cepstrum": {
+            "gross_all": 0.005129400792725572,
+            "gross_all_ci95": [
+              0.0033955337679429415,
+              0.006952315701710516
+            ],
+            "gross_answer": 0.004120209399902991,
+            "abstention": 0.0012745783787985188,
+            "false_answer": 0.0,
+            "warning_auc": 0.006693904125064505,
+            "consensus_auc": 0.062187565113930976
+          },
+          "crepe": {
+            "gross_all": 0.11177430636512008,
+            "gross_all_ci95": [
+              0.10343943614169081,
+              0.12051124408877173
+            ],
+            "gross_answer": 0.005541140826424817,
+            "abstention": 0.10832361855910466,
+            "false_answer": 0.0,
+            "warning_auc": 0.040033108055173426,
+            "consensus_auc": 0.03535554640628036
+          }
+        },
+        "pairs": {
+          "stft+acf": {
+            "gross_all": 0.4159633170125126,
+            "interaction": 0.30823035672650967,
+            "answer": 0.5141991140125903,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8660510640133429
+          },
+          "stft+cepstrum": {
+            "gross_all": 0.0870599207274423,
+            "interaction": 0.008828786818994336,
+            "answer": 0.8467552654076319,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.905284582819073
+          },
+          "stft+crepe": {
+            "gross_all": 0.4234864381751768,
+            "interaction": 0.2386103986943343,
+            "answer": 0.5078106784798321,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.847377743379448
+          },
+          "acf+cepstrum": {
+            "gross_all": 0.11447889951037539,
+            "interaction": 0.07471827154736925,
+            "answer": 0.8207663013911557,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8838494854872871
+          },
+          "acf+crepe": {
+            "gross_all": 0.49198725421621203,
+            "interaction": 0.3455817206808114,
+            "answer": 0.4381440895313593,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8749651483551355
+          },
+          "cepstrum+crepe": {
+            "gross_all": 0.19093805859951812,
+            "interaction": 0.07403435144167249,
+            "answer": 0.7515038470505946,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.8901626904143962
+          }
+        },
+        "cheapest_pair_to_drop": "stft+cepstrum",
+        "overlap": {
+          "stft": {
+            "gross": 0.13280484961529493,
+            "mean_phi": 0.07360425932591202,
+            "max_phi": 0.22201171158722394,
+            "closest": "crepe",
+            "coverage": 0.062345535089764516
+          },
+          "acf": {
+            "gross": 0.09935493899121785,
+            "mean_phi": 0.21770686835886388,
+            "max_phi": 0.31806502069706377,
+            "closest": "cepstrum",
+            "coverage": 0.020750757752389836
+          },
+          "cepstrum": {
+            "gross": 0.26186368228802365,
+            "mean_phi": 0.13086809309197547,
+            "max_phi": 0.31806502069706377,
+            "closest": "acf",
+            "coverage": 0.013010025647003964
+          },
+          "crepe": {
+            "gross": 0.02057977772596565,
+            "mean_phi": 0.21093516271836746,
+            "max_phi": 0.2702711801940729,
+            "closest": "acf",
+            "coverage": 0.08015854511541151
+          }
+        }
+      }
+    },
+    "image": {
+      "synthetic": {
+        "n": 2288,
+        "n_null": 90,
+        "sets": {
+          "full": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9387862129439142,
+              "hog": 0.9333576590166155,
+              "fft": 0.9641196655550722,
+              "gabor": 0.9586003024886567,
+              "radon": 0.9293304950329744,
+              "cnn_aug": 0.9061418202121719
+            },
+            "warning_auc_mean": 0.9383893592082341,
+            "consensus_auc": 0.934,
+            "answer": 0.9130244755244755,
+            "gross_answer": 0.059837242699856394,
+            "gross_all": 0.14160839160839161,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.9357990046532274,
+              "fft": 0.9683993040452371,
+              "gabor": 0.9609468811586233,
+              "radon": 0.9314884381000084,
+              "cnn_aug": 0.9034431416340964
+            },
+            "warning_auc_mean": 0.9400153539182385,
+            "consensus_auc": 0.9470025985353709,
+            "answer": 0.9007867132867133,
+            "gross_answer": 0.05482775351770985,
+            "gross_all": 0.1486013986013986,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9444723618090453,
+              "fft": 0.9732371562515103,
+              "gabor": 0.9701750767679546,
+              "radon": 0.9387761916687537,
+              "cnn_aug": 0.9100422748663954
+            },
+            "warning_auc_mean": 0.9473406122727319,
+            "consensus_auc": 0.9587058579861231,
+            "answer": 0.909965034965035,
+            "gross_answer": 0.056676272814601344,
+            "gross_all": 0.14160839160839161,
+            "false_answer": 0.03333333333333333
+          },
+          "-fft": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9418232100097804,
+              "hog": 0.9358353677880306,
+              "gabor": 0.9566432925431962,
+              "radon": 0.9221011770598547,
+              "cnn_aug": 0.9027119725612188
+            },
+            "warning_auc_mean": 0.9318230039924161,
+            "consensus_auc": 0.9237498923764242,
+            "answer": 0.8859265734265734,
+            "gross_answer": 0.053774050320670945,
+            "gross_all": 0.16171328671328672,
+            "false_answer": 0.0
+          },
+          "-gabor": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9345671309567974,
+              "hog": 0.9303846592711574,
+              "fft": 0.964163162727756,
+              "radon": 0.9226479672760665,
+              "cnn_aug": 0.9048044455079631
+            },
+            "warning_auc_mean": 0.9313134731479481,
+            "consensus_auc": 0.9030817765842339,
+            "answer": 0.8833041958041958,
+            "gross_answer": 0.03908955962394854,
+            "gross_all": 0.15122377622377622,
+            "false_answer": 0.03333333333333333
+          },
+          "-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9210734882466022,
+              "hog": 0.9195346521866156,
+              "fft": 0.9463583200425306,
+              "gabor": 0.9416380219075118,
+              "cnn_aug": 0.8925434048549626
+            },
+            "warning_auc_mean": 0.9242295774476446,
+            "consensus_auc": 0.9318762028199992,
+            "answer": 0.8859265734265734,
+            "gross_answer": 0.08090774543660582,
+            "gross_all": 0.18575174825174826,
+            "false_answer": 0.0
+          },
+          "-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.9345350915652086,
+              "hog": 0.9318141066392814,
+              "fft": 0.9431419457735247,
+              "gabor": 0.9365369631972135,
+              "radon": 0.9121086902078638
+            },
+            "warning_auc_mean": 0.9316273594766183,
+            "consensus_auc": 0.9189116379310345,
+            "answer": 0.9051573426573427,
+            "gross_answer": 0.06180589087397392,
+            "gross_all": 0.15078671328671328,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-hog": {
+            "lenses": [
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "fft": 0.9724517906336089,
+              "gabor": 0.9662748063614282,
+              "radon": 0.9365765088905584,
+              "cnn_aug": 0.9022626359309777
+            },
+            "warning_auc_mean": 0.9443914354541432,
+            "consensus_auc": 0.9640591390530128,
+            "answer": 0.8946678321678322,
+            "gross_answer": 0.05569125549584758,
+            "gross_all": 0.15515734265734266,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-fft": {
+            "lenses": [
+              "hog",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.9387757661022857,
+              "gabor": 0.9597552591777808,
+              "radon": 0.9249561733032807,
+              "cnn_aug": 0.8998710483635107
+            },
+            "warning_auc_mean": 0.9308395617367144,
+            "consensus_auc": 0.9359129242850173,
+            "answer": 0.8666958041958042,
+            "gross_answer": 0.04589006555723651,
+            "gross_all": 0.17307692307692307,
+            "false_answer": 0.0
+          },
+          "-tensor-gabor": {
+            "lenses": [
+              "hog",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.9317664583936773,
+              "fft": 0.969044512106713,
+              "radon": 0.925277569079222,
+              "cnn_aug": 0.9024394459067826
+            },
+            "warning_auc_mean": 0.9321319963715988,
+            "consensus_auc": 0.9271909849944532,
+            "answer": 0.8592657342657343,
+            "gross_answer": 0.03204476093591048,
+            "gross_all": 0.16826923076923078,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-radon": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.9207973306951253,
+              "fft": 0.9487120003866415,
+              "gabor": 0.9413194921857096,
+              "cnn_aug": 0.8872417643774427
+            },
+            "warning_auc_mean": 0.9245176469112297,
+            "consensus_auc": 0.9368251796099898,
+            "answer": 0.8776223776223776,
+            "gross_answer": 0.07868525896414343,
+            "gross_all": 0.19143356643356643,
+            "false_answer": 0.0
+          },
+          "-tensor-cnn_aug": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "hog": 0.9350830270679652,
+              "fft": 0.9428181334879899,
+              "gabor": 0.9328521013795316,
+              "radon": 0.908080808080808
+            },
+            "warning_auc_mean": 0.9297085175040737,
+            "consensus_auc": 0.9129046656100271,
+            "answer": 0.8916083916083916,
+            "gross_answer": 0.05588235294117647,
+            "gross_all": 0.15821678321678323,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog-fft": {
+            "lenses": [
+              "tensor",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9479292435331017,
+              "gabor": 0.9713804482331913,
+              "radon": 0.9363970281325653,
+              "cnn_aug": 0.9100289808832522
+            },
+            "warning_auc_mean": 0.9414339251955277,
+            "consensus_auc": 0.9495757770718565,
+            "answer": 0.8701923076923077,
+            "gross_answer": 0.03917629331993973,
+            "gross_all": 0.1638986013986014,
+            "false_answer": 0.0
+          },
+          "-hog-gabor": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.940499477252032,
+              "fft": 0.9746145667198298,
+              "radon": 0.936697554052926,
+              "cnn_aug": 0.9112852622902874
+            },
+            "warning_auc_mean": 0.9407742150787688,
+            "consensus_auc": 0.9426105081904071,
+            "answer": 0.8688811188811189,
+            "gross_answer": 0.03470824949698189,
+            "gross_all": 0.16127622377622378,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog-radon": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9307864827493171,
+              "fft": 0.9605335653182543,
+              "gabor": 0.9574086805078142,
+              "cnn_aug": 0.9043418148945788
+            },
+            "warning_auc_mean": 0.9382676358674911,
+            "consensus_auc": 0.951377820808818,
+            "answer": 0.8728146853146853,
+            "gross_answer": 0.07260891337005508,
+            "gross_all": 0.19055944055944055,
+            "false_answer": 0.0
+          },
+          "-hog-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.944676402144953,
+              "fft": 0.960883959209318,
+              "gabor": 0.9571222329162656,
+              "radon": 0.9239752900909926
+            },
+            "warning_auc_mean": 0.9466644710903822,
+            "consensus_auc": 0.9524970887438754,
+            "answer": 0.9012237762237763,
+            "gross_answer": 0.056741028128031036,
+            "gross_all": 0.14991258741258742,
+            "false_answer": 0.03333333333333333
+          },
+          "-fft-gabor": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9328150821220195,
+              "hog": 0.9278091462061339,
+              "radon": 0.903552049419818,
+              "cnn_aug": 0.899016245247401
+            },
+            "warning_auc_mean": 0.9157981307488431,
+            "consensus_auc": 0.9071110655617698,
+            "answer": 0.8391608391608392,
+            "gross_answer": 0.03854166666666667,
+            "gross_all": 0.19318181818181818,
+            "false_answer": 0.0
+          },
+          "-fft-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9169134261913595,
+              "hog": 0.9175585038952441,
+              "gabor": 0.9355103350291031,
+              "cnn_aug": 0.8817978782802903
+            },
+            "warning_auc_mean": 0.9129450358489992,
+            "consensus_auc": 0.9101595340592555,
+            "answer": 0.8326048951048951,
+            "gross_answer": 0.05774278215223097,
+            "gross_all": 0.21547202797202797,
+            "false_answer": 0.0
+          },
+          "-fft-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.9385298978112037,
+              "hog": 0.9358541763060322,
+              "gabor": 0.9339543517118108,
+              "radon": 0.8972910927456382
+            },
+            "warning_auc_mean": 0.9264073796436713,
+            "consensus_auc": 0.9096780786918753,
+            "answer": 0.8754370629370629,
+            "gross_answer": 0.05142286570144783,
+            "gross_all": 0.16958041958041958,
+            "false_answer": 0.0
+          },
+          "-gabor-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.9081751037064517,
+              "hog": 0.9105404188782349,
+              "fft": 0.9422357546759461,
+              "cnn_aug": 0.8855986280609396
+            },
+            "warning_auc_mean": 0.911637476330393,
+            "consensus_auc": 0.8899955043745893,
+            "answer": 0.8155594405594405,
+            "gross_answer": 0.04340836012861737,
+            "gross_all": 0.21984265734265734,
+            "false_answer": 0.0
+          },
+          "-gabor-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.9294678088428721,
+              "hog": 0.9302843471751486,
+              "fft": 0.944139964235658,
+              "radon": 0.8974747474747474
+            },
+            "warning_auc_mean": 0.9253417169321064,
+            "consensus_auc": 0.8826256857293154,
+            "answer": 0.861451048951049,
+            "gross_answer": 0.035514967021816335,
+            "gross_all": 0.16914335664335664,
+            "false_answer": 0.03333333333333333
+          },
+          "-radon-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor"
+            ],
+            "warning_auc": {
+              "tensor": 0.9045546524569155,
+              "hog": 0.9130858383144559,
+              "fft": 0.8999202551834131,
+              "gabor": 0.8937485677620423
+            },
+            "warning_auc_mean": 0.9028273284292068,
+            "consensus_auc": 0.8948690384433357,
+            "answer": 0.8688811188811189,
+            "gross_answer": 0.08148893360160966,
+            "gross_all": 0.20192307692307693,
+            "false_answer": 0.0
+          }
+        },
+        "value": {
+          "tensor": {
+            "gross_all": 0.006993006993006978,
+            "gross_all_ci95": [
+              0.0004382025015694286,
+              0.013961910423192116
+            ],
+            "gross_answer": -0.005009489182146547,
+            "abstention": 0.012237762237762184,
+            "false_answer": 0.0,
+            "warning_auc": -0.0017053654571403732,
+            "consensus_auc": -0.01300259853537089
+          },
+          "hog": {
+            "gross_all": 0.0,
+            "gross_all_ci95": [
+              -0.00480349344978166,
+              0.004374453193350831
+            ],
+            "gross_answer": -0.0031609698852550494,
+            "abstention": 0.0030594405594405183,
+            "false_answer": 0.0,
+            "warning_auc": -0.007944913026173972,
+            "consensus_auc": -0.024705857986123014
+          },
+          "fft": {
+            "gross_all": 0.020104895104895104,
+            "gross_all_ci95": [
+              0.012258658591845982,
+              0.02794759825327511
+            ],
+            "gross_answer": -0.006063192379185449,
+            "abstention": 0.027097902097902082,
+            "false_answer": -0.03333333333333333,
+            "warning_auc": 0.0014202939464503794,
+            "consensus_auc": 0.01025010762357581
+          },
+          "gabor": {
+            "gross_all": 0.009615384615384609,
+            "gross_all_ci95": [
+              0.0021833584825136985,
+              0.01706036745406824
+            ],
+            "gross_answer": -0.020747683075907852,
+            "abstention": 0.029720279720279685,
+            "false_answer": 0.0,
+            "warning_auc": 0.003033697404201541,
+            "consensus_auc": 0.03091822341576611
+          },
+          "radon": {
+            "gross_all": 0.04414335664335664,
+            "gross_all_ci95": [
+              0.036371603856266435,
+              0.05184833577639464
+            ],
+            "gross_answer": 0.02107050273674943,
+            "abstention": 0.027097902097902082,
+            "false_answer": -0.03333333333333333,
+            "warning_auc": 0.015971554595641545,
+            "consensus_auc": 0.002123797180000886
+          },
+          "cnn_aug": {
+            "gross_all": 0.009178321678321666,
+            "gross_all_ci95": [
+              0.004811793357561074,
+              0.013950042449831149
+            ],
+            "gross_answer": 0.0019686481741175293,
+            "abstention": 0.007867132867132809,
+            "false_answer": 0.0,
+            "warning_auc": 0.01321150753082818,
+            "consensus_auc": 0.015088362068965577
+          }
+        },
+        "pairs": {
+          "tensor+hog": {
+            "gross_all": 0.013548951048951041,
+            "interaction": 0.006555944055944063,
+            "answer": 0.8946678321678322,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9443914354541432
+          },
+          "tensor+fft": {
+            "gross_all": 0.03146853146853146,
+            "interaction": 0.004370629370629375,
+            "answer": 0.8666958041958042,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9308395617367144
+          },
+          "tensor+gabor": {
+            "gross_all": 0.026660839160839167,
+            "interaction": 0.01005244755244758,
+            "answer": 0.8592657342657343,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9321319963715988
+          },
+          "tensor+radon": {
+            "gross_all": 0.04982517482517482,
+            "interaction": -0.0013111888111888015,
+            "answer": 0.8776223776223776,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9245176469112297
+          },
+          "tensor+cnn_aug": {
+            "gross_all": 0.016608391608391615,
+            "interaction": 0.00043706293706297084,
+            "answer": 0.8916083916083916,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9297085175040737
+          },
+          "hog+fft": {
+            "gross_all": 0.022290209790209792,
+            "interaction": 0.0021853146853146876,
+            "answer": 0.8701923076923077,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9414339251955277
+          },
+          "hog+gabor": {
+            "gross_all": 0.01966783216783216,
+            "interaction": 0.010052447552447552,
+            "answer": 0.8688811188811189,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9407742150787688
+          },
+          "hog+radon": {
+            "gross_all": 0.04895104895104893,
+            "interaction": 0.004807692307692291,
+            "answer": 0.8728146853146853,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9382676358674911
+          },
+          "hog+cnn_aug": {
+            "gross_all": 0.008304195804195807,
+            "interaction": -0.0008741258741258584,
+            "answer": 0.9012237762237763,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9466644710903822
+          },
+          "fft+gabor": {
+            "gross_all": 0.05157342657342656,
+            "interaction": 0.02185314685314685,
+            "answer": 0.8391608391608392,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9157981307488431
+          },
+          "fft+radon": {
+            "gross_all": 0.07386363636363635,
+            "interaction": 0.009615384615384609,
+            "answer": 0.8326048951048951,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9129450358489992
+          },
+          "fft+cnn_aug": {
+            "gross_all": 0.02797202797202797,
+            "interaction": -0.0013111888111888015,
+            "answer": 0.8754370629370629,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9264073796436713
+          },
+          "gabor+radon": {
+            "gross_all": 0.07823426573426573,
+            "interaction": 0.02447552447552448,
+            "answer": 0.8155594405594405,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.911637476330393
+          },
+          "gabor+cnn_aug": {
+            "gross_all": 0.027534965034965025,
+            "interaction": 0.00874125874125875,
+            "answer": 0.861451048951049,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.9253417169321064
+          },
+          "radon+cnn_aug": {
+            "gross_all": 0.06031468531468531,
+            "interaction": 0.006993006993007006,
+            "answer": 0.8688811188811189,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.9028273284292068
+          }
+        },
+        "cheapest_pair_to_drop": "hog+cnn_aug",
+        "overlap": {
+          "tensor": {
+            "gross": 0.13024475524475523,
+            "mean_phi": 0.4365268857210026,
+            "max_phi": 0.6857782034937048,
+            "closest": "hog",
+            "coverage": 0.016171328671328672
+          },
+          "hog": {
+            "gross": 0.1875,
+            "mean_phi": 0.39323625557950853,
+            "max_phi": 0.6857782034937048,
+            "closest": "tensor",
+            "coverage": 0.013986013986013986
+          },
+          "fft": {
+            "gross": 0.08653846153846154,
+            "mean_phi": 0.4543846377027507,
+            "max_phi": 0.6720110821680715,
+            "closest": "radon",
+            "coverage": 0.017045454545454544
+          },
+          "gabor": {
+            "gross": 0.09178321678321678,
+            "mean_phi": 0.4749933183593217,
+            "max_phi": 0.63978302724665,
+            "closest": "fft",
+            "coverage": 0.010052447552447552
+          },
+          "radon": {
+            "gross": 0.04807692307692308,
+            "mean_phi": 0.3910597364600626,
+            "max_phi": 0.6720110821680714,
+            "closest": "fft",
+            "coverage": 0.03365384615384615
+          },
+          "cnn_aug": {
+            "gross": 0.17395104895104896,
+            "mean_phi": 0.3562058683800565,
+            "max_phi": 0.4287690650700646,
+            "closest": "tensor",
+            "coverage": 0.015734265734265736
+          }
+        }
+      },
+      "BSDS500": {
+        "n": 3084,
+        "n_null": 90,
+        "sets": {
+          "full": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7797742612443991,
+              "hog": 0.6475609640473301,
+              "fft": 0.8189120007952484,
+              "gabor": 0.7963554537194752,
+              "radon": 0.6969114177298107,
+              "cnn_aug": 0.7864147813113214
+            },
+            "warning_auc_mean": 0.7543214798079307,
+            "consensus_auc": 0.8066428070972751,
+            "answer": 0.6939040207522698,
+            "gross_answer": 0.14906542056074767,
+            "gross_all": 0.4095330739299611,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.6551928473907767,
+              "fft": 0.8203428956429777,
+              "gabor": 0.7873882210947514,
+              "radon": 0.7137415020116672,
+              "cnn_aug": 0.789991771936166
+            },
+            "warning_auc_mean": 0.7533314476152677,
+            "consensus_auc": 0.7965596955940881,
+            "answer": 0.6877431906614786,
+            "gross_answer": 0.14945780292314945,
+            "gross_all": 0.4150453955901427,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7781738982474051,
+              "fft": 0.8320479578960157,
+              "gabor": 0.8170089153716579,
+              "radon": 0.73145681931371,
+              "cnn_aug": 0.7823697271749612
+            },
+            "warning_auc_mean": 0.78821146360075,
+            "consensus_auc": 0.8193803354528199,
+            "answer": 0.6929312581063554,
+            "gross_answer": 0.14880673841834346,
+            "gross_all": 0.4101815823605707,
+            "false_answer": 0.03333333333333333
+          },
+          "-fft": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7652226192501843,
+              "hog": 0.6445364646541262,
+              "gabor": 0.7554613975924388,
+              "radon": 0.6271556241070407,
+              "cnn_aug": 0.7792222800023112
+            },
+            "warning_auc_mean": 0.7143196771212204,
+            "consensus_auc": 0.6785939007508704,
+            "answer": 0.5389105058365758,
+            "gross_answer": 0.07460890493381468,
+            "gross_all": 0.5012970168612192,
+            "false_answer": 0.0
+          },
+          "-gabor": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7632796778401679,
+              "hog": 0.6540110171419903,
+              "fft": 0.8049868701177133,
+              "radon": 0.678251899236895,
+              "cnn_aug": 0.783392300377631
+            },
+            "warning_auc_mean": 0.7367843529428795,
+            "consensus_auc": 0.7046345100738406,
+            "answer": 0.6066796368352788,
+            "gross_answer": 0.10582576162479958,
+            "gross_all": 0.4575226977950713,
+            "false_answer": 0.03333333333333333
+          },
+          "-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7345130735636095,
+              "hog": 0.604981890928398,
+              "fft": 0.7817534674762737,
+              "gabor": 0.747095617478897,
+              "cnn_aug": 0.75560366083894
+            },
+            "warning_auc_mean": 0.7247895420572237,
+            "consensus_auc": 0.8080432619385753,
+            "answer": 0.5716601815823605,
+            "gross_answer": 0.158252977878616,
+            "gross_all": 0.5188067444876784,
+            "false_answer": 0.0
+          },
+          "-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.8117057455617945,
+              "hog": 0.6595774233919903,
+              "fft": 0.8269086651700533,
+              "gabor": 0.8114530567325301,
+              "radon": 0.6984346437292324
+            },
+            "warning_auc_mean": 0.7616159069171201,
+            "consensus_auc": 0.8232411889181137,
+            "answer": 0.6718547341115434,
+            "gross_answer": 0.1414092664092664,
+            "gross_all": 0.42315175097276264,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-hog": {
+            "lenses": [
+              "fft",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "fft": 0.8259963385438671,
+              "gabor": 0.7946548181195483,
+              "radon": 0.7515670968974927,
+              "cnn_aug": 0.7726532661650997
+            },
+            "warning_auc_mean": 0.7862178799315019,
+            "consensus_auc": 0.7978721174004193,
+            "answer": 0.6867704280155642,
+            "gross_answer": 0.1501416430594901,
+            "gross_all": 0.4163424124513619,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-fft": {
+            "lenses": [
+              "hog",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.6551359602548543,
+              "gabor": 0.7446002294005882,
+              "radon": 0.6342268313702143,
+              "cnn_aug": 0.7905771872563102
+            },
+            "warning_auc_mean": 0.7061350520704918,
+            "consensus_auc": 0.6302697160064379,
+            "answer": 0.5184824902723736,
+            "gross_answer": 0.06441525953721075,
+            "gross_all": 0.5149156939040207,
+            "false_answer": 0.0
+          },
+          "-tensor-gabor": {
+            "lenses": [
+              "hog",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.6624369500910194,
+              "fft": 0.8006831404579857,
+              "radon": 0.6974563404637456,
+              "cnn_aug": 0.7856394531405718
+            },
+            "warning_auc_mean": 0.7365539710383306,
+            "consensus_auc": 0.6923165926161007,
+            "answer": 0.5927367055771725,
+            "gross_answer": 0.10065645514223195,
+            "gross_all": 0.4669260700389105,
+            "false_answer": 0.03333333333333333
+          },
+          "-tensor-radon": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "hog": 0.6098002313410195,
+              "fft": 0.7718730584756083,
+              "gabor": 0.7312302027494395,
+              "cnn_aug": 0.7595282278130057
+            },
+            "warning_auc_mean": 0.7181079300947683,
+            "consensus_auc": 0.7701040752162919,
+            "answer": 0.5551232166018158,
+            "gross_answer": 0.16296728971962618,
+            "gross_all": 0.5353437094682231,
+            "false_answer": 0.0
+          },
+          "-tensor-cnn_aug": {
+            "lenses": [
+              "hog",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "hog": 0.6710074711771845,
+              "fft": 0.8359187189873837,
+              "gabor": 0.7986656240591781,
+              "radon": 0.7200290720186083
+            },
+            "warning_auc_mean": 0.7564052215605885,
+            "consensus_auc": 0.8065552243043725,
+            "answer": 0.664396887159533,
+            "gross_answer": 0.14055636896046853,
+            "gross_all": 0.428988326848249,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog-fft": {
+            "lenses": [
+              "tensor",
+              "gabor",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7596433554534626,
+              "gabor": 0.7863355108204203,
+              "radon": 0.6660852736584919,
+              "cnn_aug": 0.7843893428433089
+            },
+            "warning_auc_mean": 0.7491133706939209,
+            "consensus_auc": 0.6798202991827437,
+            "answer": 0.5363164721141375,
+            "gross_answer": 0.0743651753325272,
+            "gross_all": 0.5035667963683528,
+            "false_answer": 0.0
+          },
+          "-hog-gabor": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7589863308944472,
+              "fft": 0.8144470124340399,
+              "radon": 0.7219537078546314,
+              "cnn_aug": 0.7753380247182324
+            },
+            "warning_auc_mean": 0.7676812689753377,
+            "consensus_auc": 0.7150158660950028,
+            "answer": 0.6050583657587548,
+            "gross_answer": 0.10610932475884244,
+            "gross_all": 0.4591439688715953,
+            "false_answer": 0.03333333333333333
+          },
+          "-hog-radon": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7358874709318813,
+              "fft": 0.7944432018688338,
+              "gabor": 0.7781967066265518,
+              "cnn_aug": 0.7626017702206797
+            },
+            "warning_auc_mean": 0.7677822874119867,
+            "consensus_auc": 0.8121263159915162,
+            "answer": 0.5706874189364461,
+            "gross_answer": 0.16022727272727272,
+            "gross_all": 0.5207522697795072,
+            "false_answer": 0.0
+          },
+          "-hog-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "fft",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.80918609267767,
+              "fft": 0.850763907872683,
+              "gabor": 0.8360856689290171,
+              "radon": 0.7405279711610122
+            },
+            "warning_auc_mean": 0.8091409101600956,
+            "consensus_auc": 0.8492303188128881,
+            "answer": 0.6712062256809338,
+            "gross_answer": 0.14106280193236714,
+            "gross_all": 0.42347600518806744,
+            "false_answer": 0.03333333333333333
+          },
+          "-fft-gabor": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "radon",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7174553910725426,
+              "hog": 0.6475609640473301,
+              "radon": 0.5743975832996457,
+              "cnn_aug": 0.76256952086869
+            },
+            "warning_auc_mean": 0.6754958648220521,
+            "consensus_auc": 0.5817426622024323,
+            "answer": 0.374189364461738,
+            "gross_answer": 0.07019064124783363,
+            "gross_all": 0.6520752269779507,
+            "false_answer": 0.0
+          },
+          "-fft-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.6927933753048607,
+              "hog": 0.5785554459951456,
+              "gabor": 0.6757894821918196,
+              "cnn_aug": 0.7250214211841514
+            },
+            "warning_auc_mean": 0.6680399311689943,
+            "consensus_auc": 0.698622311827957,
+            "answer": 0.35084306095979245,
+            "gross_answer": 0.08317929759704251,
+            "gross_all": 0.6783398184176395,
+            "false_answer": 0.0
+          },
+          "-fft-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "gabor",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.8133210821847882,
+              "hog": 0.6626388994235437,
+              "gabor": 0.7613223603609792,
+              "radon": 0.6132398462848987
+            },
+            "warning_auc_mean": 0.7126305470635524,
+            "consensus_auc": 0.6427799814330323,
+            "answer": 0.49513618677042803,
+            "gross_answer": 0.053700065487884745,
+            "gross_all": 0.5314526588845655,
+            "false_answer": 0.0
+          },
+          "-gabor-radon": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "cnn_aug"
+            ],
+            "warning_auc": {
+              "tensor": 0.7022312971470706,
+              "hog": 0.600319990139563,
+              "fft": 0.7587045182810486,
+              "cnn_aug": 0.7383941524758321
+            },
+            "warning_auc_mean": 0.6999124895108785,
+            "consensus_auc": 0.7076812265267274,
+            "answer": 0.36251621271076523,
+            "gross_answer": 0.08497316636851521,
+            "gross_all": 0.6682879377431906,
+            "false_answer": 0.0
+          },
+          "-gabor-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "radon"
+            ],
+            "warning_auc": {
+              "tensor": 0.802683455277636,
+              "hog": 0.6758632622876214,
+              "fft": 0.8139450118873067,
+              "radon": 0.6784799568608756
+            },
+            "warning_auc_mean": 0.74274292157836,
+            "consensus_auc": 0.7139272072982101,
+            "answer": 0.5713359273670557,
+            "gross_answer": 0.08967082860385925,
+            "gross_all": 0.4798962386511025,
+            "false_answer": 0.03333333333333333
+          },
+          "-radon-cnn_aug": {
+            "lenses": [
+              "tensor",
+              "hog",
+              "fft",
+              "gabor"
+            ],
+            "warning_auc": {
+              "tensor": 0.7631766774431399,
+              "hog": 0.6086359412924758,
+              "fft": 0.7782328365792169,
+              "gabor": 0.7532199261957826
+            },
+            "warning_auc_mean": 0.7258163453776538,
+            "consensus_auc": 0.8279996657754011,
+            "answer": 0.5337224383916991,
+            "gross_answer": 0.1445929526123937,
+            "gross_all": 0.543450064850843,
+            "false_answer": 0.0
+          }
+        },
+        "value": {
+          "tensor": {
+            "gross_all": 0.005512321660181618,
+            "gross_all_ci95": [
+              0.0022434820857325653,
+              0.00936708117055626
+            ],
+            "gross_answer": 0.00039238236240177193,
+            "abstention": 0.006160830090791158,
+            "false_answer": 0.0,
+            "warning_auc": -0.00410052409463062,
+            "consensus_auc": 0.01008311150318697
+          },
+          "hog": {
+            "gross_all": 0.0006485084306095956,
+            "gross_all_ci95": [
+              -0.0006398260249028003,
+              0.001968503937007874
+            ],
+            "gross_answer": -0.0002586821424042096,
+            "abstention": 0.0009727626459143934,
+            "false_answer": 0.0,
+            "warning_auc": -0.012537880640699028,
+            "consensus_auc": -0.012737528355544758
+          },
+          "fft": {
+            "gross_all": 0.09176394293125811,
+            "gross_all_ci95": [
+              0.07637331654936008,
+              0.10821975372031505
+            ],
+            "gross_answer": -0.07445651562693299,
+            "abstention": 0.1549935149156939,
+            "false_answer": -0.03333333333333333,
+            "warning_auc": 0.027083698489247056,
+            "consensus_auc": 0.12804890634640465
+          },
+          "gabor": {
+            "gross_all": 0.04798962386511024,
+            "gross_all_ci95": [
+              0.03843782444154191,
+              0.05898032685856327
+            ],
+            "gross_answer": -0.0432396589359481,
+            "abstention": 0.08722438391699094,
+            "false_answer": 0.0,
+            "warning_auc": 0.009130332082742432,
+            "consensus_auc": 0.1020082970234345
+          },
+          "radon": {
+            "gross_all": 0.1092736705577173,
+            "gross_all_ci95": [
+              0.0942479956237072,
+              0.12533943803849285
+            ],
+            "gross_answer": 0.009187557317868328,
+            "abstention": 0.12224383916990922,
+            "false_answer": -0.03333333333333333,
+            "warning_auc": 0.04101395016633118,
+            "consensus_auc": -0.0014004548413002471
+          },
+          "cnn_aug": {
+            "gross_all": 0.013618677042801564,
+            "gross_all_ci95": [
+              0.007743928648183967,
+              0.01947237969764718
+            ],
+            "gross_answer": -0.00765615415148127,
+            "abstention": 0.022049286640726362,
+            "false_answer": 0.0,
+            "warning_auc": -0.01371308740986743,
+            "consensus_auc": -0.016598381820838615
+          }
+        },
+        "pairs": {
+          "tensor+hog": {
+            "gross_all": 0.0068093385214008095,
+            "interaction": 0.0006485084306095956,
+            "answer": 0.6867704280155642,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.7862178799315019
+          },
+          "tensor+fft": {
+            "gross_all": 0.10538261997405962,
+            "interaction": 0.00810635538261989,
+            "answer": 0.5184824902723736,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7061350520704918
+          },
+          "tensor+gabor": {
+            "gross_all": 0.057392996108949434,
+            "interaction": 0.0038910505836575737,
+            "answer": 0.5927367055771725,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.7365539710383306
+          },
+          "tensor+radon": {
+            "gross_all": 0.125810635538262,
+            "interaction": 0.01102464332036307,
+            "answer": 0.5551232166018158,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7181079300947683
+          },
+          "tensor+cnn_aug": {
+            "gross_all": 0.019455252918287924,
+            "interaction": 0.0003242542153047423,
+            "answer": 0.664396887159533,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.7564052215605885
+          },
+          "hog+fft": {
+            "gross_all": 0.0940337224383917,
+            "interaction": 0.001621271076523989,
+            "answer": 0.5363164721141375,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7491133706939209
+          },
+          "hog+gabor": {
+            "gross_all": 0.04961089494163423,
+            "interaction": 0.0009727626459143934,
+            "answer": 0.6050583657587548,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.7676812689753377
+          },
+          "hog+radon": {
+            "gross_all": 0.11121919584954609,
+            "interaction": 0.0012970168612191912,
+            "answer": 0.5706874189364461,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7677822874119867
+          },
+          "hog+cnn_aug": {
+            "gross_all": 0.013942931258106361,
+            "interaction": -0.0003242542153047978,
+            "answer": 0.6712062256809338,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.8091409101600956
+          },
+          "fft+gabor": {
+            "gross_all": 0.24254215304798965,
+            "interaction": 0.1027885862516213,
+            "answer": 0.374189364461738,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.6754958648220521
+          },
+          "fft+radon": {
+            "gross_all": 0.2688067444876784,
+            "interaction": 0.06776913099870296,
+            "answer": 0.35084306095979245,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.6680399311689943
+          },
+          "fft+cnn_aug": {
+            "gross_all": 0.12191958495460442,
+            "interaction": 0.016536964980544744,
+            "answer": 0.49513618677042803,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7126305470635524
+          },
+          "gabor+radon": {
+            "gross_all": 0.25875486381322954,
+            "interaction": 0.10149156939040199,
+            "answer": 0.36251621271076523,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.6999124895108785
+          },
+          "gabor+cnn_aug": {
+            "gross_all": 0.0703631647211414,
+            "interaction": 0.008754863813229596,
+            "answer": 0.5713359273670557,
+            "false_answer": 0.03333333333333333,
+            "warning_auc_mean": 0.74274292157836
+          },
+          "radon+cnn_aug": {
+            "gross_all": 0.13391699092088194,
+            "interaction": 0.01102464332036307,
+            "answer": 0.5337224383916991,
+            "false_answer": 0.0,
+            "warning_auc_mean": 0.7258163453776538
+          }
+        },
+        "cheapest_pair_to_drop": "tensor+hog",
+        "overlap": {
+          "tensor": {
+            "gross": 0.3647859922178988,
+            "mean_phi": 0.3251582463455127,
+            "max_phi": 0.48267910875859943,
+            "closest": "hog",
+            "coverage": 0.022697795071335927
+          },
+          "hog": {
+            "gross": 0.3320363164721141,
+            "mean_phi": 0.3276553691373515,
+            "max_phi": 0.4826791087585994,
+            "closest": "tensor",
+            "coverage": 0.030155642023346304
+          },
+          "fft": {
+            "gross": 0.25583657587548636,
+            "mean_phi": 0.37531740412502235,
+            "max_phi": 0.5816892394372752,
+            "closest": "gabor",
+            "coverage": 0.02756160830090791
+          },
+          "gabor": {
+            "gross": 0.193579766536965,
+            "mean_phi": 0.39408514726668387,
+            "max_phi": 0.5816892394372752,
+            "closest": "fft",
+            "coverage": 0.039234760051880674
+          },
+          "radon": {
+            "gross": 0.18060959792477302,
+            "mean_phi": 0.34561175539174094,
+            "max_phi": 0.5534488074951098,
+            "closest": "fft",
+            "coverage": 0.0625810635538262
+          },
+          "cnn_aug": {
+            "gross": 0.6235408560311284,
+            "mean_phi": 0.13894240957663223,
+            "max_phi": 0.16338573010265772,
+            "closest": "tensor",
+            "coverage": 0.02464332036316472
+          }
+        }
+      }
+    }
+  },
+  "relation": {
+    "n_points": 24,
+    "coverage": {
+      "rho": 0.7904347826086956,
+      "p": 4.311986843446477e-06
+    },
+    "mean_phi": {
+      "rho": -0.05826086956521739,
+      "p": 0.7868436161547347
+    },
+    "max_phi": {
+      "rho": -0.14018296675200306,
+      "p": 0.513543414011565
+    },
+    "gross": {
+      "rho": -0.5460869565217391,
+      "p": 0.005769573258910435
+    }
+  }
+}

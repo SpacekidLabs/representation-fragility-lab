@@ -142,4 +142,5 @@ tests/               pytest
 
 - Most experiments use synthetic signals. Exp 045 re-tests the key claims on real data: the warning signal holds, the framework's pitch-tracker gain does not (Exp 054 says why; the quorum tracker that replaces it beats fixed YIN), and unpitched real frames fool the consensus.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the others.
+- Not every lens earns its place (Exp 055): HOG and Cepstrum add almost nothing to the answer, and a lens's value follows how often it is right where the others cannot agree, not how independent its blind spots are.
 - The framework's DSP gains are small and depend on the baseline (see Exp 035 and Exp 041 in [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md)).
