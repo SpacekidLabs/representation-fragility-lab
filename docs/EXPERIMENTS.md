@@ -7,7 +7,7 @@ The project goal is in [VISION.md](VISION.md). Plots are in [`results/`](../resu
 
 - [Research arcs](#research-arcs)
 - [Representations](#representations)
-- [Experiment log](#experiment-log) (Phase 1 to Phase 29, Exp 001 to Exp 049)
+- [Experiment log](#experiment-log) (Phase 1 to Phase 30, Exp 001 to Exp 050)
 - [Listen tests](#listen-tests)
 - [Key findings summary](#key-findings-summary)
 - [Setup](#setup)
@@ -26,7 +26,7 @@ We have structured the research into five coherent arcs:
 * **Arc 3 — State-Space Theory** (Exp 031–036): Proving that the manifold is a projection of the physics of audio itself (nested assumption surfaces).
 * **Arc 4 — Adaptive DSP Framework** (Exp 037–040): Building reference plugins and automatically learning optimal controller surfaces.
 * **Arc 5 — External Validation** (Exp 041): Verifying zero-shot improvements on unmodified external algorithms.
-* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain.
+* **Arc 6 — Disagreement as Information** (Exp 042–): Running representations side by side and learning from where they disagree, the core of [the vision](VISION.md). Exp 044 repeats it on images, the second medium; Exp 045 tests the key claims on real data; Exp 046 adds a quorum to the consensus; Exp 047 tries fusion that knows which lenses fail together; Exp 048 learns which lens to pick in each frame; Exp 049 compares rules for when to abstain; Exp 050 perturbs the signal to settle a disagreement instead of voting.
 
 ## Representations
 
@@ -897,6 +897,57 @@ CIs are 95% group-bootstrap intervals over recordings / images for the differenc
 
 ---
 
+### Phase 30 — Perturb to Settle a Disagreement (Exp 050)
+
+#### Exp 050 — Which Answer Moves the Way It Should?
+Every fusion rule so far only *voted* on the readings it had. Issue #24 asks the signal a question instead: when the pitch lenses disagree, apply a small known change and see which answer reacts the way it should. On a frame, each distinct lens answer is a **candidate** (answers within 50 cents merged). About a third of all frames have two or more candidates (33% synthetic, 34% vocadito, 38% MDB-stem-synth), and on those frames one candidate is right 98–99% of the time, so choosing well is worth a lot.
+
+Each probe predicts what the three lenses should read *if* candidate c is the true f0; a lens **follows** when it reads within 50 cents of the prediction:
+
+| Probe | Change | Prediction | Why it separates candidates | Extra reads |
+|---|---|---|---|---|
+| none | — | c | plain voting | 0 |
+| shift | resample by 2 semitones | c × 2^(2/12) | every component moves exactly; a lens locked to a noise peak does not | 1 per frame |
+| noise | white noise 10 dB below the frame | c | a fragile peak moves | 1 per frame |
+| lowpass | 5th-order low-pass at 1.5 c | c | if c is right the fundamental survives; if the truth is 2c nothing pitched is left; if it is c / 2 the lenses go there | 1 per candidate |
+| highpass | 5th-order high-pass at 1.5 c | c | if c is right ACF and Cepstrum still read c (missing fundamental); if the truth is c / 2 they read c / 2 | 1 per candidate |
+
+Choosers (each picks the best-scoring candidate): **count** (number of follows, untrained), **lowpass count** (follows under the low-pass probe only, untrained, the cheapest), **prior** (naive Bayes: per (probe, lens) likelihood ratio of a follow for right vs wrong candidates, fit on the synthetic frames of Exp 042 and applied unchanged to real recordings; this is the blind-spot map used as the prior), **prior vote** (the same prior with the "none" probe only, i.e. no probing) and **learned** (logistic regression on the 15 follow bits, 5-fold cross-validation by recording). The frames are rebuilt with the code and seeds of Exp 042 / 045 and match the cached readings exactly (0 mismatches). All 1 069 synthetic and 6 000 of 6 102 vocadito disagreement frames are probed; MDB-stem-synth, a seeded sample of 6 000 of 24 668.
+
+Gross error (> 50 cents) on disagreement frames, quorum 2's abstentions counted as wrong:
+
+| Dataset | Consensus (legacy) | Quorum 2 | Best lens | Prior vote | Prior | Count | **Lowpass count** | Learned (CV) | Candidate oracle |
+|---|---|---|---|---|---|---|---|---|---|
+| Synthetic | 16.2% | 29.1% | 13.0% (STFT) | 20.4% | 4.1%* | 2.9% | **0.6%** | 1.8% | 0.3% |
+| vocadito | 14.5% | 39.9% | 11.6% (ACF) | 43.5% | 16.0% | 5.0% | **3.9%** | 3.7% | 1.2% |
+| MDB-stem-synth | 17.6% | 42.5% | 24.1% (ACF) | 38.5% | 15.7% | 7.4% | **5.6%** | 6.0% | 2.3% |
+
+\* in-sample: the prior is fit on these frames.
+
+Differences with 95% group-bootstrap CIs (over recordings): lowpass count vs consensus −15.6 pts (synthetic, CI −18.3 to −13.4), −10.6 (vocadito, −13.2 to −7.7), −12.0 (MDB, −13.4 to −10.6); vs quorum 2 −28.5, −36.0 and −36.9 pts; vs the best lens −12.4, −7.7 and −18.5 pts. Quorum 2 answers only 61–63% of the real disagreement frames; **on the frames it does answer** its error is 4.0% (vocadito) and 5.0% (MDB), and lowpass count makes 2.1% and 2.6% there.
+
+Over the whole dataset (consensus where the lenses agree, the chooser where they disagree), gross error falls from 6.5% to 1.4% (synthetic), 5.6% to 2.0% (vocadito) and 7.3% to 2.7% (MDB-stem-synth).
+
+**Cost.** All five probes: 18.5–19.1 extra lens reads per disagreement frame, about 7× the base reading time (1.1 ms → +7.3–7.8 ms per 93 ms frame). Lowpass only: 6.3–6.6 extra reads (about 2 candidates × 3 lenses), about twice the base reads. Only disagreement frames are probed, so on a whole recording the cost is about a third of that.
+
+**Key findings:**
+1. **Issue #24's Done-when is met.** Probing cuts gross error on disagreement frames by 10–16 pts against the consensus and 28–37 pts against quorum 2 on all three datasets, with CIs far from zero, and beats the best single lens chosen in hindsight by 8–19 pts. Lowpass count closes 78–98% of the gap between the consensus and the candidate oracle. This is the first fusion result that holds on both real audio datasets (compare Exp 045 and 048).
+2. **The low-pass probe does almost all the work, and needs no training.** Removing it from the prior raises the error from 16% to 32–37%; the low-pass probe alone is the best single probe (prior with low-pass only: 4.6% vocadito, 6.3% MDB), and the untrained lowpass count is the best chooser overall. The measured reaction map shows why: on vocadito, under the low-pass probe STFT follows a right candidate 96% of the time and a wrong one 42%, Cepstrum 48% vs 3%.
+3. **The other probes behave as the blind-spot atlas predicts.** Under the high-pass probe STFT follows a right candidate only 1% of the time (it loses the fundamental, the missing-fundamental blind spot of Exp 008) while ACF still does 70% vs 5%. The 2-semitone shift is the second-best probe alone (7.7% vocadito, 15.4% MDB).
+4. **The prior learned on synthetic signals hurts.** Its naive-Bayes sum double-counts correlated follows and weights plain voting heavily; with the "none" probe only it is worse than the consensus (38–44%). The untrained counts transfer; the synthetic likelihoods do not. The cross-validated learned chooser ties lowpass count on real data (3.7% vs 3.9%, 6.0% vs 5.6%), so training buys nothing here.
+5. **Probing always answers, but the follow count is also a voicing score.** 97–99% of unpitched real frames have two or more candidates and would reach the prober. The best candidate's follow count separates pitched disagreement frames from them with AUC 0.93 (vocadito), 0.98 (MDB) and 0.98 (synthetic). Abstaining below 9 of 15 follows on vocadito answers 74% of disagreement frames (quorum 2: 63%) at 27.2% gross error with abstentions counted (quorum 2: 39.9%) and 6.3% false answers (quorum 2: 6.6%). On MDB, 8 follows gives 78% answered and 25.4% gross error but 1.4% false answers (4 of 289 frames), where quorum 2 has none.
+
+**Decision:** the probe lives in this experiment for now. It is a strong candidate for the open "blind-spot / voicing detector" piece: the low-pass follow count both picks the answer and warns when there is none. Moving it into the core would need a `Medium` hook for "perturb with a known effect" (audio: low-pass, shift; images: blur, rotation by a known angle, where the prediction is θ + angle).
+
+**Images (not run).** The same idea carries over: rotating a patch by a known angle predicts θ + angle for the right candidate (the analogue of the pitch shift), and a Gaussian blur at a scale tied to the candidate's edge is the analogue of the low-pass. Images have one hard difference: Exp 047 found that in most image failures the right lens had been marked blind, and the candidates here include untrusted lenses, so probing might help more there than any fusion rule did. That is a separate experiment.
+
+- **Run**: `.venv/bin/python src/experiments/exp050_probing.py` (needs the caches of Exp 045 / 046 and the raw datasets in `data/raw/`; about 6 minutes the first time, then the probes are cached in `data/processed/exp050_*.pkl`)
+- **Outputs**: [results/exp050_probing.png](../results/exp050_probing.png), [results/exp050_summary.json](../results/exp050_summary.json) (every chooser, CI, per-family error, reaction map, abstain thresholds and cost)
+
+![Exp 050](../results/exp050_probing.png)
+
+---
+
 ## Listen tests
 
 The listen-test pages live in `listen_test/`, which is **not tracked in git** (issue #18).
@@ -1031,6 +1082,9 @@ Exp 048:      A learned lens chooser on held-out vocadito: 1.8% gross errors vs 
               there is no pitch at all
 Exp 049:      When to abstain: a learned gate keeps the quorum's false-answer rate and answers
               more (MDB +5.3 pts, noisy photos 50% vs 35%); on real singing no rule can
+Exp 050:      Probing: when lenses disagree, low-pass the frame at 1.5x each candidate and keep
+              the one the lenses still read. Gross error on disagreement frames 3.9% vs 14.5%
+              consensus (vocadito), 5.6% vs 17.6% (MDB), untrained; ~2x the reading cost there
 ```
 
 **Next** (GitHub issues)
@@ -1039,7 +1093,7 @@ Exp 049:      When to abstain: a learned gate keeps the quorum's false-answer ra
 
 **Known limits**
 
-- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049).
+- Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049). Probing (Exp 050) answers far better where the lenses disagree, but it always answers; its follow count separates unpitched frames (AUC 0.93–0.98) without yet matching the quorum's false-answer rate on MDB-stem-synth.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 

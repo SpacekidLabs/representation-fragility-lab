@@ -103,7 +103,7 @@ The 41 audio experiments are the proof of concept for this vision:
 | Using it in practice | ✅ Confidence-gated tuner, adaptive plugins, external algorithms | Exp 019–024, 033–041 |
 | Medium-agnostic core | ✅ Interfaces and generic loop in `src/core` ([design note](core_interfaces.md)); audio runs on it with 5 lenses (STFT, ACF, Cepstrum, CQT, wavelet) | Issues #4, #5 |
 | Second medium: images | 🟡 `src/image_medium`: 5 orientation lenses on the same core. Disagreement predicts blind spots (AUC 0.96–0.98), but correlated failures keep the consensus from beating the best single lens. Real photos (BSDS500): the warning holds (AUC 0.87–0.92), fusion still does not beat the best lens. Family-aware fusion (an agreement table) narrows the gap by 2.6–3.1 pts but cannot close it | Exp 044, 045, 047, issues #6, #21 |
-| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048) | Exp 045, 046, 048, issues #7, #20, #22 |
+| Real-world validation | 🟡 Key claims re-run on vocadito, MDB-stem-synth and BSDS500. The disagreement warning holds in both media; the consensus gain holds on one of two audio datasets; the framework's pitch-tracker gain does not hold; unpitched real frames fool single lenses; with the quorum (Exp 046) the consensus no longer follows them. A learned lens chooser beats the best lens on held-out vocadito (Exp 048). Probing the signal (low-pass at 1.5× each candidate) cuts gross error on disagreement frames to 3.9% / 5.6% vs 14.5% / 17.6% for the consensus on both real audio datasets, untrained (Exp 050) | Exp 045, 046, 048, 050, issues #7, #20, #22, #24 |
 
 **Honest gaps:** disagreement reliably *warns* that a lens is blind, in both media
 and on real data (Exp 045). Turning that warning into a better *answer* is the
@@ -125,6 +125,12 @@ pitch at all, though, so a learned voicing / blind-spot detector is the open pie
 Exp 049 finds the same on the abstention side: a learned gate keeps the quorum's
 false-answer rate and answers more on MDB-stem-synth and photos, but on real singing
 no rule beats the quorum.
+Exp 050 stops voting and asks the signal instead: low-pass the frame at 1.5× each
+candidate pitch and keep the candidate the lenses still read. Where the lenses disagree
+this cuts gross errors from 14.5% to 3.9% (vocadito) and 17.6% to 5.6% (MDB-stem-synth)
+with no training, beating the best single lens on both real datasets. The same follow
+count also separates unpitched frames (AUC 0.93–0.98), so probing is the strongest
+candidate so far for the missing blind-spot / voicing detector; it is not in the core yet.
 
 ---
 
