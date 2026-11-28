@@ -1557,6 +1557,65 @@ On synthetic patches the same three rows give −3.4 (not admitted), −1.2 [−
 
 ![Exp 059](../results/exp059_recalibrated_photo_lens.png)
 
+### Phase 40 — Probes Tied to the Candidate or the Centre (Exp 060)
+
+#### Exp 060 — Can an Image Probe Tell the True Boundary From an Occluder's Edge?
+Exp 057's image probes (blur and rotation) only matched Radon on photos: 28.1% vs 29.9% gross error on disagreement patches, with the candidate oracle at 11.6%. Global perturbations move every real structure alike. The audio low-pass works because it treats the candidate differently from its octaves *and* never creates energy at the candidate. Issue #36 tries image probes with those properties.
+
+**New opt-in probe kinds** (`ImagePatch.PROBE_ALONG_BLUR`, `PROBE_CROSS_BLUR`, `PROBE_CENTRE`; empty by default, so the Exp 057 set is unchanged):
+- **along-blur σ:** a 1-D Gaussian blur along the candidate.
+- **cross-blur σ:** the same blur along the candidate's normal.
+- **centre σ:** the patch faded towards its mean away from the centre, with an isotropic Gaussian window. It is tied not to the candidate but to where the truth is: the BSDS500 truth is a boundary through the patch centre.
+- **Tests:** the blur direction convention, a flat patch staying flat, a central edge beating a stronger edge near the border, and the default set being unchanged. 3 new tests, 100 in all.
+
+**Why the oriented blurs cannot work, found while building them.** A straight edge keeps its direction under *any* 1-D blur. The blur only changes how sharp each edge stays, so the probes are biased by construction:
+- along-blur keeps the candidate's own edge sharp and widens every other, so each candidate is favoured by its own probe;
+- cross-blur widens the candidate's own edge most, so it is biased against it.
+
+They were run anyway as controls.
+
+**Results.** Gross error on disagreement patches. Sets were chosen on the synthetic patches; BSDS500 is held out. Group-bootstrap CIs:
+
+| Probe set | Synthetic | BSDS500 | vs Radon on BSDS500 [CI95] | AUC oriented vs unoriented (BSDS500 run) | Time on BSDS500 |
+|---|---|---|---|---|---|
+| **Exp 057 default** (blur 1.5, 3 + rotate 30, 60) | 24.3% | **28.1%** | −1.8 [−5.4, +1.9] | 0.851 | 180 s |
+| along-blur 3 (chosen on synthetic) | **22.5%** | 29.2% | −0.7 [−4.0, +2.4] | **0.389** | 61 s |
+| cross-blur 3 | 24.1% | 31.1% | +1.3 [−1.6, +4.0] | **0.913** | 62 s |
+| centre 8 | 33.5% | 34.3% | +4.4 [−0.1, +8.7] | 0.776 | 55 s |
+| centre 12 | 32.8% | 31.4% | +1.5 [−2.6, +5.5] | 0.796 | 56 s |
+| centre 8, 16 | 29.8% | 32.3% | +2.4 [−2.0, +6.6] | 0.819 | 96 s |
+| centre 8, 16 + rotate 30, 60 | 29.5% | 29.9% | +0.0 [−4.3, +4.1] | 0.835 | 180 s |
+| default + centre 8, 16 | 25.2% | 29.4% | −0.4 [−4.5, +3.6] | 0.863 | 261 s |
+| Radon (best lens) | 18.8% | 29.9% | | | |
+| Candidate oracle | 5.3% | 11.6% | | | |
+
+By condition on BSDS500, for the default, centre 8 and centre 8, 16 + rotate:
+
+| Condition | Radon | Default | Centre 8 | Centre 8, 16 + rotate | Oracle |
+|---|---|---|---|---|---|
+| Occlusion | 62.0% | **58.1%** | 72.5% | 64.0% | 28.9% |
+| Blur | 29.1% | 25.9% | 28.6% | **22.2%** | 9.0% |
+| JPEG | 20.4% | 17.3% | 16.4% | **15.6%** | 4.9% |
+| Clean | 19.6% | **17.4%** | 18.3% | **17.4%** | 6.4% |
+| Noise | **15.7%** | 16.6% | 22.8% | 19.2% | 5.1% |
+
+**Key findings:**
+1. **No new probe beats the Exp 057 default or Radon on photos.** The best new sets tie with Radon (29.4–29.9%) and the default stays best (28.1%). All CIs against Radon include 0.
+2. **The centre window fails where it was meant to help, under occlusion** (72.5% vs 58.1%). The occluder is a flat block of about a quarter of the patch, placed uniformly at random. It often covers or touches the centre, hiding the true boundary there, so the window emphasises the occluder's own edges. The centre is the right place to look only when the truth is still visible there. The window does help a little where nothing hides the centre (blur and JPEG with rotation: 22.2% and 15.6%, the best values for those conditions).
+3. **along-blur behaves exactly as the analysis predicts.** It is chosen on synthetic patches (22.5%), but its follow share is *higher* on unoriented input than on real patterns (AUC 0.389). It streaks noise along whichever candidate it is built for, so every candidate "follows". It creates what it tests, so it must not be used as a probe.
+4. **cross-blur is the best "nothing here" detector so far** (AUC 0.913 on the BSDS500 run vs 0.851 for the default). Because it is biased against the candidate, only strong real structure survives it. As a chooser it is no better than the default.
+5. **For orientation, candidate-tied filters cannot copy the audio low-pass.** Every straight edge is a fixed point of every oriented linear filter's direction, so any such probe either favours or penalises its own candidate whatever the truth. What sets the true boundary apart on photos is *where* it is, and an occluder can hide exactly that.
+
+**Decision:**
+- The three probe kinds stay in `ImagePatch` as **opt-in** settings, documented with what they do: cross-blur as an unoriented-input score, centre for patches known not to be occluded at the centre. along-blur is kept only so the result can be reproduced, with a note not to use it.
+- The recommended image probe set stays the Exp 057 default.
+- The remaining gap to the oracle on photos (28% vs 12%) is mostly occlusion (58% vs 29%). Closing it would need a probe or lens that notices an occluder, such as a flat block with straight borders, rather than a better filter.
+
+- **Run**: `.venv/bin/python src/experiments/exp060_candidate_probes.py` (needs the Exp 045, 046 and 052 caches in `data/processed`; about 20 minutes)
+- **Outputs**: [results/exp060_candidate_probes.png](../results/exp060_candidate_probes.png), [results/exp060_summary.json](../results/exp060_summary.json) (every probe set on both datasets with CIs against the consensus, quorum and Radon, per-condition errors, unoriented AUC and run time)
+
+![Exp 060](../results/exp060_candidate_probes.png)
+
 ---
 
 ## Listen tests
@@ -1717,6 +1776,10 @@ Exp 059:      Calibrating its confidence against smooth unoriented input too get
               admitted (false answers unchanged), but its gain shrinks to −1.4 pts; the same rule
               for every lens would wreck the photo pool (Radon scores blobs high), so it stays
               per lens and Radon-as-lead stays the photo recommendation
+Exp 060:      Probes tied to the candidate (oriented blurs) or to the patch centre do not beat
+              the Exp 057 probes or Radon on photos: a straight edge keeps its direction under
+              any oriented blur, and the occluder often hides the centre. Cross-blur is the best
+              "nothing here" score yet (AUC 0.91)
 ```
 
 **Next** (GitHub issues)

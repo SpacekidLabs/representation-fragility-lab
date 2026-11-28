@@ -200,9 +200,13 @@ def image_run(name, sets):
 
     out = {"n_rows": len(rows), "n_disagree": len(dis), "reading_mismatch_checked": mismatch, "best_lens": best,
            "sets": {}}
-    for label, (blur, rot) in sets.items():
+    for label, spec in sets.items():
         medium = ImagePatch()
-        medium.PROBE_BLUR, medium.PROBE_ROTATE = blur, rot
+        if isinstance(spec, dict):              # Exp 060: any ImagePatch.PROBE_* settings
+            for k, v in spec.items():
+                setattr(medium, k, v)
+        else:
+            medium.PROBE_BLUR, medium.PROBE_ROTATE = spec
         an.medium = medium
         an.prober = Prober()
         t = time.time()

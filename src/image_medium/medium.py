@@ -116,13 +116,55 @@ class ImagePatch(Medium):
     #: Default set: the best of five on synthetic patches, also best on held-out BSDS500 (Exp 057).
     PROBE_BLUR = (1.5, 3.0)
     PROBE_ROTATE = (30.0, 60.0)
+    #: Opt-in probes tied to the candidate or to the patch centre (issue #36, Exp 060);
+    #: empty by default, so the Exp 057 set is unchanged.
+    #: Oriented blur σ, a 1-D Gaussian along a direction tied to the candidate. A straight
+    #: edge keeps its direction under any 1-D blur; what changes is how sharp each edge
+    #: stays. "along": blur along the candidate (its own edge stays sharp, others widen,
+    #: texture is streaked along it, so it creates what it tests: on unoriented input it
+    #: is followed more than on real patterns, Exp 060; do not use it). "cross": blur
+    #: along the candidate's normal (its own edge widens most); no better a chooser than
+    #: the default, but the best unoriented-input score so far (AUC 0.91 on BSDS500).
+    PROBE_ALONG_BLUR: tuple[float, ...] = ()
+    PROBE_CROSS_BLUR: tuple[float, ...] = ()
+    #: Centre window σ: the patch minus its mean, times an isotropic Gaussian around the
+    #: centre, plus the mean (flat regions stay flat, no direction is favoured). It keeps
+    #: what passes through the centre and fades what lies near the border. Exp 060: it
+    #: fails where an occluder covers the centre, so use it only where that cannot happen.
+    PROBE_CENTRE: tuple[float, ...] = ()
 
     def probes(self, signal: np.ndarray, candidate: float, context: Mapping[str, Any]):
         out = [Probe(f"blur {s:g}", ndimage.gaussian_filter(signal, s, mode="reflect"), candidate)
                for s in self.PROBE_BLUR]
         out += [Probe(f"rotate {a:g}", ndimage.rotate(signal, a, reshape=False, mode="reflect", order=1),
                       (candidate - a) % 180.0) for a in self.PROBE_ROTATE]
+        out += [Probe(f"along-blur {s:g}", oriented_blur(signal, candidate, s), candidate)
+                for s in self.PROBE_ALONG_BLUR]
+        out += [Probe(f"cross-blur {s:g}", oriented_blur(signal, candidate + 90.0, s), candidate)
+                for s in self.PROBE_CROSS_BLUR]
+        out += [Probe(f"centre {s:g}", centre_window(signal, s), candidate) for s in self.PROBE_CENTRE]
         return out
+
+
+def oriented_blur(patch: np.ndarray, direction_deg: float, sigma: float) -> np.ndarray:
+    """1-D Gaussian blur along ``direction_deg`` (x = column, y = row, the convention the
+    lenses read orientation in), reflect padding."""
+    t = np.radians(direction_deg)
+    r = int(np.ceil(3 * sigma))
+    yy, xx = np.mgrid[-r:r + 1, -r:r + 1].astype(float)
+    along = xx * np.cos(t) + yy * np.sin(t)
+    across = -xx * np.sin(t) + yy * np.cos(t)
+    k = np.exp(-0.5 * (along / sigma) ** 2) * np.exp(-0.5 * (across / 0.5) ** 2)
+    return ndimage.convolve(patch, k / k.sum(), mode="reflect")
+
+
+def centre_window(patch: np.ndarray, sigma: float) -> np.ndarray:
+    """Fade the patch towards its mean away from the centre (isotropic Gaussian window)."""
+    h, w = patch.shape
+    yy, xx = np.mgrid[:h, :w]
+    win = np.exp(-0.5 * (((yy - (h - 1) / 2) ** 2 + (xx - (w - 1) / 2) ** 2) / sigma ** 2))
+    m = patch.mean()
+    return m + win * (patch - m)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

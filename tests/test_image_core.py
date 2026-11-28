@@ -152,3 +152,38 @@ def test_rotation_probe_predicts_the_orientation_the_lenses_read():
             rd = [r.read(probe.signal, {}) for r in an.representations]
             follow = [abs(angle_diff(r.estimate, probe.predicted)) < 10.0 for r in rd]
             assert all(follow) if want else not any(follow), (probe.name, candidate, [r.estimate for r in rd])
+
+
+def test_oriented_blur_follows_the_direction_convention():
+    """Issue #36: blurring along a direction leaves a grating at that direction intact and
+    washes out one across it (x = column, y = row, as the lenses read orientation)."""
+    from image_medium.medium import oriented_blur
+
+    g = grating(30.0, period=6.0)
+    assert np.std(oriented_blur(g, 30.0, 3.0)) > 0.8 * np.std(g)       # along the stripes
+    assert np.std(oriented_blur(g, 120.0, 3.0)) < 0.2 * np.std(g)      # across the stripes
+
+
+def test_centre_window_keeps_the_centre_and_flat_stays_flat():
+    """Issue #36: the centre window favours what passes through the centre and adds no edge."""
+    from image_medium.medium import centre_window
+
+    flat = np.full((N, N), 0.4)
+    assert np.allclose(centre_window(flat, 8.0), flat)
+    # a central edge at 40° plus a stronger edge at 120° near the border: windowed, the
+    # lenses read the central one
+    off = 0.3 + 0.6 / (1.0 + np.exp(-(across(120.0) - 24.0) / 0.7))
+    patch = edge(40.0) + off - 0.3
+    an = make_image_analyzer()
+    w = centre_window(patch, 8.0)
+    reads = [r.read(w, {}).estimate for r in an.representations]
+    assert sum(abs(angle_diff(e, 40.0)) < 10.0 for e in reads if e is not None) >= 3, reads
+
+
+def test_new_probe_kinds_are_opt_in():
+    """Without the new settings the probe set is the Exp 057 one."""
+    names = [p.name for p in ImagePatch().probes(grating(10.0), 10.0, {})]
+    assert names == ["blur 1.5", "blur 3", "rotate 30", "rotate 60"]
+    m = ImagePatch()
+    m.PROBE_ALONG_BLUR, m.PROBE_CROSS_BLUR, m.PROBE_CENTRE = (2.0,), (2.0,), (8.0,)
+    assert [p.name for p in m.probes(grating(10.0), 10.0, {})][-3:] == ["along-blur 2", "cross-blur 2", "centre 8"]

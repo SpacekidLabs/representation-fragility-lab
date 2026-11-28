@@ -190,6 +190,12 @@ with no extra false answers, but its gain falls from 8.9 to 1.4 pts. Applied to 
 the same rule removes all false answers but ruins the photo pool (gross_all 41% → 60%),
 because Radon, the best photo lens, scores smooth input high. Confidence that tells "nothing
 here" from "weak structure" is now the limit on photos, not what the lenses can read.
+Exp 060 tries image probes tied to the candidate (blurring along or across it) or to the
+patch centre. None beats the Exp 057 probes or Radon on photos. A straight edge keeps its
+direction under any oriented blur, so such a probe favours or penalises its own candidate
+whatever the truth. The centre is where the truth is, but the occluder often hides exactly
+that. The gap left on photos (28% vs 12% for the oracle) is mostly occlusion; closing it
+needs something that notices the occluder, not a better filter.
 
 ---
 
