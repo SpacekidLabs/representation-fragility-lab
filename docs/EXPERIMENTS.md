@@ -1495,6 +1495,68 @@ Exp 055 found that a lens is worth what it covers: the frames where it is right 
 
 ![Exp 058](../results/exp058_photo_lens.png)
 
+### Phase 39 — Calibrating Against Smooth Unoriented Input (Exp 059)
+
+#### Exp 059 — Does a Stricter Confidence Rule Get the Photo Lens Admitted, and What Does It Cost?
+Exp 058's `cnn_photo` cut gross_all on BSDS500 by 8.9 pts but was not admitted: it made the pool answer 7 of the 90 synthetic unoriented patches instead of 3. Its confidence trusts no white-noise patch but 18% of the smooth "blob" patches. The project rule sets lo from white noise only. Issue #35 adds smooth input to the rule and re-runs the admission test. Nothing is retrained.
+
+**Rules.** Confidence is `clip((raw − lo) / (hi − lo))`, trusted at ≥ 0.5.
+- **`white`:** the project rule up to Exp 058. lo = the strongest raw score over 60 white-noise patches; hi = the 5th percentile over clean patterns.
+- **`white+blob`:** lo = the strongest raw score over the same white-noise patches *and* 60 blob patches. The blob seeds (60,000+) are disjoint from the null set's (20,000+), so no null patch is seen, but the null *type* now is. If lo reaches hi, hi falls back to the clean median.
+- **Raw scores:** the cached readings keep only the clipped confidence, so the classic lenses' raw scores were re-read on the rebuilt patches. They reproduce every cached confidence under the old rule (0 mismatches on both datasets).
+
+**1. What the new rule changes:**
+
+| Lens | lo (white) | strongest blob | hi | Rule under white+blob | Clean patterns trusted, white → white+blob |
+|---|---|---|---|---|---|
+| tensor | 0.086 | 0.148 | 0.974 | rule | 100% → 100% |
+| hog | 0.171 | 0.189 | 0.904 | rule | 100% → 100% |
+| fft | 0.038 | **0.609** | 0.506 | hi = clean median | 100% → 75% |
+| gabor | 0.505 | 0.591 | 0.997 | rule | 100% → 100% |
+| radon | 0.575 | **0.865** | 0.984 | rule | 100% → 100% |
+| cnn_aug | 0.284 | 0.779 | 0.803 | rule | 100% → 97% |
+| cnn_photo | 0.345 | **0.485** | 0.363 | hi = clean median | 96% → 73% |
+
+- Smooth blobs score far above white noise for FFT, Radon, `cnn_aug` and `cnn_photo`.
+- For FFT and `cnn_photo` the blobs even score above 5% of clean patterns, so the original rule is undefined for them.
+- The clean-pattern column hides the real cost. Clean patterns score far above the blobs, so they stay trusted, but weaker real structure does not (point 2).
+
+**2. Admission of `cnn_photo` against the Exp 055 pool.** Group-bootstrap CIs; false answers on the 90 synthetic null patches:
+
+| Calibration (BSDS500) | Pool gross_all | Pool + cnn_photo | Δ gross_all [CI95] | False answers | Admitted |
+|---|---|---|---|---|---|
+| white (= Exp 058) | 41.0% | 32.0% | −8.9 [−10.2, −7.7] | 3.3% → 7.8% | no |
+| **only cnn_photo on white+blob** | 41.0% | 39.5% | **−1.4 [−2.1, −0.8]** | 3.3% → 3.3% | **yes** |
+| every lens on white+blob | **59.6%** | 53.4% | −6.2 [−7.3, −5.1] | 0.0% → 0.0% | yes |
+
+On synthetic patches the same three rows give −3.4 (not admitted), −1.2 [−1.7, −0.7] (admitted) and −2.2 (admitted, pool 14.1% → 19.1%). Against the classic pool the results are within 0.6 pts of these.
+
+**3. The trade-off.** The sweep moves `cnn_photo`'s trust threshold over its raw score, with every other lens on the old rule (left panel):
+- The white rule trusts at raw 0.354, the white+blob rule at 0.709.
+- False answers come back to the pool's own 3.3% from raw 0.575 on. The gain there is −3.4 pts.
+- They first fall within the +2-pt admission limit at 0.55 (4.4%), with a gain of −3.9 pts.
+- Both thresholds are read off the null set used for evaluation, so they are a ceiling, not a rule. The white+blob rule lands at 0.709 (−1.4 pts) because its fallback hi (the clean median) is strict.
+
+**4. Lead mode.** Radon answering alone (Exp 056) makes 26.6% gross_all on BSDS500 under the old rule (5.6% false answers). Under white+blob it makes 50.2% (0% false answers), because Radon's lo rises from 0.575 to 0.865.
+
+**Key findings:**
+1. **`cnn_photo` passes the admission test once its own confidence sees smooth input,** but most of its value goes. −8.9 pts becomes −1.4 pts (CI −2.1 to −0.8) at no cost in false answers. The value was mostly in answers the lens gave with low raw scores, the same range where it answers smooth unoriented input.
+2. **The best honest trade-off lies between the two rules.** The sweep shows about −3.4 to −3.9 pts with false answers at or near the pool's own rate. Finding such a threshold properly needs a null set of its own for calibration, not the evaluation one.
+3. **`white+blob` must not become the project rule.** For every lens at once, it removes all false answers but makes the photo pool much worse: answers drop from 69.4% to 42.8%, gross_all rises from 41.0% to 59.6%, and Radon-as-lead from 26.6% to 50.2%. Radon, the best photo lens, scores smooth blobs as high as 0.865. Its value on photos lies in exactly the range a blob-aware rule cuts away.
+4. **No rule changes the ranking on photos.** Radon as lead under the old rule (26.6%) still beats every quorum configuration: 32.0% with the photo lens on the old rule (not admitted), 39.5% with it admitted.
+
+**Decision:**
+- `cnn_photo` with its own white+blob calibration (lo 0.485, hi 0.932) **is admitted**. It is the learned image lens to use in place of `cnn_aug`.
+- It stays **opt-in**, like every learned lens. It needs torch, and its fitted head is a cache (`data/processed/exp058_cnn_photo_head.npz`), not a shipped file. `make_image_analyzer` is unchanged.
+- The project rule stays `white` for the classic lenses and `cnn_aug`.
+- For photos, the recommendation stays Radon as lead (Exp 056).
+- What would lift the admitted gain back towards −3 to −4 pts is a calibration null set separate from the evaluation one, such as smooth photo regions measured as isotropic. A per-lens blob rule is not the way.
+
+- **Run**: `.venv/bin/python src/experiments/exp059_recalibrated_photo_lens.py` (needs the Exp 045, 046, 052 and 058 caches in `data/processed`; about 2 minutes)
+- **Outputs**: [results/exp059_recalibrated_photo_lens.png](../results/exp059_recalibrated_photo_lens.png), [results/exp059_summary.json](../results/exp059_summary.json) (both calibrations per lens with the fallback used, every admission run under the three calibrations on both datasets, the pool and Radon-lead metrics, and the threshold sweep)
+
+![Exp 059](../results/exp059_recalibrated_photo_lens.png)
+
 ---
 
 ## Listen tests
@@ -1651,6 +1713,10 @@ Exp 058:      A learned orientation lens trained on BSDS500 photos: 25.9% gross 
               62.4%), right on 57% of the patches the pool leaves unanswered, −8.9 pts gross_all.
               Not admitted: it doubles the false answers on null input (3.3% → 7.8%). The new
               core.admission_test checks coverage and value for any lens
+Exp 059:      Calibrating its confidence against smooth unoriented input too gets the photo lens
+              admitted (false answers unchanged), but its gain shrinks to −1.4 pts; the same rule
+              for every lens would wreck the photo pool (Radon scores blobs high), so it stays
+              per lens and Radon-as-lead stays the photo recommendation
 ```
 
 **Next** (GitHub issues)
@@ -1662,7 +1728,7 @@ Exp 058:      A learned orientation lens trained on BSDS500 photos: 25.9% gross 
 - Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049). Probing (Exp 050) answers far better where the lenses disagree, but it always answers; its follow count separates unpitched frames (AUC 0.93–0.98) without yet matching the quorum's false-answer rate on MDB-stem-synth.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
 - Time series (Exp 053): one real dataset (MIT-BIH ECG); PPG and accelerometer are synthetic only. The rate lenses report drift as a 30 / min rhythm, so the quorum answers most rhythm-free real noise windows.
-- The learned lenses (Exp 052) are opt-in and need torch. CREPE was trained on MDB-stem-synth, so its MDB numbers are optimistic; on vocadito it is far better than every classic lens, and the fusion rules, built for comparable voters, still lose to CREPE alone. The CNN orientation read-out fitted on synthetic patterns is not usable on photos; the one fitted on photos (Exp 058) reads them well, but its confidence trusts smooth unoriented input, so it is not in the pool.
+- The learned lenses (Exp 052) are opt-in and need torch. CREPE was trained on MDB-stem-synth, so its MDB numbers are optimistic; on vocadito it is far better than every classic lens, and the fusion rules, built for comparable voters, still lose to CREPE alone. The CNN orientation read-out fitted on synthetic patterns is not usable on photos; the one fitted on photos (Exp 058) reads them well; with a confidence that also sees smooth unoriented input it is admitted (Exp 059), but most of its gain goes with the low-confidence answers.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
 ## Running the experiments

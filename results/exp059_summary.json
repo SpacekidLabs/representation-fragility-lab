@@ -1,0 +1,747 @@
+{
+  "calibration": {
+    "white": {
+      "tensor": [
+        0.08620914354267722,
+        0.9739707586154008
+      ],
+      "hog": [
+        0.17115905195338862,
+        0.9035041085193178
+      ],
+      "fft": [
+        0.03757777439136479,
+        0.5062612222811326
+      ],
+      "gabor": [
+        0.5045602430654084,
+        0.996685437893854
+      ],
+      "radon": [
+        0.5745350658624552,
+        0.9835884816920188
+      ],
+      "cnn_aug": [
+        0.28376124924773666,
+        0.8033809882558555
+      ],
+      "cnn_photo": [
+        0.3453172723424211,
+        0.36314660800188814
+      ]
+    },
+    "white+blob": {
+      "tensor": [
+        0.14821600954836095,
+        0.9739707586154008
+      ],
+      "hog": [
+        0.18915366059770908,
+        0.9035041085193178
+      ],
+      "fft": [
+        0.6089994590496604,
+        0.8930336236646502
+      ],
+      "gabor": [
+        0.5910320551356879,
+        0.996685437893854
+      ],
+      "radon": [
+        0.8647017422057869,
+        0.9835884816920188
+      ],
+      "cnn_aug": [
+        0.7788805731165762,
+        0.8033809882558555
+      ],
+      "cnn_photo": [
+        0.4847280683523522,
+        0.9319918563094507
+      ]
+    }
+  },
+  "lens_info": {
+    "tensor": {
+      "lo_white": 0.08620914354267722,
+      "lo_blob_max": 0.14821600954836095,
+      "hi": 0.9739707586154008,
+      "clean_median": 0.9937122720909329,
+      "white+blob": "rule",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 1.0
+      }
+    },
+    "hog": {
+      "lo_white": 0.17115905195338862,
+      "lo_blob_max": 0.18915366059770908,
+      "hi": 0.9035041085193178,
+      "clean_median": 0.9721600632635472,
+      "white+blob": "rule",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 1.0
+      }
+    },
+    "fft": {
+      "lo_white": 0.03757777439136479,
+      "lo_blob_max": 0.6089994590496604,
+      "hi": 0.5062612222811326,
+      "clean_median": 0.8930336236646502,
+      "white+blob": "hi = clean median",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 0.75
+      }
+    },
+    "gabor": {
+      "lo_white": 0.5045602430654084,
+      "lo_blob_max": 0.5910320551356879,
+      "hi": 0.996685437893854,
+      "clean_median": 0.9999521023391951,
+      "white+blob": "rule",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 1.0
+      }
+    },
+    "radon": {
+      "lo_white": 0.5745350658624552,
+      "lo_blob_max": 0.8647017422057869,
+      "hi": 0.9835884816920188,
+      "clean_median": 0.9961191929159313,
+      "white+blob": "rule",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 1.0
+      }
+    },
+    "cnn_aug": {
+      "lo_white": 0.28376124924773666,
+      "lo_blob_max": 0.7788805731165762,
+      "hi": 0.8033809882558555,
+      "clean_median": 0.989432810611889,
+      "white+blob": "rule",
+      "clean_trusted": {
+        "white": 1.0,
+        "white+blob": 0.9652777777777778
+      }
+    },
+    "cnn_photo": {
+      "lo_white": 0.3453172723424211,
+      "lo_blob_max": 0.4847280683523522,
+      "hi": 0.36314660800188814,
+      "clean_median": 0.9319918563094507,
+      "white+blob": "hi = clean median",
+      "clean_trusted": {
+        "white": 0.9602888086642599,
+        "white+blob": 0.7292418772563177
+      }
+    }
+  },
+  "check_mismatch": {
+    "bsds": 0,
+    "synthetic": 0
+  },
+  "datasets": {
+    "BSDS500": {
+      "admission": {
+        "white": {
+          "exp055 pool": {
+            "coverage": 0.029182879377431907,
+            "coverage_unanswered": 0.5677966101694916,
+            "without": {
+              "gross_all": 0.4095330739299611,
+              "gross_answer": 0.14906542056074767,
+              "abstention": 0.30609597924773024,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.32003891050583655,
+              "gross_answer": 0.14303228442991417,
+              "abstention": 0.20654993514915698,
+              "false_answer": 0.07777777777777778
+            },
+            "value": {
+              "gross_all": -0.08949416342412453,
+              "gross_answer": -0.006033136130833505,
+              "abstention": -0.09954604409857326,
+              "false_answer": 0.044444444444444446
+            },
+            "gross_all_ci95": [
+              -0.10181451612903226,
+              -0.0768976897689769
+            ],
+            "admitted": false
+          },
+          "classic pool": {
+            "coverage": 0.03631647211413749,
+            "coverage_unanswered": 0.5691699604743083,
+            "without": {
+              "gross_all": 0.42315175097276264,
+              "gross_answer": 0.1414092664092664,
+              "abstention": 0.3281452658884566,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.32684824902723736,
+              "gross_answer": 0.1367983367983368,
+              "abstention": 0.2201686121919585,
+              "false_answer": 0.07777777777777778
+            },
+            "value": {
+              "gross_all": -0.09630350194552528,
+              "gross_answer": -0.004610929610929598,
+              "abstention": -0.10797665369649811,
+              "false_answer": 0.044444444444444446
+            },
+            "gross_all_ci95": [
+              -0.10891681627767803,
+              -0.08365019011406843
+            ],
+            "admitted": false
+          }
+        },
+        "photo lens recalibrated": {
+          "exp055 pool": {
+            "coverage": 0.029182879377431907,
+            "coverage_unanswered": 0.5677966101694916,
+            "without": {
+              "gross_all": 0.4095330739299611,
+              "gross_answer": 0.14906542056074767,
+              "abstention": 0.30609597924773024,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.3952658884565499,
+              "gross_answer": 0.1425287356321839,
+              "abstention": 0.2947470817120622,
+              "false_answer": 0.03333333333333333
+            },
+            "value": {
+              "gross_all": -0.01426718547341116,
+              "gross_answer": -0.0065366849285637685,
+              "abstention": -0.011348897535668034,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.0207138304652645,
+              -0.008365508365508366
+            ],
+            "admitted": true
+          },
+          "classic pool": {
+            "coverage": 0.03631647211413749,
+            "coverage_unanswered": 0.5691699604743083,
+            "without": {
+              "gross_all": 0.42315175097276264,
+              "gross_answer": 0.1414092664092664,
+              "abstention": 0.3281452658884566,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.4075875486381323,
+              "gross_answer": 0.13739376770538245,
+              "abstention": 0.3132295719844358,
+              "false_answer": 0.03333333333333333
+            },
+            "value": {
+              "gross_all": -0.01556420233463035,
+              "gross_answer": -0.004015498703883957,
+              "abstention": -0.01491569390402081,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.022967101179391682,
+              -0.008806262230919765
+            ],
+            "admitted": true
+          }
+        },
+        "all recalibrated": {
+          "exp055 pool": {
+            "coverage": 0.029182879377431907,
+            "coverage_unanswered": 0.608621667612025,
+            "without": {
+              "gross_all": 0.5959792477302205,
+              "gross_answer": 0.05677517032551098,
+              "abstention": 0.5716601815823605,
+              "false_answer": 0.0
+            },
+            "with": {
+              "gross_all": 0.5340466926070039,
+              "gross_answer": 0.05148514851485148,
+              "abstention": 0.5087548638132295,
+              "false_answer": 0.0
+            },
+            "value": {
+              "gross_all": -0.061932555123216604,
+              "gross_answer": -0.005290021810659497,
+              "abstention": -0.062905317769131,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.072992700729927,
+              -0.050917141049968376
+            ],
+            "admitted": true
+          },
+          "classic pool": {
+            "coverage": 0.03631647211413749,
+            "coverage_unanswered": 0.6128674431503051,
+            "without": {
+              "gross_all": 0.603112840466926,
+              "gross_answer": 0.04449648711943794,
+              "abstention": 0.5846303501945525,
+              "false_answer": 0.0
+            },
+            "with": {
+              "gross_all": 0.5376134889753567,
+              "gross_answer": 0.03973063973063973,
+              "abstention": 0.5184824902723735,
+              "false_answer": 0.0
+            },
+            "value": {
+              "gross_all": -0.06549935149156938,
+              "gross_answer": -0.0047658473887982125,
+              "abstention": -0.06614785992217898,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.07616316124920332,
+              -0.05486111111111111
+            ],
+            "admitted": true
+          }
+        }
+      },
+      "pool": {
+        "white": {
+          "answer": 0.6939040207522698,
+          "gross_answer": 0.14906542056074767,
+          "gross_all": 0.4095330739299611,
+          "false_answer": 0.03333333333333333
+        },
+        "photo lens recalibrated": {
+          "answer": 0.6939040207522698,
+          "gross_answer": 0.14906542056074767,
+          "gross_all": 0.4095330739299611,
+          "false_answer": 0.03333333333333333
+        },
+        "all recalibrated": {
+          "answer": 0.4283398184176394,
+          "gross_answer": 0.05677517032551098,
+          "gross_all": 0.5959792477302205,
+          "false_answer": 0.0
+        }
+      },
+      "lead_radon": {
+        "white": {
+          "answer": 0.8294422827496758,
+          "gross_answer": 0.1145426114151681,
+          "gross_all": 0.26556420233463035,
+          "false_answer": 0.05555555555555555
+        },
+        "photo lens recalibrated": {
+          "answer": 0.8294422827496758,
+          "gross_answer": 0.1145426114151681,
+          "gross_all": 0.26556420233463035,
+          "false_answer": 0.05555555555555555
+        },
+        "all recalibrated": {
+          "answer": 0.5223735408560312,
+          "gross_answer": 0.04717566728739913,
+          "gross_all": 0.5022697795071336,
+          "false_answer": 0.0
+        }
+      },
+      "n": 3084,
+      "n_null": 90
+    },
+    "synthetic": {
+      "admission": {
+        "white": {
+          "exp055 pool": {
+            "coverage": 0.008741258741258742,
+            "coverage_unanswered": 0.6161616161616161,
+            "without": {
+              "gross_all": 0.14117132867132867,
+              "gross_answer": 0.05980861244019139,
+              "abstention": 0.08653846153846156,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.10751748251748251,
+              "gross_answer": 0.05419175544233441,
+              "abstention": 0.05638111888111885,
+              "false_answer": 0.07777777777777778
+            },
+            "value": {
+              "gross_all": -0.03365384615384616,
+              "gross_answer": -0.005616856997856974,
+              "abstention": -0.03015734265734271,
+              "false_answer": 0.044444444444444446
+            },
+            "gross_all_ci95": [
+              -0.044697633654688866,
+              -0.02322524101665206
+            ],
+            "admitted": false
+          },
+          "classic pool": {
+            "coverage": 0.011363636363636364,
+            "coverage_unanswered": 0.6388888888888888,
+            "without": {
+              "gross_all": 0.15034965034965034,
+              "gross_answer": 0.06177606177606178,
+              "abstention": 0.09440559440559437,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.10882867132867133,
+              "gross_answer": 0.05294937296795169,
+              "abstention": 0.059003496503496455,
+              "false_answer": 0.07777777777777778
+            },
+            "value": {
+              "gross_all": -0.04152097902097901,
+              "gross_answer": -0.008826688808110085,
+              "abstention": -0.03540209790209792,
+              "false_answer": 0.044444444444444446
+            },
+            "gross_all_ci95": [
+              -0.052700348432055746,
+              -0.031031468531468532
+            ],
+            "admitted": false
+          }
+        },
+        "photo lens recalibrated": {
+          "exp055 pool": {
+            "coverage": 0.008741258741258742,
+            "coverage_unanswered": 0.6161616161616161,
+            "without": {
+              "gross_all": 0.14117132867132867,
+              "gross_answer": 0.05980861244019139,
+              "abstention": 0.08653846153846156,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.12893356643356643,
+              "gross_answer": 0.05365622032288699,
+              "abstention": 0.07954545454545459,
+              "false_answer": 0.03333333333333333
+            },
+            "value": {
+              "gross_all": -0.01223776223776224,
+              "gross_answer": -0.006152392117304395,
+              "abstention": -0.006993006993006978,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.017452006980802792,
+              -0.007417102966841187
+            ],
+            "admitted": true
+          },
+          "classic pool": {
+            "coverage": 0.011363636363636364,
+            "coverage_unanswered": 0.6388888888888888,
+            "without": {
+              "gross_all": 0.15034965034965034,
+              "gross_answer": 0.06177606177606178,
+              "abstention": 0.09440559440559437,
+              "false_answer": 0.03333333333333333
+            },
+            "with": {
+              "gross_all": 0.13505244755244755,
+              "gross_answer": 0.05536992840095466,
+              "abstention": 0.08435314685314688,
+              "false_answer": 0.03333333333333333
+            },
+            "value": {
+              "gross_all": -0.015297202797202786,
+              "gross_answer": -0.00640613337510712,
+              "abstention": -0.010052447552447497,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.02050610820244328,
+              -0.01048951048951049
+            ],
+            "admitted": true
+          }
+        },
+        "all recalibrated": {
+          "exp055 pool": {
+            "coverage": 0.008741258741258742,
+            "coverage_unanswered": 0.5457142857142857,
+            "without": {
+              "gross_all": 0.19143356643356643,
+              "gross_answer": 0.04540763673890609,
+              "abstention": 0.15297202797202802,
+              "false_answer": 0.0
+            },
+            "with": {
+              "gross_all": 0.16958041958041958,
+              "gross_answer": 0.034552845528455285,
+              "abstention": 0.1398601398601399,
+              "false_answer": 0.0
+            },
+            "value": {
+              "gross_all": -0.02185314685314685,
+              "gross_answer": -0.010854791210450805,
+              "abstention": -0.013111888111888126,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.027534965034965036,
+              -0.016550522648083623
+            ],
+            "admitted": true
+          },
+          "classic pool": {
+            "coverage": 0.011363636363636364,
+            "coverage_unanswered": 0.5675675675675675,
+            "without": {
+              "gross_all": 0.19886363636363635,
+              "gross_answer": 0.0443169968717414,
+              "abstention": 0.16171328671328666,
+              "false_answer": 0.0
+            },
+            "with": {
+              "gross_all": 0.17089160839160839,
+              "gross_answer": 0.03460559796437659,
+              "abstention": 0.14117132867132864,
+              "false_answer": 0.0
+            },
+            "value": {
+              "gross_all": -0.02797202797202797,
+              "gross_answer": -0.009711398907364811,
+              "abstention": -0.02054195804195802,
+              "false_answer": 0.0
+            },
+            "gross_all_ci95": [
+              -0.03524804177545692,
+              -0.021528998242530756
+            ],
+            "admitted": true
+          }
+        }
+      },
+      "pool": {
+        "white": {
+          "answer": 0.9134615384615384,
+          "gross_answer": 0.05980861244019139,
+          "gross_all": 0.14117132867132867,
+          "false_answer": 0.03333333333333333
+        },
+        "photo lens recalibrated": {
+          "answer": 0.9134615384615384,
+          "gross_answer": 0.05980861244019139,
+          "gross_all": 0.14117132867132867,
+          "false_answer": 0.03333333333333333
+        },
+        "all recalibrated": {
+          "answer": 0.847027972027972,
+          "gross_answer": 0.04540763673890609,
+          "gross_all": 0.19143356643356643,
+          "false_answer": 0.0
+        }
+      },
+      "lead_radon": {
+        "white": {
+          "answer": 0.9265734265734266,
+          "gross_answer": 0.02688679245283019,
+          "gross_all": 0.09833916083916083,
+          "false_answer": 0.05555555555555555
+        },
+        "photo lens recalibrated": {
+          "answer": 0.9265734265734266,
+          "gross_answer": 0.02688679245283019,
+          "gross_all": 0.09833916083916083,
+          "false_answer": 0.05555555555555555
+        },
+        "all recalibrated": {
+          "answer": 0.8304195804195804,
+          "gross_answer": 0.014736842105263158,
+          "gross_all": 0.18181818181818182,
+          "false_answer": 0.0
+        }
+      },
+      "n": 2288,
+      "n_null": 90
+    }
+  },
+  "sweep": {
+    "base": {
+      "answer": 0.6939040207522698,
+      "gross_answer": 0.14906542056074767,
+      "gross_all": 0.4095330739299611,
+      "false_answer": 0.03333333333333333
+    },
+    "points": [
+      {
+        "threshold": 0.3,
+        "d_gross_all": -0.10408560311284043,
+        "false_answer": 0.1111111111111111,
+        "answer": 0.8093385214007782,
+        "gross_answer": 0.14182692307692307,
+        "photo_trusted": 0.814526588845655
+      },
+      {
+        "threshold": 0.325,
+        "d_gross_all": -0.09662775616083008,
+        "false_answer": 0.1111111111111111,
+        "answer": 0.8012321660181583,
+        "gross_answer": 0.1424524484014569,
+        "photo_trusted": 0.7928015564202334
+      },
+      {
+        "threshold": 0.35,
+        "d_gross_all": -0.09014267185473412,
+        "false_answer": 0.07777777777777778,
+        "answer": 0.7944228274967574,
+        "gross_answer": 0.14326530612244898,
+        "photo_trusted": 0.7720492866407264
+      },
+      {
+        "threshold": 0.375,
+        "d_gross_all": -0.08268482490272372,
+        "false_answer": 0.07777777777777778,
+        "answer": 0.7856679636835279,
+        "gross_answer": 0.14321089558398678,
+        "photo_trusted": 0.7493514915693904
+      },
+      {
+        "threshold": 0.4,
+        "d_gross_all": -0.07717250324254216,
+        "false_answer": 0.07777777777777778,
+        "answer": 0.7775616083009079,
+        "gross_answer": 0.1413678065054212,
+        "photo_trusted": 0.7292477302204928
+      },
+      {
+        "threshold": 0.425,
+        "d_gross_all": -0.07166018158236054,
+        "false_answer": 0.06666666666666667,
+        "answer": 0.771076523994812,
+        "gross_answer": 0.14129520605550883,
+        "photo_trusted": 0.7075226977950714
+      },
+      {
+        "threshold": 0.45,
+        "d_gross_all": -0.06614785992217898,
+        "false_answer": 0.06666666666666667,
+        "answer": 0.7655642023346303,
+        "gross_answer": 0.1423125794155019,
+        "photo_trusted": 0.6857976653696498
+      },
+      {
+        "threshold": 0.475,
+        "d_gross_all": -0.06063553826199741,
+        "false_answer": 0.06666666666666667,
+        "answer": 0.7597276264591439,
+        "gross_answer": 0.14297908664105846,
+        "photo_trusted": 0.664396887159533
+      },
+      {
+        "threshold": 0.5,
+        "d_gross_all": -0.05252918287937741,
+        "false_answer": 0.06666666666666667,
+        "answer": 0.7506485084306096,
+        "gross_answer": 0.14341252699784018,
+        "photo_trusted": 0.6361867704280155
+      },
+      {
+        "threshold": 0.525,
+        "d_gross_all": -0.04442282749675747,
+        "false_answer": 0.05555555555555555,
+        "answer": 0.7409208819714657,
+        "gross_answer": 0.14310722100656456,
+        "photo_trusted": 0.6095979247730221
+      },
+      {
+        "threshold": 0.55,
+        "d_gross_all": -0.03858625162127105,
+        "false_answer": 0.044444444444444446,
+        "answer": 0.73378728923476,
+        "gross_answer": 0.14273088820150243,
+        "photo_trusted": 0.5865758754863813
+      },
+      {
+        "threshold": 0.575,
+        "d_gross_all": -0.03372243839169908,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.727302204928664,
+        "gross_answer": 0.14177440927329468,
+        "photo_trusted": 0.5603112840466926
+      },
+      {
+        "threshold": 0.6,
+        "d_gross_all": -0.02853437094682232,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7217898832684825,
+        "gross_answer": 0.14240790655884997,
+        "photo_trusted": 0.5376134889753567
+      },
+      {
+        "threshold": 0.625,
+        "d_gross_all": -0.021076523994811913,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7136835278858625,
+        "gross_answer": 0.14311676510676966,
+        "photo_trusted": 0.5116731517509727
+      },
+      {
+        "threshold": 0.65,
+        "d_gross_all": -0.017833981841763935,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7104409857328146,
+        "gross_answer": 0.14376996805111822,
+        "photo_trusted": 0.4899481193255512
+      },
+      {
+        "threshold": 0.675,
+        "d_gross_all": -0.015239948119325553,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7075226977950714,
+        "gross_answer": 0.14390467461044912,
+        "photo_trusted": 0.46335927367055774
+      },
+      {
+        "threshold": 0.7,
+        "d_gross_all": -0.01426718547341116,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7059014267185474,
+        "gross_answer": 0.14331649058337162,
+        "photo_trusted": 0.44455252918287935
+      },
+      {
+        "threshold": 0.725,
+        "d_gross_all": -0.01264591439688717,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7039559014267186,
+        "gross_answer": 0.1432519576232151,
+        "photo_trusted": 0.4179636835278859
+      },
+      {
+        "threshold": 0.75,
+        "d_gross_all": -0.011348897535667979,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7023346303501945,
+        "gross_answer": 0.14312096029547552,
+        "photo_trusted": 0.3962386511024643
+      },
+      {
+        "threshold": 0.775,
+        "d_gross_all": -0.010700389105058328,
+        "false_answer": 0.03333333333333333,
+        "answer": 0.7010376134889753,
+        "gross_answer": 0.14246068455134134,
+        "photo_trusted": 0.3722438391699092
+      }
+    ]
+  }
+}
