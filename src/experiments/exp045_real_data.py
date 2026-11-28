@@ -240,7 +240,10 @@ HALF = e44.N // 2
 DISK = 28
 
 
-def bsds_patches(split="test", per_image=6, min_dist=40):
+def bsds_patches(split="test", per_image=6, min_dist=40, half=HALF):
+    """Boundary patches of one BSDS500 split. ``half`` is half the side of the returned
+    crop (the default gives the 64×64 patches of Exp 045; Exp 058 takes larger crops
+    so it can rotate them and cut the centre back to 64×64)."""
     from PIL import Image
 
     yy, xx = np.mgrid[-DISK:DISK + 1, -DISK:DISK + 1]
@@ -255,7 +258,7 @@ def bsds_patches(split="test", per_image=6, min_dist=40):
         support = sum(ndimage.binary_dilation(b) for b in bounds)
         H, W = img.shape
         cand = np.argwhere(union & (support >= 3))
-        cand = cand[(cand[:, 0] >= HALF) & (cand[:, 0] < H - HALF) & (cand[:, 1] >= HALF) & (cand[:, 1] < W - HALF)]
+        cand = cand[(cand[:, 0] >= half) & (cand[:, 0] < H - half) & (cand[:, 1] >= half) & (cand[:, 1] < W - half)]
         rng = rng_for("bsds", iid)
         rng.shuffle(cand)
         taken = []
@@ -281,7 +284,7 @@ def bsds_patches(split="test", per_image=6, min_dist=40):
             if len(a) < 50 or len(b) < 50 or abs(a.mean() - b.mean()) < 0.08:
                 continue
             theta = float(np.degrees(np.arctan2(d_row, d_col)) % 180.0)  # (x = col, y = row)
-            out.append((iid, theta, img[r - HALF:r + HALF, c - HALF:c + HALF].copy()))
+            out.append((iid, theta, img[r - half:r + half, c - half:c + half].copy()))
             taken.append((r, c))
     return out
 

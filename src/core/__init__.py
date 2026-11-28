@@ -22,6 +22,7 @@ from .interfaces import (
     Reading,
     Representation,
 )
+from .admission import Admission, admission_test
 from .generic import (
     AgreementTable,
     Analysis,
@@ -34,10 +35,12 @@ from .generic import (
 )
 
 __all__ = [
+    "Admission",
     "AgreementTable",
     "Analysis",
     "Analyzer",
     "Assessment",
+    "admission_test",
     "BlindSpotDetector",
     "Comparator",
     "ComparisonReport",

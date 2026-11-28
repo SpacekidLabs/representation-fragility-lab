@@ -104,8 +104,8 @@ flowchart TB
     subgraph R3["Learned lenses, a third medium, what each lens is worth"]
         direction LR
         J["Exp 052<br/>Learned lenses"] --> K["Exp 053<br/>Third medium:<br/>sensor signals"]
-        K --> L["Exp 054–057<br/>Tracker retired,<br/>lens value, lead lens,<br/>probing in the core"]
-        L --> F["Next: photo lens #32,<br/>Lean proofs #11"]
+        K --> L["Exp 054–058<br/>Tracker retired,<br/>lens value, lead lens,<br/>probing, photo lens"]
+        L --> F["Next: Lean proofs #11"]
     end
     R1 --> R2 --> R3
 ```
@@ -123,6 +123,7 @@ flowchart TB
 | 055 | Which lenses are worth keeping? | A lens's value follows its coverage (right where the others cannot agree), not its independence; HOG and Cepstrum add almost nothing |
 | 056 | Should the best lens answer alone, with the others as a warning? | Yes where one lens is clearly better (−2 to −28 pts vs the quorum; opt-in `lead=` in the core); the others warn well in audio, weakly on ECG |
 | 057 | Does probing work through the core, and on images? | Audio reproduces Exp 050 exactly; on photos it matches the best lens (28% vs 30%) but does not beat it |
+| 058 | Does a learned image lens trained on photos earn its place? | It reads photos at the level of FFT and cuts gross_all by 8.9 pts, as its coverage predicted, but it doubles false answers on null input, so the new admission test rejects it |
 
 | | | | |
 |---|---|---|---|

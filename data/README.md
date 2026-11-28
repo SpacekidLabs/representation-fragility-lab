@@ -40,5 +40,9 @@ data/raw/nstdb/mit-bih-noise-stress-test-database-1.0.0/{em,ma,bw}.{hea,dat}
 Each PhysioNet archive ships a `SHA256SUMS.txt`; Exp 053 reads the WFDB files
 (format 212 signals, MIT annotations) with numpy, no extra package.
 
+Exp 058 uses the BSDS500 **train** split (to fit its read-out) and **val** split (to choose
+settings and calibrate), as well as the test split of Exp 045; nothing new to download. Its
+caches are `data/processed/exp058_*.pkl` and its fitted heads `exp058_*_head.npz`.
+
 Exp 045 skips any dataset that is missing and caches its extracted rows in
 `data/processed/` (`--refresh` recomputes them).

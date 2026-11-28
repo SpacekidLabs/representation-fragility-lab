@@ -1413,6 +1413,88 @@ By condition:
 
 ![Exp 057](../results/exp057_probing_in_core.png)
 
+### Phase 38 — A Learned Lens Trained on Photos (Exp 058)
+
+#### Exp 058 — Does a Lens Trained on Real Photos Earn Its Place, Judged by Coverage?
+Exp 055 found that a lens is worth what it covers: the frames where it is right and fewer than two other lenses are. On BSDS500 the image pool leaves 30.6% of boundary patches unanswered. Its only learned lens, the Exp 052 read-out fitted on synthetic patterns, makes 62.4% gross errors on photos. Issue #32 fits the read-out on real photos and judges it with a reusable admission test.
+
+**Admission test (new, `core.admission_test`).**
+- **Input:** cached readings per frame, the truths, a pool, a candidate lens, the comparator, a gross-error rule, optional null frames and groups.
+- **Output:**
+  - *coverage*: the share of frames where the candidate is right and fewer than k pool lenses are (k = the quorum);
+  - *coverage on unanswered*: the share of the frames the pool abstains on where the candidate is right;
+  - the change in gross_all, gross error among answers, abstention and false answers when the candidate is added, with a group-bootstrap CI on gross_all.
+- **Admitted** when the gross_all CI lies below 0 and false answers rise by at most 2 pts.
+- Standard library only, like the rest of `core`. Five new tests (`tests/test_admission.py`).
+
+**Training.**
+- **Train:** BSDS500 **train** split, boundary patches extracted with the Exp 045 rule, up to 12 per image: 617 patches from 146 images. Each is rotated 12 times, with the truth moved with it, and flipped at random: 7,404 copies.
+- **Read-outs:**
+  - `cnn_photo` also gets one random Exp 045-type perturbation per copy, with other parameters and seeds than the test conditions. So noise, blur, JPEG and occlusion are not new to it, as with Exp 052's `cnn_aug`.
+  - `cnn_photo_clean` is trained without perturbations.
+- **Features:** the frozen ResNet-18 of Exp 052. New option: channel means over the whole map *and over its central half* (`embed(..., pooling="centre")`, 512 numbers).
+- **Chosen on the val split** (277 patches, 70 images): centre pooling and ridge l2 = 30. Val gross error: 23.0% with centre pooling, 30.1% with global pooling. A small MLP head on global features did no better than ridge (27–29%, ±1.5 pts run to run), so the head stays linear.
+- **Confidence:** the project rule. lo = the strongest raw score over 60 white-noise patches (0.345); hi = the 5th percentile over clean val photo patches (0.363).
+- **Test:** the held-out Exp 045 patches (BSDS500 **test** split, 514 patches × 6 conditions) with the cached readings of every other lens. Every number is comparable with Exp 045–057.
+
+**1. Gross error (> 10°) on held-out photos:**
+
+| Lens | All | Clean | Noise | Blur | JPEG | Occlusion |
+|---|---|---|---|---|---|---|
+| Radon | **18.1%** | 9.5% | **10.4%** | 12.5% | 9.9% | 55.6% |
+| Gabor | 19.4% | **8.8%** | 14.1% | **9.5%** | **8.9%** | 60.7% |
+| FFT | 25.6% | 14.8% | 17.6% | 16.0% | 14.0% | 73.5% |
+| **cnn_photo** | 25.9% | 16.1% | 28.1% | 16.0% | 16.3% | **51.0%** |
+| HOG | 33.2% | 20.4% | 42.8% | 17.7% | 23.3% | 52.1% |
+| cnn_photo_clean | 34.1% | 11.5% | 42.8% | 13.8% | 18.9% | 74.7% |
+| Tensor | 36.5% | 31.5% | 39.8% | 22.2% | 31.9% | 53.7% |
+| cnn_aug (Exp 052) | 62.4% | 57.8% | 61.4% | 59.9% | 62.8% | 70.8% |
+
+- **Training on photos cuts the learned lens's error from 62.4% to 25.9%.** It is level with FFT and still behind Radon and Gabor, but it is the best lens under occlusion.
+- **Perturbation training matters:** without it, noise errors are 42.8% (vs 28.1%) and occlusion errors 74.7% (vs 51.0%).
+- **Family:** its failures correlate about equally with the local-gradient lenses (φ 0.39) and the global ones (0.37). Within each classic family the closest pairs reach 0.48–0.58. It joins neither family, as CREPE joined neither in audio.
+- **Cost on synthetic patterns:** 30.3% gross error there, against 17.4% for `cnn_aug`.
+
+**2. Admission against the Exp 055 pool** (tensor, hog, fft, gabor, radon, cnn_aug; quorum 2). Group-bootstrap CIs over images:
+
+| Candidate (data) | Coverage | Right on unanswered | Δ gross_all [CI95] | Δ gross among answers | Δ abstention | False answers (90 synthetic null patches) | Admitted |
+|---|---|---|---|---|---|---|---|
+| cnn_photo (BSDS500) | 2.9% | **56.8%** | **−8.9 [−10.2, −7.7]** | −0.6 | −10.0 | 3.3% → **7.8%** | no |
+| cnn_photo_clean (BSDS500) | 2.3% | 41.4% | −8.2 [−9.5, −6.9] | +1.0 | −10.6 | 3.3% → 11.1% | no |
+| cnn_photo (synthetic) | 0.9% | 61.8% | −3.4 [−4.5, −2.4] | −0.6 | −3.1 | 3.3% → 7.8% | no |
+| cnn_aug, given classic + cnn_photo (BSDS500) | 1.8% | 23.3% | −0.6 [−1.1, −0.2] | +0.7 | −1.4 | 7.8% → 7.8% | yes |
+
+- **On value, `cnn_photo` is the largest gain any lens has added on photos.** With it, the pool answers 79.4% of patches instead of 69.4%, at the same accuracy among answers (14.3% vs 14.9%), and gross_all falls from 41.0% to 32.0%.
+- **It fails the false-answer check.** It makes the pool answer 7 of the 90 synthetic unoriented patches instead of 3. Its confidence trusts no white-noise patch but 18% of the smooth "blob" patches. The confidence rule takes lo from white noise only, so it never sees that kind of input.
+- **Drop-one (Exp 055) on the pool + cnn_photo:** `cnn_photo` is the second most valuable lens (+8.9 pts when dropped) after Radon (+10.4). It also has the second-highest coverage (2.9% vs 5.0%), so the Exp 055 rule (value follows coverage) holds for the new lens too.
+- **Lead mode still wins:** Exp 056's Radon-as-lead reaches 26.6% gross_all on the same patches, against 32.0% for the quorum with `cnn_photo`.
+
+**3. A photo null set, and a negative result.** BSDS500 has no null set of its own; Exp 049 and 055 borrowed the synthetic one. I tried to build one: photo patches with no human boundary (any annotator) within 36 px of the centre, and std ≥ 0.02 (390 test patches, 2 per image).
+- **It is not a null set.** The classic pool answers 47.7% of these patches; Radon trusts 60% and FFT 56%. Humans do not mark texture (grass, bark, water ripples, stripes), and texture has a real direction. The numbers are kept in the summary as "answers on no-boundary patches", not as false answers.
+- **Training the read-out to give zero on such patches (`cnn_photo_null`, train split) made things worse:**
+  - the val gross error rose from 23.0% to 24.4%;
+  - the confidence rule broke (noise scored above clean patterns, so it fell back to lo = 0);
+  - the lens trusts 53% of the synthetic null patches.
+
+  The target "no boundary" fights the real orientation of texture.
+
+**Key findings:**
+1. **A learned image lens trained on photos is useful.** At 25.9% gross error it is at the level of FFT and joins neither classic family. Added to the pool, it answers 57% of the patches the pool left unanswered, and cuts gross_all by 8.9 pts with a CI well below 0.
+2. **Coverage predicted its value.** The admission test's coverage ranks it second, as its drop-one value does. This is the first prospective check of the Exp 055 rule, and it held.
+3. **It is not admitted, because of false answers.** The value comes with more answers on null input (3.3% → 7.8%). The confidence rule calibrates against white noise only and misses smooth, structure-free input. That is a calibration gap, not a gap in what the lens can read.
+4. **On photos, "no human boundary" does not mean "no orientation".** A real-photo null set for orientation needs a different source, such as flat sky or defocused regions with a measured lack of anisotropy. Annotator absence is not enough.
+
+**Decision:**
+- `core.admission_test` is in the core as the check for any new lens in any medium.
+- `cnn_photo` is **not added** to the image pool or recommended as a lens. The Exp 055 pool stays as it is.
+- The heads are saved (`data/processed/exp058_*_head.npz`), so that a follow-up can fix the confidence (for example, lo over white and smooth isotropic noise) and re-run the admission test without retraining.
+- `CnnOrientation` takes `pooling=`, and `OrientationHead.fit` takes `E_null=`. Both default to the Exp 052 behaviour.
+
+- **Run**: `.venv/bin/python src/experiments/exp058_photo_lens.py` (needs BSDS500 in `data/raw/` and the Exp 045, 046 and 052 caches in `data/processed`; about 11 minutes on CPU the first time, of which ~5 for the embeddings, and ~5 minutes with the caches)
+- **Outputs**: [results/exp058_photo_lens.png](../results/exp058_photo_lens.png), [results/exp058_summary.json](../results/exp058_summary.json) (the val grid and the chosen settings, calibration, per-lens gross error by condition on photos and synthetic patches, φ with each family, every admission run with false answers on both null sets, and the drop-one analysis)
+
+![Exp 058](../results/exp058_photo_lens.png)
+
 ---
 
 ## Listen tests
@@ -1565,6 +1647,10 @@ Exp 053:      Third medium (sensor rate; MIT-BIH ECG with real NSTDB noise) on t
 Exp 054:      Why the pitch tracker lost on real audio: its 5-hop median filter (transitions,
               vibrato) and noise-blind window choices. The quorum of plain lenses with a YIN
               fallback beats fixed YIN on vocadito and MDB-stem-synth (−1.2 to −2.7 pts)
+Exp 058:      A learned orientation lens trained on BSDS500 photos: 25.9% gross errors (Exp 052's:
+              62.4%), right on 57% of the patches the pool leaves unanswered, −8.9 pts gross_all.
+              Not admitted: it doubles the false answers on null input (3.3% → 7.8%). The new
+              core.admission_test checks coverage and value for any lens
 ```
 
 **Next** (GitHub issues)
@@ -1576,7 +1662,7 @@ Exp 054:      Why the pitch tracker lost on real audio: its 5-hop median filter 
 - Exp 045 tests the key claims on three real datasets; the earlier experiments remain synthetic. Unpitched real frames (breaths, consonants) fool single lenses; since Exp 046 the consensus needs two agreeing lenses and no longer follows them, but it abstains more under heavy noise. A learned gate answers more at the same false-answer rate on MDB-stem-synth and photos, but not on real singing (Exp 049). Probing (Exp 050) answers far better where the lenses disagree, but it always answers; its follow count separates unpitched frames (AUC 0.93–0.98) without yet matching the quorum's false-answer rate on MDB-stem-synth.
 - More lenses are not more independent votes: lenses that share a blind spot outvote the ones that do not (see [docs/core_interfaces.md](core_interfaces.md)). On images this keeps the consensus from beating the best single lens (Exp 044). Exp 047's agreement table narrows the gap but cannot close it: in 93–100% of the remaining cases the right lens was marked blind by the confidence threshold.
 - Time series (Exp 053): one real dataset (MIT-BIH ECG); PPG and accelerometer are synthetic only. The rate lenses report drift as a 30 / min rhythm, so the quorum answers most rhythm-free real noise windows.
-- The learned lenses (Exp 052) are opt-in and need torch. CREPE was trained on MDB-stem-synth, so its MDB numbers are optimistic; on vocadito it is far better than every classic lens, and the fusion rules, built for comparable voters, still lose to CREPE alone. The CNN orientation read-out is fitted on synthetic patterns only and is not usable on photos.
+- The learned lenses (Exp 052) are opt-in and need torch. CREPE was trained on MDB-stem-synth, so its MDB numbers are optimistic; on vocadito it is far better than every classic lens, and the fusion rules, built for comparable voters, still lose to CREPE alone. The CNN orientation read-out fitted on synthetic patterns is not usable on photos; the one fitted on photos (Exp 058) reads them well, but its confidence trusts smooth unoriented input, so it is not in the pool.
 - The framework's DSP gains are small and depend on the baseline: in the HPSS cross-check, a plain fixed-kernel baseline beats every framework variant (see Exp 035 and Exp 041).
 
 ## Running the experiments

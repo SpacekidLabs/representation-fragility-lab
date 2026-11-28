@@ -74,8 +74,15 @@ class _Backbone:
             return hashlib.sha256(f.read()).hexdigest()
 
 
-def embed(patches: np.ndarray, batch: int = 256) -> np.ndarray:
-    """(n, H, W) gray patches in ~[0, 1] → (n, 256) frozen ResNet-18 embedding."""
+def embed(patches: np.ndarray, batch: int = 256, pooling: str = "global") -> np.ndarray:
+    """(n, H, W) gray patches in ~[0, 1] → frozen ResNet-18 embedding.
+
+    pooling "global": the spatial mean of each layer's channels, 256 numbers (Exp 052).
+    pooling "centre": those 256 plus the mean over the central half of each map
+    (512 numbers), so the read-out can tell the structure through the patch centre
+    from clutter near the border (Exp 058)."""
+    if pooling not in ("global", "centre"):
+        raise ValueError(f"unknown pooling {pooling!r}")
     import torch
     import torch.nn.functional as F
 
@@ -94,7 +101,12 @@ def embed(patches: np.ndarray, batch: int = 256) -> np.ndarray:
         a0 = net.relu(net.bn1(net.conv1(x)))
         a1 = net.layer1(net.maxpool(a0))
         a2 = net.layer2(a1)
-        out.append(torch.cat([a.mean((2, 3)) for a in (a0, a1, a2)], 1).numpy())
+        feats = [a.mean((2, 3)) for a in (a0, a1, a2)]
+        if pooling == "centre":
+            for a in (a0, a1, a2):
+                q = a.shape[2] // 4
+                feats.append(a[:, :, q:a.shape[2] - q, q:a.shape[3] - q].mean((2, 3)))
+        out.append(torch.cat(feats, 1).numpy())
     return np.concatenate(out).astype(float)
 
 
@@ -105,11 +117,17 @@ class OrientationHead:
         self.mu, self.sd, self.W, self.b = (np.asarray(v, float) for v in (mu, sd, W, b))
 
     @classmethod
-    def fit(cls, E: np.ndarray, theta_deg: np.ndarray, l2: float = 10.0) -> "OrientationHead":
-        mu, sd = E.mean(0), E.std(0) + 1e-6
-        Z = (E - mu) / sd
+    def fit(cls, E: np.ndarray, theta_deg: np.ndarray, l2: float = 10.0,
+            E_null: np.ndarray | None = None) -> "OrientationHead":
+        """Ridge fit. ``E_null``: embeddings of patches with no orientation, fitted to
+        (0, 0) so that the read-out's length (its raw contrast) is low on them (Exp 058)."""
         t = np.radians(2 * np.asarray(theta_deg, float))
         Y = np.c_[np.cos(t), np.sin(t)]
+        if E_null is not None and len(E_null):
+            E = np.r_[E, E_null]
+            Y = np.r_[Y, np.zeros((len(E_null), 2))]
+        mu, sd = E.mean(0), E.std(0) + 1e-6
+        Z = (E - mu) / sd
         b = Y.mean(0)
         W = np.linalg.solve(Z.T @ Z + l2 * len(Z) * np.eye(Z.shape[1]) / 100.0, Z.T @ (Y - b))
         return cls(mu, sd, W, b)
@@ -136,17 +154,19 @@ class CnnOrientation(Representation):
                    "orientation survives spatial averaging of ImageNet early-layer channels",
                    "the ImageNet input normalisation suits gray patches in [0, 1]")
 
-    def __init__(self, head: OrientationHead, contrast: tuple[float, float] = (0.0, 1.0), name: str = "cnn"):
+    def __init__(self, head: OrientationHead, contrast: tuple[float, float] = (0.0, 1.0), name: str = "cnn",
+                 pooling: str = "global"):
         self.name = name
         self.head = head
         self.contrast = contrast
+        self.pooling = pooling
 
     def read(self, signal: np.ndarray, context: Mapping[str, Any] | None = None) -> Reading:
         theta, raw, conf = self.read_batch(np.asarray(signal, float)[None])
         return Reading(self.name, float(theta[0]), float(conf[0]), {"raw": float(raw[0])})
 
     def read_batch(self, patches: np.ndarray):
-        theta, raw = self.head.predict(embed(patches))
+        theta, raw = self.head.predict(embed(patches, pooling=self.pooling))
         return theta, raw, _scale_many(raw, *self.contrast)
 
 
